@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/Button";
+import { Button } from "@/ui/concepts/button/component";
 import { type Epaper } from "@/lib/api";
 import { downloadWframePackage } from "./esphomeBundle";
 

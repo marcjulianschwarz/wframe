@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Button } from "@/components/Button";
+import { Button } from "@/ui/concepts/button/component";
 import { DashboardPreview } from "@/features/epaper/DashboardPreview";
 import { api, type DashboardType, type StoreItem } from "@/lib/api";
 import { useSession } from "@/lib/session";

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/Button";
+import { Button } from "@/ui/concepts/button/component";
 import { Input } from "@/components/Input";
 import { authApi } from "@/lib/api";
 import { auth } from "@/lib/auth";

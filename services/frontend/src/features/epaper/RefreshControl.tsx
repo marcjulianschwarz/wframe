@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/Button";
+import { Button } from "@/ui/concepts/button/component";
 import { Input } from "@/components/Input";
 import { api, type Epaper } from "@/lib/api";
 

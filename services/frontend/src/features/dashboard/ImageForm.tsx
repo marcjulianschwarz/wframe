@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/Button";
+import { Button } from "@/ui/concepts/button/component";
 import { api, type ImageAlgorithm, type ImageConfig, type ImageFit } from "@/lib/api";
 
 const ALGORITHMS: { value: ImageAlgorithm; label: string }[] = [

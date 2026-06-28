@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Check } from "lucide-react";
-import { Button } from "@/components/Button";
-import { Modal } from "@/components/Modal";
+import { Button } from "@/ui/concepts/button/component";
+import { Modal } from "@/ui/concepts/modal/component";
 import { type Dashboard, type Epaper } from "@/lib/api";
 
 /** Pick which epaper(s) show a dashboard. Each row toggles deploy/clear for one

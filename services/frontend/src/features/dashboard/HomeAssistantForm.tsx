@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button } from "@/components/Button";
+import { Button } from "@/ui/concepts/button/component";
 import { api, type HaConnection } from "@/lib/api";
 
 /** Connect screen for the Home Assistant dashboard.

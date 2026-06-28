@@ -6,7 +6,7 @@ import {
   Route,
   Routes,
 } from "react-router-dom";
-import { Button } from "@/components/Button";
+import { Button } from "@/ui/concepts/button/component";
 import { Login } from "@/features/auth/Login";
 import { CollectionPage } from "@/features/dashboard/CollectionPage";
 import { SettingsPage } from "@/features/epaper/SettingsPage";

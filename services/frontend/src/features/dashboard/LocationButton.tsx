@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button } from "@/components/Button";
+import { Button } from "@/ui/concepts/button/component";
 import { api, type Location } from "@/lib/api";
 
 /** Lets the user grant browser geolocation, which the weather dashboard needs.

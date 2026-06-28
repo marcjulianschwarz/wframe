@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Button } from "@/components/Button";
+import { Button } from "@/ui/concepts/button/component";
 import { Input } from "@/components/Input";
-import { Modal } from "@/components/Modal";
+import { Modal } from "@/ui/concepts/modal/component";
 import { GithubForm } from "@/features/dashboard/GithubForm";
 import { HomeAssistantForm } from "@/features/dashboard/HomeAssistantForm";
 import { ImageForm } from "@/features/dashboard/ImageForm";
@@ -58,6 +58,7 @@ export function EditDashboardModal({ dashboard, onSaved, onClose }: Props) {
   return (
     <Modal
       title="Edit dashboard"
+      width="xl"
       onClose={onClose}
       actions={
         <>

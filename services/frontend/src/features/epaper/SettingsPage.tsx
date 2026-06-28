@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { Button } from "@/components/Button";
+import { Button } from "@/ui/concepts/button/component";
 import { Input } from "@/components/Input";
-import { Modal } from "@/components/Modal";
+import { Modal } from "@/ui/concepts/modal/component";
 import { EpaperCard } from "@/features/epaper/EpaperCard";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";

@@ -12,7 +12,7 @@ import {
   ToastViewport,
   type ToastData,
   type ToastStatus,
-} from "@/components/Toast";
+} from "@/ui/concepts/toast/component";
 import { api, type Epaper, type User } from "@/lib/api";
 import { auth } from "@/lib/auth";
 
@@ -104,9 +104,14 @@ export function SessionProvider({
   return (
     <SessionContext.Provider value={value}>
       {children}
-      <ToastViewport>
+      <ToastViewport position="bottom-right">
         {toasts.map((t) => (
-          <Toast key={t.id} toast={t} onDismiss={() => dismiss(t.id)} />
+          <Toast
+            key={t.id}
+            toast={t}
+            position="bottom-right"
+            onDismiss={() => dismiss(t.id)}
+          />
         ))}
       </ToastViewport>
     </SessionContext.Provider>

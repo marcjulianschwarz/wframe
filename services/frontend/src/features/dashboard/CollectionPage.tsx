@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, Pencil, Play, Plus, Trash2 } from "lucide-react";
-import { Button } from "@/components/Button";
+import { Button } from "@/ui/concepts/button/component";
 import { ContextMenu } from "@/components/ContextMenu";
-import { Modal } from "@/components/Modal";
+import { Modal } from "@/ui/concepts/modal/component";
 import { CreateCustomForm } from "@/features/dashboard/CreateCustomForm";
 import { DeployTargetModal } from "@/features/dashboard/DeployTargetModal";
 import { EditDashboardModal } from "@/features/dashboard/EditDashboardModal";

@@ -1,13 +1,15 @@
+// @ui-source: concepts/toast@0.2.0
+// Managed copy. Edits here are local to this app.
+// Improvements belong back in the ui repo's concepts/toast — port
+// them there and bump the version. Do not treat this as throwaway code.
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  AlertTriangle,
   CheckCircle2,
+  AlertTriangle,
   Info,
   XCircle,
   type LucideIcon,
 } from "lucide-react";
-
-export type ToastStatus = "success" | "error" | "warning" | "info";
 
 export type ToastPosition =
   | "top"
@@ -17,15 +19,17 @@ export type ToastPosition =
   | "bottom-left"
   | "bottom-right";
 
+export type ToastStatus = "success" | "error" | "warning" | "info";
+
 export interface ToastData {
-  /** Stable key so React keeps the right node mounted while it animates. */
+  /** stable key so React keeps the right node mounted while it animates */
   id: number;
   message: string;
   status: ToastStatus;
 }
 
 /** How long a toast lives before it auto-dismisses. */
-const LIFETIME_MS = 3200;
+export const TOAST_LIFETIME_MS = 3200;
 
 const STATUS_ICON: Record<ToastStatus, LucideIcon> = {
   success: CheckCircle2,
@@ -47,13 +51,14 @@ const STATUS_COLOR: Record<ToastStatus, string> = {
  * to the edge and older ones rise away from it.
  */
 export function ToastViewport({
-  position = "bottom-right",
+  position,
   children,
 }: {
-  position?: ToastPosition;
+  position: ToastPosition;
   children: ReactNode;
 }) {
   const isBottom = position.startsWith("bottom");
+
   const vertical = isBottom ? "bottom-0" : "top-0";
   const horizontal = position.endsWith("left")
     ? "left-0 items-start"
@@ -79,17 +84,13 @@ function hiddenOffset(position: ToastPosition): string {
   return position.endsWith("left") ? "-translate-x-3" : "translate-x-3";
 }
 
-/**
- * A transient message that animates in from a screen edge and back out. Click or
- * the timer dismisses it; the slide direction follows the docked position.
- */
 export function Toast({
   toast,
-  position = "bottom-right",
+  position,
   onDismiss,
 }: {
   toast: ToastData;
-  position?: ToastPosition;
+  position: ToastPosition;
   onDismiss: () => void;
 }) {
   // `shown` flips on the frame after mount to trigger the enter transition, and
@@ -99,7 +100,7 @@ export function Toast({
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setShown(true));
-    const life = setTimeout(close, LIFETIME_MS);
+    const life = setTimeout(close, TOAST_LIFETIME_MS);
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(life);
@@ -124,7 +125,10 @@ export function Toast({
           : `${hiddenOffset(position)} scale-95 opacity-0`
       }`}
     >
-      <Icon className={`h-5 w-5 shrink-0 ${STATUS_COLOR[toast.status]}`} aria-hidden />
+      <Icon
+        className={`h-5 w-5 shrink-0 ${STATUS_COLOR[toast.status]}`}
+        aria-hidden
+      />
       <span className="leading-snug">{toast.message}</span>
     </div>
   );

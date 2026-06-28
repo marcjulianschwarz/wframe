@@ -1,61 +1,25 @@
+// The token → utility mapping is the shared *contract*, managed by the UI
+// registry. Import it so this app and templates/ui stay in lockstep; brand
+// *values* live in src/styles/tokens.css (app-owned). See CLAUDE.md.
+import tokens from "./src/ui/concepts/tokens/tailwind-tokens.cjs";
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
-      colors: {
-        "bg-1": "var(--primary-background-color)",
-        "bg-1-light": "var(--primary-background-color-light)",
-        "bg-2": "var(--secondary-background-color)",
-        "bg-hover": "var(--hover-state-background-color)",
-        "bg-active": "var(--active-state-background-color)",
-        "fg-1": "var(--font-color-1)",
-        "fg-2": "var(--font-color-2)",
-        "fg-danger": "var(--danger-font-color)",
-        "fg-success": "var(--success-font-color)",
-        "fg-warning": "var(--warning-font-color)",
-        "border-1": "var(--border-color-1)",
-        "border-2": "var(--border-color-2)",
-        highlight: "var(--highlight-color)",
-        "highlight-soft": "var(--highlight-color-soft)",
-        "bg-danger": "var(--danger-background-color)",
-        "bg-success": "var(--success-background-color)",
-      },
-      fontFamily: {
-        sans: "var(--font-sans)",
-        mono: "var(--font-mono)",
-      },
-      fontSize: {
-        s: "var(--font-size-s)",
-        m: "var(--font-size-m)",
-        l: "var(--font-size-l)",
-        xl: "var(--font-size-xl)",
-      },
-      spacing: {
-        xs: "var(--space-xs)",
-        s: "var(--space-s)",
-        n: "var(--space-n)",
-        m: "var(--space-m)",
-        l: "var(--space-l)",
-        xl: "var(--space-xl)",
-      },
-      borderRadius: {
-        s: "var(--border-radius-s)",
-        n: "var(--border-radius-n)",
-      },
-      boxShadow: {
-        normal: "var(--shadow-normal)",
-        high: "var(--shadow-high)",
-        focus: "var(--focus-ring)",
-      },
-      transitionDuration: {
-        fast: "var(--duration-fast)",
-        base: "var(--duration-base)",
-      },
-      transitionTimingFunction: {
-        out: "var(--ease-out)",
-      },
+      // Token contract (colors, type, spacing, radius, shadow, motion easings).
+      ...tokens,
       keyframes: {
+        // Enter animations the managed Modal component can use (slide/fade/pop).
+        "modal-slide": {
+          from: { opacity: "0", transform: "translateY(12px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "modal-fade": {
+          from: { opacity: "0", transform: "scale(0.97)" },
+          to: { opacity: "1", transform: "scale(1)" },
+        },
         // Springy scale "pop" — the panel overshoots full size then settles.
         "modal-pop": {
           from: { opacity: "0", transform: "scale(0.9)" },
@@ -67,6 +31,8 @@ export default {
         },
       },
       animation: {
+        "modal-slide": "modal-slide var(--duration-base) var(--ease-out)",
+        "modal-fade": "modal-fade var(--duration-base) var(--ease-out)",
         // Spring overshoot easing gives the "pop" its bounce.
         "modal-pop": "modal-pop 220ms cubic-bezier(0.34, 1.56, 0.64, 1)",
         "backdrop-fade": "backdrop-fade 120ms ease",
