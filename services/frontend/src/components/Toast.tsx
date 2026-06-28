@@ -1,40 +1,74 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { CheckCircle2, XCircle, type LucideIcon } from "lucide-react";
+
+type Variant = "success" | "error";
 
 interface Props {
   message: string;
-  variant?: "success" | "error";
+  variant?: Variant;
   onDismiss: () => void;
   /** Auto-dismiss after this many ms. */
   duration?: number;
 }
 
-/** A transient confirmation banner pinned to the bottom of the viewport. */
+const STATUS_ICON: Record<Variant, LucideIcon> = {
+  success: CheckCircle2,
+  error: XCircle,
+};
+
+const STATUS_COLOR: Record<Variant, string> = {
+  success: "text-bg-success",
+  error: "text-fg-danger",
+};
+
+/**
+ * A transient confirmation toast pinned to the bottom of the viewport. Slides in
+ * on mount and back out before unmounting; click or the timer dismisses it.
+ */
 export function Toast({
   message,
   variant = "success",
   onDismiss,
   duration = 3000,
 }: Props) {
-  useEffect(() => {
-    const id = setTimeout(onDismiss, duration);
-    return () => clearTimeout(id);
-  }, [onDismiss, duration]);
+  // `shown` flips on the frame after mount to trigger the enter transition, and
+  // back off to play the exit transition before we actually call onDismiss.
+  const [shown, setShown] = useState(false);
+  const Icon = STATUS_ICON[variant];
 
-  const tone =
-    variant === "error"
-      ? "bg-bg-danger text-fg-danger border-border-2"
-      : "bg-bg-2 text-fg-1 border-border-2";
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setShown(true));
+    const life = setTimeout(close, duration);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(life);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function close() {
+    setShown(false);
+    // Wait out the exit transition (matches duration-base) before unmounting.
+    setTimeout(onDismiss, 180);
+  }
 
   return (
-    <div
-      role="status"
-      className="fixed bottom-l left-1/2 -translate-x-1/2 z-50"
-    >
+    <div className="pointer-events-none fixed right-0 top-0 z-50 flex p-m">
       <div
-        className={`flex items-center gap-s px-m py-n rounded-full border shadow-normal text-m ${tone}`}
+        role="status"
+        aria-live="polite"
+        onClick={close}
+        className={`pointer-events-auto flex max-w-[80vw] cursor-pointer items-center gap-s rounded-n border border-border-1 bg-bg-1-light px-m py-n text-m text-fg-1 shadow-high transition-all duration-base ease-out ${
+          shown
+            ? "translate-x-0 scale-100 opacity-100"
+            : "translate-x-3 scale-95 opacity-0"
+        }`}
       >
-        {variant === "success" && <span aria-hidden>✓</span>}
-        <span>{message}</span>
+        <Icon
+          className={`h-5 w-5 shrink-0 ${STATUS_COLOR[variant]}`}
+          aria-hidden
+        />
+        <span className="leading-snug">{message}</span>
       </div>
     </div>
   );
