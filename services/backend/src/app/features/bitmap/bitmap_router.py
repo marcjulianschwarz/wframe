@@ -1,3 +1,4 @@
+import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -10,6 +11,7 @@ from app.features.bitmap.bitmap_repository import BitmapRepo
 from app.features.bitmap.bitmap_service import BitmapService
 from app.features.bitmap.previews import preview_html
 from app.features.dashboard.dashboard_models import DashboardType
+from app.features.dashboard.dashboard_router import DashboardServiceDep
 
 router = APIRouter(prefix="/bitmaps", tags=["bitmap"])
 
@@ -36,14 +38,15 @@ async def preview(dashboard_type: DashboardType) -> HTMLResponse:
     return HTMLResponse(content=preview_html(dashboard_type))
 
 
-@router.post("/{dashboard_type}/render")
+@router.post("/dashboards/{dashboard_id}/render")
 async def render_now(
-    dashboard_type: DashboardType,
+    dashboard_id: uuid.UUID,
     auth: AuthDep,
     service: BitmapServiceDep,
-    custom_url: str | None = None,
+    dashboards: DashboardServiceDep,
 ) -> Response:
-    """Render a dashboard now and return the BMP. Used for the in-app preview;
-    it does not change which dashboard the user's epaper serves."""
-    data = await service.force_render(auth.user.id, dashboard_type, custom_url=custom_url)
+    """Render a collection dashboard now and return the BMP. Used for the in-app
+    preview; it does not change which dashboard the user's epaper serves."""
+    dashboard = await dashboards.get_owned(auth.user.id, dashboard_id)
+    data = await service.force_render(dashboard)
     return Response(content=data, media_type="image/bmp")

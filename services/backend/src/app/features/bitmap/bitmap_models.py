@@ -51,15 +51,21 @@ class LifeState(Base, TimestampMixin):
 
 
 class Bitmap(Base, TimestampMixin):
+    """Last rendered native BMP for a collection dashboard.
+
+    Cached per ``dashboard_id`` so the serve path can fall back to the most
+    recent good image when a fresh render fails, and so two custom-URL
+    dashboards never share a cache entry.
+    """
+
     __tablename__: str = "bitmaps"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(
+    dashboard_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("users.id", ondelete="CASCADE"),
+        ForeignKey("dashboards.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
-    dashboard_type: Mapped[str] = mapped_column(String(32), nullable=False)
     data: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     rendered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

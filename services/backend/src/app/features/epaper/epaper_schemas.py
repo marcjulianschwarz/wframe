@@ -4,7 +4,7 @@ from typing import ClassVar, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.features.dashboard.dashboard_models import DashboardType
+from app.features.dashboard.dashboard_schemas import DashboardRead
 
 # Guard rails for geometry: large enough for any realistic epaper, small enough
 # to keep compositing cheap and reject obviously bad input.
@@ -14,8 +14,8 @@ MAX_REFRESH_INTERVAL = 86_400
 
 
 class EpaperUpdate(BaseModel):
-    dashboard_type: DashboardType
-    custom_url: str | None = None
+    # The collection dashboard to deploy. Null clears the epaper (shows nothing).
+    dashboard_id: uuid.UUID | None = None
 
 
 class EpaperGeometryUpdate(BaseModel):
@@ -37,8 +37,9 @@ class EpaperRead(BaseModel):
     id: uuid.UUID
     user_id: uuid.UUID
     slug: str
-    dashboard_type: DashboardType
-    custom_url: str | None
+    dashboard_id: uuid.UUID | None
+    # The full deployed dashboard, resolved for convenience; null when none set.
+    dashboard: DashboardRead | None
     bitmap_url: str
     screen_width: int
     screen_height: int

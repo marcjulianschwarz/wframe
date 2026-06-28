@@ -1,44 +1,105 @@
-import { useEffect, useState } from "react";
-import { CheckCircle2, XCircle, type LucideIcon } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Info,
+  XCircle,
+  type LucideIcon,
+} from "lucide-react";
 
-type Variant = "success" | "error";
+export type ToastStatus = "success" | "error" | "warning" | "info";
 
-interface Props {
+export type ToastPosition =
+  | "top"
+  | "bottom"
+  | "top-left"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-right";
+
+export interface ToastData {
+  /** Stable key so React keeps the right node mounted while it animates. */
+  id: number;
   message: string;
-  variant?: Variant;
-  onDismiss: () => void;
-  /** Auto-dismiss after this many ms. */
-  duration?: number;
+  status: ToastStatus;
 }
 
-const STATUS_ICON: Record<Variant, LucideIcon> = {
+/** How long a toast lives before it auto-dismisses. */
+const LIFETIME_MS = 3200;
+
+const STATUS_ICON: Record<ToastStatus, LucideIcon> = {
   success: CheckCircle2,
   error: XCircle,
+  warning: AlertTriangle,
+  info: Info,
 };
 
-const STATUS_COLOR: Record<Variant, string> = {
-  success: "text-bg-success",
+const STATUS_COLOR: Record<ToastStatus, string> = {
+  success: "text-fg-success",
   error: "text-fg-danger",
+  warning: "text-fg-warning",
+  info: "text-fg-2",
 };
 
 /**
- * A transient confirmation toast pinned to the bottom of the viewport. Slides in
- * on mount and back out before unmounting; click or the timer dismisses it.
+ * Fixed container pinned to one of the six edges/corners. Toasts stack inside
+ * it; bottom positions stack upward (column-reverse) so the newest sits closest
+ * to the edge and older ones rise away from it.
+ */
+export function ToastViewport({
+  position = "bottom-right",
+  children,
+}: {
+  position?: ToastPosition;
+  children: ReactNode;
+}) {
+  const isBottom = position.startsWith("bottom");
+  const vertical = isBottom ? "bottom-0" : "top-0";
+  const horizontal = position.endsWith("left")
+    ? "left-0 items-start"
+    : position.endsWith("right")
+      ? "right-0 items-end"
+      : "left-1/2 -translate-x-1/2 items-center";
+
+  return (
+    <div
+      className={`pointer-events-none fixed z-50 flex flex-col gap-s p-m ${vertical} ${horizontal} ${
+        isBottom ? "flex-col-reverse" : "flex-col"
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
+
+/** Where the toast slides from while hidden — toward its docked edge. */
+function hiddenOffset(position: ToastPosition): string {
+  if (position === "top") return "-translate-y-3";
+  if (position === "bottom") return "translate-y-3";
+  return position.endsWith("left") ? "-translate-x-3" : "translate-x-3";
+}
+
+/**
+ * A transient message that animates in from a screen edge and back out. Click or
+ * the timer dismisses it; the slide direction follows the docked position.
  */
 export function Toast({
-  message,
-  variant = "success",
+  toast,
+  position = "bottom-right",
   onDismiss,
-  duration = 3000,
-}: Props) {
+}: {
+  toast: ToastData;
+  position?: ToastPosition;
+  onDismiss: () => void;
+}) {
   // `shown` flips on the frame after mount to trigger the enter transition, and
   // back off to play the exit transition before we actually call onDismiss.
   const [shown, setShown] = useState(false);
-  const Icon = STATUS_ICON[variant];
+  const Icon = STATUS_ICON[toast.status];
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setShown(true));
-    const life = setTimeout(close, duration);
+    const life = setTimeout(close, LIFETIME_MS);
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(life);
@@ -53,23 +114,18 @@ export function Toast({
   }
 
   return (
-    <div className="pointer-events-none fixed right-0 top-0 z-50 flex p-m">
-      <div
-        role="status"
-        aria-live="polite"
-        onClick={close}
-        className={`pointer-events-auto flex max-w-[80vw] cursor-pointer items-center gap-s rounded-n border border-border-1 bg-bg-1-light px-m py-n text-m text-fg-1 shadow-high transition-all duration-base ease-out ${
-          shown
-            ? "translate-x-0 scale-100 opacity-100"
-            : "translate-x-3 scale-95 opacity-0"
-        }`}
-      >
-        <Icon
-          className={`h-5 w-5 shrink-0 ${STATUS_COLOR[variant]}`}
-          aria-hidden
-        />
-        <span className="leading-snug">{message}</span>
-      </div>
+    <div
+      role="status"
+      aria-live="polite"
+      onClick={close}
+      className={`pointer-events-auto flex w-72 max-w-[80vw] cursor-pointer items-center gap-s rounded-n border border-border-1 bg-bg-1-light px-m py-n text-m text-fg-1 shadow-high transition-all duration-base ease-out ${
+        shown
+          ? "translate-x-0 translate-y-0 scale-100 opacity-100"
+          : `${hiddenOffset(position)} scale-95 opacity-0`
+      }`}
+    >
+      <Icon className={`h-5 w-5 shrink-0 ${STATUS_COLOR[toast.status]}`} aria-hidden />
+      <span className="leading-snug">{toast.message}</span>
     </div>
   );
 }

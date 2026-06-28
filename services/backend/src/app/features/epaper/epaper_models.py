@@ -5,7 +5,6 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.session import Base, TimestampMixin
-from app.features.dashboard.dashboard_models import DashboardType
 
 # Native render size of every dashboard; also the default screen/image geometry.
 DEFAULT_WIDTH = 480
@@ -19,15 +18,22 @@ class Epaper(Base, TimestampMixin):
     __tablename__: str = "epapers"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    # Not unique: a user can register several epapers, each showing its own
+    # dashboard with its own geometry/refresh settings.
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
-        unique=True,
         nullable=False,
+        index=True,
     )
     slug: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
-    dashboard_type: Mapped[str] = mapped_column(String(32), nullable=False, default=DashboardType.HN_ZEITUNG.value)
-    custom_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    # The collection dashboard this epaper currently displays. Null until the
+    # user deploys one. A deleted dashboard sets this back to null (SET NULL).
+    dashboard_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("dashboards.id", ondelete="SET NULL"),
+        nullable=True,
+    )
 
     # Display geometry: the dashboard is rendered, scaled to image_width×image_height,
     # then composited at (image_x, image_y) onto a screen_width×screen_height canvas.

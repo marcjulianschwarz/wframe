@@ -4,7 +4,6 @@ from typing import Protocol
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.features.dashboard.dashboard_models import DashboardType
 from app.features.epaper.epaper_models import Epaper
 
 
@@ -12,12 +11,7 @@ class EpaperRepoProtocol(Protocol):
     async def get_by_user(self, user_id: uuid.UUID) -> Epaper | None: ...
     async def get_by_slug(self, slug: str) -> Epaper | None: ...
     async def create(self, user_id: uuid.UUID, slug: str) -> Epaper: ...
-    async def set_dashboard(
-        self,
-        epaper: Epaper,
-        dashboard_type: DashboardType,
-        custom_url: str | None = None,
-    ) -> Epaper: ...
+    async def set_dashboard_id(self, epaper: Epaper, dashboard_id: uuid.UUID | None) -> Epaper: ...
     async def set_geometry(
         self,
         epaper: Epaper,
@@ -44,7 +38,11 @@ class EpaperRepo:
         self.session: AsyncSession = session
 
     async def get_by_user(self, user_id: uuid.UUID) -> Epaper | None:
-        result = await self.session.execute(select(Epaper).where(Epaper.user_id == user_id))
+        # A user may own several epapers; the single-epaper UI uses their oldest
+        # (first-created) one. Ordered + limited so this never assumes uniqueness.
+        result = await self.session.execute(
+            select(Epaper).where(Epaper.user_id == user_id).order_by(Epaper.created_at.asc()).limit(1)
+        )
         return result.scalar_one_or_none()
 
     async def get_by_slug(self, slug: str) -> Epaper | None:
@@ -58,14 +56,8 @@ class EpaperRepo:
         await self.session.refresh(epaper)
         return epaper
 
-    async def set_dashboard(
-        self,
-        epaper: Epaper,
-        dashboard_type: DashboardType,
-        custom_url: str | None = None,
-    ) -> Epaper:
-        epaper.dashboard_type = dashboard_type.value
-        epaper.custom_url = custom_url
+    async def set_dashboard_id(self, epaper: Epaper, dashboard_id: uuid.UUID | None) -> Epaper:
+        epaper.dashboard_id = dashboard_id
         await self.session.flush()
         await self.session.refresh(epaper)
         return epaper

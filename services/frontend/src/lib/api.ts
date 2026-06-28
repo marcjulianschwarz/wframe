@@ -18,10 +18,27 @@ export interface Location {
   place: string | null;
 }
 
-export interface DashboardOption {
+export type DashboardSource = "store" | "custom";
+
+/** A built-in dashboard in the store catalog. */
+export interface StoreItem {
   type: DashboardType;
   title: string;
   description: string;
+}
+
+/** One dashboard in the user's collection (store-added or custom). */
+export interface Dashboard {
+  id: string;
+  source: DashboardSource;
+  type: DashboardType | null;
+  custom_url: string | null;
+  name: string;
+  description: string | null;
+  slug: string;
+  preview_url: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface User {
@@ -51,8 +68,8 @@ export interface Epaper extends EpaperGeometry, EpaperRefresh {
   id: string;
   user_id: string;
   slug: string;
-  dashboard_type: DashboardType;
-  custom_url: string | null;
+  dashboard_id: string | null;
+  dashboard: Dashboard | null;
   bitmap_url: string;
   created_at: string;
   updated_at: string;
@@ -108,18 +125,64 @@ export const authApi = {
     post<TokenResponse>("/auth/login", { email, password }),
 };
 
+/** Request expecting no body (e.g. 204 responses). */
+async function reqVoid(path: string, token: string, init?: RequestInit): Promise<void> {
+  const res = await fetch(`${BASE}${path}`, {
+    ...init,
+    headers: { ...authHeader(token), ...(init?.headers ?? {}) },
+  });
+  if (!res.ok) throw new Error(await errorMessage(res));
+}
+
+export interface CustomDashboardInput {
+  name: string;
+  description?: string | null;
+  slug?: string | null;
+  custom_url: string;
+}
+
+export interface DashboardEdit {
+  name?: string;
+  description?: string | null;
+  slug?: string;
+  custom_url?: string;
+}
+
 export const api = {
   me: (token: string) => req<User>("/users/me", token),
-  listDashboards: (token: string) => req<DashboardOption[]>("/dashboards", token),
+
+  // --- store (built-in catalog) --- //
+  listStore: (token: string) => req<StoreItem[]>("/store", token),
+  getStoreItem: (token: string, type: DashboardType) =>
+    req<StoreItem>(`/store/${type}`, token),
+
+  // --- collection --- //
+  listDashboards: (token: string, source?: DashboardSource) =>
+    req<Dashboard[]>(`/dashboards${source ? `?source=${source}` : ""}`, token),
+  addStoreDashboard: (token: string, type: DashboardType) =>
+    req<Dashboard>("/dashboards/store", token, {
+      method: "POST",
+      body: JSON.stringify({ type }),
+    }),
+  createCustomDashboard: (token: string, body: CustomDashboardInput) =>
+    req<Dashboard>("/dashboards/custom", token, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  updateDashboard: (token: string, id: string, body: DashboardEdit) =>
+    req<Dashboard>(`/dashboards/${id}`, token, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+  deleteDashboard: (token: string, id: string) =>
+    reqVoid(`/dashboards/${id}`, token, { method: "DELETE" }),
+
+  // --- epaper --- //
   getEpaper: (token: string) => req<Epaper>("/epaper", token),
-  setDashboard: (
-    token: string,
-    dashboard_type: DashboardType,
-    custom_url?: string | null,
-  ) =>
+  setDashboard: (token: string, dashboard_id: string | null) =>
     req<Epaper>("/epaper", token, {
       method: "PATCH",
-      body: JSON.stringify({ dashboard_type, custom_url: custom_url ?? null }),
+      body: JSON.stringify({ dashboard_id }),
     }),
   setGeometry: (token: string, geometry: EpaperGeometry) =>
     req<Epaper>("/epaper/geometry", token, {
@@ -132,8 +195,8 @@ export const api = {
       body: JSON.stringify(refresh),
     }),
 
-  /** URL of the live example HTML for a dashboard, for the in-app iframe
-   * preview. Serves canned data and does not change what the epaper serves. */
+  /** Live example HTML preview for a built-in dashboard type, for the in-app
+   * iframe. Serves canned data and does not change what the epaper serves. */
   previewUrl: (dashboard_type: DashboardType): string =>
     `${BASE}/bitmaps/${dashboard_type}/preview`,
 

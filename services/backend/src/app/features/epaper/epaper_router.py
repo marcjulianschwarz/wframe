@@ -9,6 +9,7 @@ from app.auth.auth import AuthDep
 from app.database.session import get_session
 from app.features.bitmap.bitmap_router import BitmapServiceDep
 from app.features.bitmap.renderers import Geometry
+from app.features.dashboard.dashboard_repository import DashboardRepo
 from app.features.dashboard.dashboard_router import get_dashboard_service
 from app.features.dashboard.dashboard_service import DashboardService
 from app.features.epaper import force_serve
@@ -62,6 +63,10 @@ def get_epaper_service(
     return EpaperService(repo, dashboards)
 
 
+def get_dashboard_repo_for_serve(session: Annotated[AsyncSession, Depends(get_session)]) -> DashboardRepo:
+    return DashboardRepo(session)
+
+
 EpaperServiceDep = Annotated[EpaperService, Depends(get_epaper_service)]
 
 
@@ -72,7 +77,7 @@ async def get_my_epaper(auth: AuthDep, service: EpaperServiceDep) -> EpaperRead:
 
 @router.patch("/epaper", response_model=EpaperRead)
 async def update_my_epaper(body: EpaperUpdate, auth: AuthDep, service: EpaperServiceDep) -> EpaperRead:
-    return await service.set_dashboard(auth.user.id, body.dashboard_type, body.custom_url)
+    return await service.set_dashboard(auth.user.id, body.dashboard_id)
 
 
 @router.patch("/epaper/geometry", response_model=EpaperRead)
@@ -86,21 +91,33 @@ async def update_my_epaper_refresh(body: EpaperRefreshUpdate, auth: AuthDep, ser
 
 
 @router.get("/e/{slug}.bmp")
-async def serve_bitmap(slug: str, epaper_service: EpaperServiceDep, bitmap_service: BitmapServiceDep) -> Response:
+async def serve_bitmap(
+    slug: str,
+    epaper_service: EpaperServiceDep,
+    bitmap_service: BitmapServiceDep,
+    dashboard_repo: Annotated[DashboardRepo, Depends(get_dashboard_repo_for_serve)],
+) -> Response:
     epaper = await epaper_service.get_by_slug(slug)
     if epaper is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+    no_content = Response(
+        status_code=status.HTTP_204_NO_CONTENT,
+        headers={
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        },
+    )
     # Outside a serve window (or paused): tell the device there's nothing to draw
     # so it leaves the panel untouched. 204 = "no content", no body.
     if not should_serve_now(epaper):
-        return Response(
-            status_code=status.HTTP_204_NO_CONTENT,
-            headers={
-                "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-                "Pragma": "no-cache",
-                "Expires": "0",
-            },
-        )
+        return no_content
+    # No dashboard deployed yet (or it was deleted): nothing to draw.
+    if epaper.dashboard_id is None:
+        return no_content
+    dashboard = await dashboard_repo.get_any(epaper.dashboard_id)
+    if dashboard is None:
+        return no_content
     geometry = Geometry(
         screen_width=epaper.screen_width,
         screen_height=epaper.screen_height,
@@ -110,9 +127,7 @@ async def serve_bitmap(slug: str, epaper_service: EpaperServiceDep, bitmap_servi
         image_y=epaper.image_y,
         rotation=epaper.rotation,
     )
-    data = await bitmap_service.get_or_render(
-        epaper.user_id, epaper.dashboard_type, epaper.custom_url, geometry=geometry
-    )
+    data = await bitmap_service.get_or_render(dashboard, geometry=geometry)
     return Response(
         content=data,
         media_type="image/bmp",

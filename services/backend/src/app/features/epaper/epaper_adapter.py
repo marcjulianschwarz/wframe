@@ -1,16 +1,17 @@
-from app.features.dashboard.dashboard_models import DashboardType
+from app.features.dashboard.dashboard_adapter import dashboard_model_to_read
+from app.features.dashboard.dashboard_models import Dashboard
 from app.features.epaper.epaper_models import Epaper
 from app.features.epaper.epaper_schemas import EpaperRead
 from app.settings import settings
 
 
-def epaper_model_to_read(epaper: Epaper) -> EpaperRead:
+def epaper_model_to_read(epaper: Epaper, dashboard: Dashboard | None = None) -> EpaperRead:
     return EpaperRead(
         id=epaper.id,
         user_id=epaper.user_id,
         slug=epaper.slug,
-        dashboard_type=DashboardType(epaper.dashboard_type),
-        custom_url=epaper.custom_url,
+        dashboard_id=epaper.dashboard_id,
+        dashboard=dashboard_model_to_read(dashboard) if dashboard is not None else None,
         bitmap_url=f"{settings.BACKEND_URL}/e/{epaper.slug}.bmp",
         screen_width=epaper.screen_width,
         screen_height=epaper.screen_height,

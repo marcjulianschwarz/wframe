@@ -12,6 +12,8 @@ export default {
         "fg-1": "var(--font-color-1)",
         "fg-2": "var(--font-color-2)",
         "fg-danger": "var(--danger-font-color)",
+        "fg-success": "var(--success-font-color)",
+        "fg-warning": "var(--warning-font-color)",
         "border-1": "var(--border-color-1)",
         "border-2": "var(--border-color-2)",
         highlight: "var(--highlight-color)",
@@ -52,6 +54,22 @@ export default {
       },
       transitionTimingFunction: {
         out: "var(--ease-out)",
+      },
+      keyframes: {
+        // Springy scale "pop" — the panel overshoots full size then settles.
+        "modal-pop": {
+          from: { opacity: "0", transform: "scale(0.9)" },
+          to: { opacity: "1", transform: "scale(1)" },
+        },
+        "backdrop-fade": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+      },
+      animation: {
+        // Spring overshoot easing gives the "pop" its bounce.
+        "modal-pop": "modal-pop 220ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "backdrop-fade": "backdrop-fade 120ms ease",
       },
     },
   },
