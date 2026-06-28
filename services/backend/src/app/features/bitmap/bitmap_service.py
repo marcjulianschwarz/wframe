@@ -27,6 +27,8 @@ class BitmapService:
         if dashboard.source == DashboardSource.CUSTOM.value:
             return renderer_factory(DashboardType.CUSTOM_URL, custom_url=dashboard.custom_url)
         dashboard_type = DashboardType(dashboard.type)
+        if dashboard_type == DashboardType.HOMEASSISTANT:
+            return renderer_factory(dashboard_type, user_id=dashboard.user_id)
         if dashboard_type in (DashboardType.LIFE, DashboardType.WEATHER, DashboardType.GITHUB):
             return renderer_factory(dashboard_type, session=self.session, user_id=dashboard.user_id)
         return renderer_factory(dashboard_type)

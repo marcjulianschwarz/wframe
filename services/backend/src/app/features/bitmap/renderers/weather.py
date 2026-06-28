@@ -131,9 +131,10 @@ async def _fetch(lat: float, lon: float) -> Forecast:
         return Forecast.model_validate(r.json())
 
 
-def _svg_chart(times: list[str], temps: list[float], now_idx: int) -> str:
-    """A 24h temperature line chart as inline SVG, 1px white on black, with a
-    dot + vertical guide on the current hour."""
+def svg_line_chart(times: list[str], temps: list[float], now_idx: int) -> str:
+    """A 24h line chart as inline SVG, 1px white on black, with a dot + vertical
+    guide on ``now_idx``. Shared with the Home Assistant renderer; both feed it a
+    timestamp list and a value list, so it's deliberately series-agnostic."""
     # Width matches the frame's inner content box: 480 − 2×26 body padding
     # − 2×22 frame padding − 2×2 frame border = 380.
     w, h = 380, 200
@@ -223,7 +224,7 @@ def render_html(data: Forecast, place: str | None) -> str:
     sunset = daily.sunset[0][11:16]
 
     label = escape(place) if place else "Your location"
-    chart = _svg_chart(window_t, window_v, 0)
+    chart = svg_line_chart(window_t, window_v, 0)
     stamp = now.strftime("%a %d %b · %H:%M")
 
     return f"""\

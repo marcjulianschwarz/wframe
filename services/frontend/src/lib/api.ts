@@ -6,10 +6,19 @@ export type DashboardType =
   | "life"
   | "custom_url"
   | "weather"
-  | "github";
+  | "github"
+  | "homeassistant";
 
 export interface GithubProfile {
   username: string;
+}
+
+/** The user's Home Assistant ingest channel: the webhook URL HA pushes to,
+ * plus a ready-to-paste HA automation snippet. */
+export interface HaConnection {
+  ingest_token: string;
+  webhook_url: string;
+  automation_yaml: string;
 }
 
 export interface Location {
@@ -213,4 +222,11 @@ export const api = {
       method: "PUT",
       body: JSON.stringify({ username }),
     }),
+
+  // --- home assistant --- //
+  /** Fetch the existing HA connection (404 if not minted yet). */
+  getHaConnection: (token: string) => req<HaConnection>("/ha/connection", token),
+  /** Mint (or return the existing) HA connection for the current user. */
+  createHaConnection: (token: string) =>
+    req<HaConnection>("/ha/connection", token, { method: "POST" }),
 };

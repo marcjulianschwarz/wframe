@@ -3,6 +3,7 @@ import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { Modal } from "@/components/Modal";
 import { GithubForm } from "@/features/dashboard/GithubForm";
+import { HomeAssistantForm } from "@/features/dashboard/HomeAssistantForm";
 import { LocationButton } from "@/features/dashboard/LocationButton";
 import { api, type Dashboard } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -104,6 +105,7 @@ export function EditDashboardModal({ dashboard, onSaved, onClose }: Props) {
         {/* Per-user config the renderer needs for these built-ins. */}
         {dashboard.type === "weather" && <LocationButton token={token} />}
         {dashboard.type === "github" && <GithubForm token={token} />}
+        {dashboard.type === "homeassistant" && <HomeAssistantForm token={token} />}
         {error && <div className="text-s text-fg-danger">{error}</div>}
       </div>
     </Modal>

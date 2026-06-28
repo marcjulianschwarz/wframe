@@ -38,6 +38,27 @@ class GithubProfile(Base, TimestampMixin):
     username: Mapped[str] = mapped_column(String(39), nullable=False)
 
 
+class HaConnection(Base, TimestampMixin):
+    """Per-user Home Assistant ingest channel.
+
+    Holds only the opaque token HA authenticates with when it pushes light
+    states to the webhook — this is connection *config*, not home data. The
+    pushed states themselves are never stored here; they live in an in-memory
+    TTL cache (see ``ha_cache``) only as long as a render needs them.
+    """
+
+    __tablename__: str = "ha_connections"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    # Opaque secret in the webhook URL; indexed for the token→user lookup on
+    # ingest, where there is no JWT to resolve the user from.
+    ingest_token: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
+
+
 class LifeState(Base, TimestampMixin):
     __tablename__: str = "life_states"
 

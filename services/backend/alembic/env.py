@@ -16,6 +16,7 @@ if str(_SRC) not in sys.path:
 
 from app.database.session import Base  # noqa: E402
 from app.features.bitmap import bitmap_models  # noqa: E402, F401
+from app.features.dashboard import dashboard_models  # noqa: E402, F401
 from app.features.epaper import epaper_models  # noqa: E402, F401
 
 # Import all modules that define ORM models so they register on Base.metadata.

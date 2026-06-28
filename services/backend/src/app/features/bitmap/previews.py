@@ -227,9 +227,28 @@ def _custom_url_preview() -> str:
 </body></html>"""
 
 
+# --------------------------------------------------------------------------- #
+# homeassistant — reuses the real renderer's HTML with sample lights
+# --------------------------------------------------------------------------- #
+def _homeassistant_preview() -> str:
+    from app.features.bitmap import ha_cache
+    from app.features.bitmap.renderers.homeassistant import render_html
+
+    lights = [
+        ha_cache.Light(name="Living Room", is_on=True, brightness=204),
+        ha_cache.Light(name="Kitchen", is_on=True, brightness=128),
+        ha_cache.Light(name="Bedroom", is_on=True, brightness=46),
+        ha_cache.Light(name="Hallway", is_on=False, brightness=0),
+        ha_cache.Light(name="Desk Lamp", is_on=True, brightness=255),
+        ha_cache.Light(name="Porch", is_on=False, brightness=None),
+    ]
+    return render_html(lights)
+
+
 _PREVIEWS = {
     DashboardType.WEATHER: _weather_preview,
     DashboardType.GITHUB: _github_preview,
+    DashboardType.HOMEASSISTANT: _homeassistant_preview,
     DashboardType.DASHBOARD: _dashboard_preview,
     DashboardType.HN_ZEITUNG: _hn_preview,
     DashboardType.LIFE: _life_preview,

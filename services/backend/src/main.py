@@ -13,6 +13,7 @@ from app.database.status import DBPoolStatus, get_db_pool_status_value
 from app.database.test_connection import test_db_connection
 from app.features.bitmap.bitmap_router import router as bitmap_router
 from app.features.bitmap.github_router import router as github_router
+from app.features.bitmap.ha_router import router as ha_router
 from app.features.bitmap.location_router import router as location_router
 from app.features.dashboard.dashboard_router import router as dashboard_router
 from app.features.epaper.epaper_router import router as epaper_router
@@ -80,6 +81,7 @@ app.include_router(epaper_router)
 app.include_router(bitmap_router)
 app.include_router(location_router)
 app.include_router(github_router)
+app.include_router(ha_router)
 
 
 @app.get("/")

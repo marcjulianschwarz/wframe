@@ -15,6 +15,7 @@ class DashboardType(str, enum.Enum):
     CUSTOM_URL = "custom_url"
     WEATHER = "weather"
     GITHUB = "github"
+    HOMEASSISTANT = "homeassistant"
 
 
 class DashboardSource(str, enum.Enum):
@@ -55,6 +56,10 @@ DASHBOARD_CATALOG: dict[DashboardType, dict[str, str]] = {
     DashboardType.GITHUB: {
         "title": "GitHub",
         "description": "A public profile card: stars, top repos, and languages.",
+    },
+    DashboardType.HOMEASSISTANT: {
+        "title": "Home Assistant",
+        "description": "Your lights and their brightness, pushed live from Home Assistant.",
     },
 }
 
