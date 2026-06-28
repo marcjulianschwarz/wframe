@@ -1,0 +1,14 @@
+__pycache__
+*.pyc
+.venv
+.env
+.env.local
+.env.production
+.bitmaps
+.pytest_cache
+.ruff_cache
+.mypy_cache
+*.egg-info/
+.coverage
+htmlcov/
+*.log

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WFrame Dashboard</title><style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 480px; height: 800px;
+    background: #000; color: #fff;
+    font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: none; font-smooth: never; text-rendering: geometricPrecision; image-rendering: pixelated; shape-rendering: crispEdges;
+    letter-spacing: -0.02em;
+  }
+  body { padding: 20px; display: grid; gap: 14px; grid-template-rows: auto auto 1fr auto; }
+  header { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; }
+  header h1 { font-size: 22px; font-weight: 700; }
+  header .date { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+  .card { border: 2px solid #fff; border-radius: 22px; padding: 20px; }
+  .hero { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 8px; }
+  .hero .temp { font-size: 104px; font-weight: 300; line-height: 0.9; letter-spacing: -0.06em; }
+  .hero .cond { font-size: 18px; font-weight: 700; margin-top: 6px; }
+  .hero .meta { font-size: 14px; font-weight: 500; margin-top: 4px; }
+  .hero .icon { font-size: 56px; line-height: 1; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .stat .label { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+  .stat .value { font-size: 38px; font-weight: 700; line-height: 1; letter-spacing: -0.03em; }
+  .stat .unit { font-size: 16px; font-weight: 600; margin-left: 2px; }
+  .stat .sub { font-size: 13px; font-weight: 500; margin-top: 6px; }
+  .wide { grid-column: 1 / -1; }
+  .section-label { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; }
+  .list { list-style: none; }
+  .list li { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-top: 2px solid #fff; font-size: 16px; font-weight: 600; }
+  .list li:first-child { border-top: none; padding-top: 4px; }
+  .list li .left { display: flex; align-items: center; gap: 12px; }
+  .list li .dot { width: 8px; height: 8px; background: #fff; border-radius: 50%; flex-shrink: 0; }
+  .list li .time { font-size: 15px; font-weight: 600; }
+  .quote { font-size: 18px; font-weight: 600; line-height: 1.4; }
+  .quote .attr { font-size: 12px; font-weight: 700; margin-top: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+  footer { display: flex; justify-content: space-between; padding: 0 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>WFrame</h1>
+    <div class="date">Sat 27 Jun</div>
+  </header>
+
+  <section class="card hero">
+    <div>
+      <div class="temp">-4&deg;</div>
+      <div class="cond">Clear</div>
+      <div class="meta">H 15&deg; &middot; L 10&deg; &middot; Humidity 44%</div>
+    </div>
+    <div class="icon">&#9928;</div>
+  </section>
+
+  <section class="grid">
+    <div class="card stat">
+      <div class="label">Steps</div>
+      <div class="value">17,292</div>
+      <div class="sub">Goal 10,000</div>
+    </div>
+    <div class="card stat">
+      <div class="label">Battery</div>
+      <div class="value">62<span class="unit">%</span></div>
+      <div class="sub">~17 hours left</div>
+    </div>
+    <div class="card wide">
+      <div class="section-label">Next Up</div>
+      <ul class="list">
+        <li><span class="left"><span class="dot"></span>1:1 w/ Sam</span><span class="time">08:30</span></li>
+        <li><span class="left"><span class="dot"></span>Code Review</span><span class="time">10:30</span></li>
+        <li><span class="left"><span class="dot"></span>Coffee Break</span><span class="time">16:30</span></li>
+        <li><span class="left"><span class="dot"></span>Sprint Planning</span><span class="time">18:15</span></li>
+      </ul>
+    </div>
+    <div class="card wide quote">
+      &ldquo;First, solve the problem. Then, write the code.&rdquo;
+      <div class="attr">John Johnson</div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Updated 10:58:34</span>
+    <span>WFrame v1</span>
+  </footer>
+</body>
+</html>
