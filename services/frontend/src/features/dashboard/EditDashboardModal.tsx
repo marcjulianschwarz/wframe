@@ -105,7 +105,8 @@ export function EditDashboardModal({ dashboard, onSaved, onClose }: Props) {
         {/* Per-user config the renderer needs for these built-ins. */}
         {dashboard.type === "weather" && <LocationButton token={token} />}
         {dashboard.type === "github" && <GithubForm token={token} />}
-        {dashboard.type === "homeassistant" && <HomeAssistantForm token={token} />}
+        {(dashboard.type === "homeassistant" ||
+          dashboard.type === "homeassistant_temp") && <HomeAssistantForm token={token} />}
         {error && <div className="text-s text-fg-danger">{error}</div>}
       </div>
     </Modal>

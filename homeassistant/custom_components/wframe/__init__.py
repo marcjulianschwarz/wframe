@@ -20,7 +20,8 @@ from datetime import datetime, timedelta
 
 import voluptuous as vol
 from homeassistant.components.recorder import get_instance, history
-from homeassistant.core import HomeAssistant
+from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
+from homeassistant.core import CoreState, HomeAssistant
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.event import async_track_time_interval
@@ -63,11 +64,16 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     async def _push(_now: datetime | None = None) -> None:
         await _push_series(hass, ingest_url, entity_id)
 
-    # Push once at startup, then on the configured interval.
-    async def _startup(_event: object) -> None:
-        await _push()
+    # Push once as soon as the recorder is usable, then on the configured
+    # interval. If HA is still starting, wait for the started event (the
+    # recorder isn't ready mid-startup); if we're loaded into an already-running
+    # HA — a config reload, or install without a full restart — push right away
+    # rather than making the user wait a whole interval for the first chart.
+    if hass.state is CoreState.running:
+        hass.async_create_task(_push())
+    else:
+        hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _push)
 
-    hass.bus.async_listen_once("homeassistant_started", _startup)
     async_track_time_interval(hass, _push, interval)
     _LOGGER.info("wframe set up: pushing %s to %s every %s", entity_id, ingest_url, interval)
     return True

@@ -53,6 +53,22 @@ def _waiting_html() -> str:
 </body></html>"""
 
 
+def _temp_waiting_html() -> str:
+    return f"""\
+<!doctype html><html><head><meta charset="utf-8"><style>{_font_face()}
+  html,body{{margin:0;width:480px;height:800px;background:#000;color:#fff;
+    font-family:"Cozette",monospace;-webkit-font-smoothing:none;}}
+  body{{display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;padding:40px;}}
+  h1{{font-size:39px;font-weight:700;text-transform:uppercase;margin:0 0 20px;}}
+  p{{font-size:13px;line-height:1.6;}}
+</style></head><body>
+  <h1>Temperature</h1>
+  <p>Waiting for Home Assistant&hellip;<br><br>Install the wframe integration<br>
+     and point it at a sensor to enable<br>this 24h chart.</p>
+</body></html>"""
+
+
 def _brightness_bar(pct: int | None) -> str:
     """A 1-bit fill bar for brightness. Off/no-brightness lights render empty."""
     fill = pct or 0
@@ -193,26 +209,15 @@ def render_sensor_html(series: ha_cache.SensorSeries) -> str:
 
 
 class HomeAssistantRenderer:
+    """Lights grid from the pushed light snapshot."""
+
     def __init__(self, user_id: uuid.UUID) -> None:
         self.user_id: uuid.UUID = user_id
 
     async def render(self) -> bytes:
-        # Prefer a pushed sensor series (the temperature chart); fall back to the
-        # lights grid; then the waiting frame. A user wiring up the integration
-        # gets the chart, while existing lights-only setups keep working.
-        series = ha_cache.get_sensors(self.user_id)
-        if series is not None and series.values:
-            logger.info(
-                "ha render: temperature chart",
-                user_id=str(self.user_id),
-                points=len(series.values),
-                age_seconds=round(ha_cache.age_seconds(series)),
-            )
-            return await html_to_bmp(render_sensor_html(series), scale=1)
-
         snap = ha_cache.get(self.user_id)
         if snap is None:
-            logger.info("ha render: waiting frame (no cached data)", user_id=str(self.user_id))
+            logger.info("ha render: waiting frame (no cached lights)", user_id=str(self.user_id))
             return await html_to_bmp(_waiting_html(), scale=1)
         logger.info(
             "ha render: lights grid",
@@ -221,3 +226,23 @@ class HomeAssistantRenderer:
             age_seconds=round(ha_cache.age_seconds(snap)),
         )
         return await html_to_bmp(render_html(snap.lights), scale=1)
+
+
+class HomeAssistantTempRenderer:
+    """24h temperature chart from the pushed sensor series."""
+
+    def __init__(self, user_id: uuid.UUID) -> None:
+        self.user_id: uuid.UUID = user_id
+
+    async def render(self) -> bytes:
+        series = ha_cache.get_sensors(self.user_id)
+        if series is None or not series.values:
+            logger.info("ha render: waiting frame (no cached sensor series)", user_id=str(self.user_id))
+            return await html_to_bmp(_temp_waiting_html(), scale=1)
+        logger.info(
+            "ha render: temperature chart",
+            user_id=str(self.user_id),
+            points=len(series.values),
+            age_seconds=round(ha_cache.age_seconds(series)),
+        )
+        return await html_to_bmp(render_sensor_html(series), scale=1)

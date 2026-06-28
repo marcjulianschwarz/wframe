@@ -67,6 +67,26 @@ export function HomeAssistantForm({ token }: { token: string }) {
               URL contains your secret token.
             </p>
           </div>
+
+          <div className="flex flex-col gap-s pt-s border-t border-border-1">
+            <div className="text-s text-fg-2 uppercase tracking-wider font-semibold">
+              Temperature chart (24h)
+            </div>
+            <CopyField label="Sensor ingest URL" value={conn.sensor_webhook_url} mono />
+            <CopyField
+              label="Integration config"
+              value={conn.sensor_automation_yaml}
+              block
+            />
+            <p className="text-s text-fg-2">
+              For a 24h temperature chart, install the wframe Home Assistant
+              integration (it reads your sensor's history from the recorder and
+              pushes it here). Then paste the config above into{" "}
+              <span className="font-mono">configuration.yaml</span>, set your{" "}
+              <span className="font-mono">sensor</span> entity, and restart HA.
+              Keep it private — the URL contains your secret token.
+            </p>
+          </div>
         </>
       )}
 

@@ -245,10 +245,28 @@ def _homeassistant_preview() -> str:
     return render_html(lights)
 
 
+def _homeassistant_temp_preview() -> str:
+    import math
+    import time
+
+    from app.features.bitmap import ha_cache
+    from app.features.bitmap.renderers.homeassistant import render_sensor_html
+
+    # A day's worth of hourly readings: a gentle diurnal curve so the chart and
+    # high/low stats look real in the store thumbnail.
+    times = [f"2026-06-27T{h:02d}:00:00" for h in range(24)]
+    values = [round(18 + 6 * math.sin((h - 9) / 24 * 2 * math.pi), 1) for h in range(24)]
+    series = ha_cache.SensorSeries(
+        name="Living Room", unit="°C", times=times, values=values, received_at=time.monotonic()
+    )
+    return render_sensor_html(series)
+
+
 _PREVIEWS = {
     DashboardType.WEATHER: _weather_preview,
     DashboardType.GITHUB: _github_preview,
     DashboardType.HOMEASSISTANT: _homeassistant_preview,
+    DashboardType.HOMEASSISTANT_TEMP: _homeassistant_temp_preview,
     DashboardType.DASHBOARD: _dashboard_preview,
     DashboardType.HN_ZEITUNG: _hn_preview,
     DashboardType.LIFE: _life_preview,

@@ -7,7 +7,8 @@ export type DashboardType =
   | "custom_url"
   | "weather"
   | "github"
-  | "homeassistant";
+  | "homeassistant"
+  | "homeassistant_temp";
 
 export interface GithubProfile {
   username: string;
@@ -18,7 +19,9 @@ export interface GithubProfile {
 export interface HaConnection {
   ingest_token: string;
   webhook_url: string;
+  sensor_webhook_url: string;
   automation_yaml: string;
+  sensor_automation_yaml: string;
 }
 
 export interface Location {
