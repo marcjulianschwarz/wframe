@@ -29,7 +29,12 @@ class BitmapService:
         dashboard_type = DashboardType(dashboard.type)
         if dashboard_type in (DashboardType.HOMEASSISTANT, DashboardType.HOMEASSISTANT_TEMP):
             return renderer_factory(dashboard_type, user_id=dashboard.user_id)
-        if dashboard_type in (DashboardType.LIFE, DashboardType.WEATHER, DashboardType.GITHUB):
+        if dashboard_type in (
+            DashboardType.LIFE,
+            DashboardType.WEATHER,
+            DashboardType.GITHUB,
+            DashboardType.IMAGE,
+        ):
             return renderer_factory(dashboard_type, session=self.session, user_id=dashboard.user_id)
         return renderer_factory(dashboard_type)
 

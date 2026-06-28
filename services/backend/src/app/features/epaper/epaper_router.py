@@ -9,6 +9,7 @@ from app.auth.auth import AuthDep
 from app.database.session import get_session
 from app.features.bitmap.bitmap_router import BitmapServiceDep
 from app.features.bitmap.renderers import Geometry
+from app.features.dashboard.dashboard_models import DashboardType
 from app.features.dashboard.dashboard_repository import DashboardRepo
 from app.features.dashboard.dashboard_router import get_dashboard_service
 from app.features.dashboard.dashboard_service import DashboardService
@@ -128,12 +129,14 @@ async def serve_bitmap(
         rotation=epaper.rotation,
     )
     data = await bitmap_service.get_or_render(dashboard, geometry=geometry)
-    return Response(
-        content=data,
-        media_type="image/bmp",
-        headers={
-            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-            "Pragma": "no-cache",
-            "Expires": "0",
-        },
-    )
+    headers = {
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        "Pragma": "no-cache",
+        "Expires": "0",
+    }
+    # Photos ghost badly under the panel's default partial refresh, so tell the
+    # device to do a full refresh for this push. Text dashboards stay on partials
+    # (faster, less wear); only the Image dashboard opts into the full clear.
+    if dashboard.type == DashboardType.IMAGE.value:
+        headers["X-Epaper-Full-Refresh"] = "1"
+    return Response(content=data, media_type="image/bmp", headers=headers)

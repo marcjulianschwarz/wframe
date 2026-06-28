@@ -38,6 +38,33 @@ class GithubProfile(Base, TimestampMixin):
     username: Mapped[str] = mapped_column(String(39), nullable=False)
 
 
+class ImageUpload(Base, TimestampMixin):
+    """Per-user source image for the Image dashboard.
+
+    Stores the *original* upload bytes (plus its content type) so the renderer
+    can re-dither it to a 1-bit BMP on demand — keeping the original means the
+    user can switch dithering algorithms or fit modes without re-uploading, and
+    it can be rasterized at whatever screen size a render needs. ``algorithm``
+    and ``fit`` are the user's current display choices, applied at render time.
+    """
+
+    __tablename__: str = "image_uploads"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    data: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+    content_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    # One of the ImageAlgorithm / ImageFit string values; validated in the API.
+    algorithm: Mapped[str] = mapped_column(String(24), nullable=False, default="floyd_steinberg")
+    fit: Mapped[str] = mapped_column(String(16), nullable=False, default="contain")
+    # Contrast multiplier applied before dithering. 1.0 = unchanged; <1.0 reduces
+    # contrast to recover detail on harsh high-contrast photos.
+    contrast: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
+
+
 class HaConnection(Base, TimestampMixin):
     """Per-user Home Assistant ingest channel.
 

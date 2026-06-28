@@ -4,6 +4,7 @@ import { Input } from "@/components/Input";
 import { Modal } from "@/components/Modal";
 import { GithubForm } from "@/features/dashboard/GithubForm";
 import { HomeAssistantForm } from "@/features/dashboard/HomeAssistantForm";
+import { ImageForm } from "@/features/dashboard/ImageForm";
 import { LocationButton } from "@/features/dashboard/LocationButton";
 import { api, type Dashboard } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -107,6 +108,7 @@ export function EditDashboardModal({ dashboard, onSaved, onClose }: Props) {
         {dashboard.type === "github" && <GithubForm token={token} />}
         {(dashboard.type === "homeassistant" ||
           dashboard.type === "homeassistant_temp") && <HomeAssistantForm token={token} />}
+        {dashboard.type === "image" && <ImageForm token={token} />}
         {error && <div className="text-s text-fg-danger">{error}</div>}
       </div>
     </Modal>

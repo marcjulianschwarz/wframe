@@ -245,6 +245,21 @@ def _homeassistant_preview() -> str:
     return render_html(lights)
 
 
+def _image_preview() -> str:
+    return """\
+<!doctype html><html><head><meta charset="utf-8"><style>
+  html,body{margin:0;width:480px;height:800px;background:#000;color:#fff;
+    font-family:-apple-system,Helvetica,Arial,sans-serif;}
+  body{display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;padding:40px;}
+  h1{font-size:40px;font-weight:700;margin-bottom:20px;}
+  p{font-size:18px;line-height:1.5;}
+</style></head><body>
+  <h1>Image</h1>
+  <p>Upload an image and pick a dithering<br>style. Your epaper shows it fullscreen.</p>
+</body></html>"""
+
+
 def _homeassistant_temp_preview() -> str:
     import math
     import time
@@ -267,6 +282,7 @@ _PREVIEWS = {
     DashboardType.GITHUB: _github_preview,
     DashboardType.HOMEASSISTANT: _homeassistant_preview,
     DashboardType.HOMEASSISTANT_TEMP: _homeassistant_temp_preview,
+    DashboardType.IMAGE: _image_preview,
     DashboardType.DASHBOARD: _dashboard_preview,
     DashboardType.HN_ZEITUNG: _hn_preview,
     DashboardType.LIFE: _life_preview,

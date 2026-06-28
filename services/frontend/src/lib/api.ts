@@ -8,7 +8,20 @@ export type DashboardType =
   | "weather"
   | "github"
   | "homeassistant"
-  | "homeassistant_temp";
+  | "homeassistant_temp"
+  | "image";
+
+export type ImageAlgorithm = "floyd_steinberg" | "ordered" | "threshold" | "atkinson";
+export type ImageFit = "contain" | "cover" | "stretch";
+
+/** The user's current Image dashboard config (never the bytes). */
+export interface ImageConfig {
+  content_type: string;
+  algorithm: ImageAlgorithm;
+  fit: ImageFit;
+  /** Contrast multiplier applied before dithering; 1.0 = unchanged, <1.0 softer. */
+  contrast: number;
+}
 
 export interface GithubProfile {
   username: string;
@@ -224,6 +237,34 @@ export const api = {
     req<GithubProfile>("/github", token, {
       method: "PUT",
       body: JSON.stringify({ username }),
+    }),
+
+  // --- image --- //
+  /** Fetch the user's Image dashboard config (404 if nothing uploaded). */
+  getImage: (token: string) => req<ImageConfig>("/image", token),
+  /** Upload (or replace) the source image. Sends multipart/form-data; the
+   * browser sets the boundary Content-Type, so we don't send authHeader's. */
+  uploadImage: async (token: string, file: File): Promise<ImageConfig> => {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${BASE}/image`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}` },
+      body: form,
+    });
+    if (!res.ok) throw new Error(await errorMessage(res));
+    return res.json() as Promise<ImageConfig>;
+  },
+  /** Change dithering algorithm / fit / contrast without re-uploading. */
+  setImageSettings: (
+    token: string,
+    algorithm: ImageAlgorithm,
+    fit: ImageFit,
+    contrast: number,
+  ) =>
+    req<ImageConfig>("/image", token, {
+      method: "PATCH",
+      body: JSON.stringify({ algorithm, fit, contrast }),
     }),
 
   // --- home assistant --- //

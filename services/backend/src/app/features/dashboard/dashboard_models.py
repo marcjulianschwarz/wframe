@@ -17,6 +17,7 @@ class DashboardType(str, enum.Enum):
     GITHUB = "github"
     HOMEASSISTANT = "homeassistant"
     HOMEASSISTANT_TEMP = "homeassistant_temp"
+    IMAGE = "image"
 
 
 class DashboardSource(str, enum.Enum):
@@ -65,6 +66,10 @@ DASHBOARD_CATALOG: dict[DashboardType, dict[str, str]] = {
     DashboardType.HOMEASSISTANT_TEMP: {
         "title": "Home Assistant — Temperature",
         "description": "A 24h temperature chart from a Home Assistant sensor.",
+    },
+    DashboardType.IMAGE: {
+        "title": "Image",
+        "description": "Show an uploaded image fullscreen, dithered for epaper.",
     },
 }
 
