@@ -10,3 +10,5 @@ dist/
 .bitmaps/
 .DS_Store
 *.log
+*.sh
+*.conf
