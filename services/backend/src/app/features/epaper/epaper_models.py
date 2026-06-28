@@ -12,6 +12,8 @@ DEFAULT_HEIGHT = 800
 # Default seconds the device waits between refreshes (the "off" part of the
 # serve duty cycle). 300s = redraw the epaper every 5 minutes.
 DEFAULT_REFRESH_INTERVAL = 300
+# Shown until the user names the device; keeps the UI from rendering blanks.
+DEFAULT_NAME = "My epaper"
 
 
 class Epaper(Base, TimestampMixin):
@@ -27,6 +29,8 @@ class Epaper(Base, TimestampMixin):
         index=True,
     )
     slug: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    # User-facing label so a user with several devices can tell them apart.
+    name: Mapped[str] = mapped_column(String(80), nullable=False, default=DEFAULT_NAME)
     # The collection dashboard this epaper currently displays. Null until the
     # user deploys one. A deleted dashboard sets this back to null (SET NULL).
     dashboard_id: Mapped[uuid.UUID | None] = mapped_column(

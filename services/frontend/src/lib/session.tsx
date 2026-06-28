@@ -19,16 +19,20 @@ import { auth } from "@/lib/auth";
 interface SessionValue {
   token: string;
   user: User | null;
-  epaper: Epaper | null;
-  setEpaper: (e: Epaper) => void;
-  refreshEpaper: () => Promise<void>;
+  /** Every epaper device the user owns (always at least one). */
+  epapers: Epaper[];
+  /** Replace the whole list (e.g. after create/delete). */
+  setEpapers: (e: Epaper[]) => void;
+  /** Insert-or-replace a single epaper in the list by id. */
+  upsertEpaper: (e: Epaper) => void;
+  refreshEpapers: () => Promise<void>;
   notify: (status: ToastStatus, message: string) => void;
   logout: () => void;
 }
 
 const SessionContext = createContext<SessionValue | null>(null);
 
-/** App-wide session: holds the auth token, the current user, and their epaper.
+/** App-wide session: holds the auth token, the current user, and their epapers.
  * Provided once at the router root so every page can read them. */
 export function SessionProvider({
   token,
@@ -40,7 +44,7 @@ export function SessionProvider({
   children: ReactNode;
 }) {
   const [user, setUser] = useState<User | null>(null);
-  const [epaper, setEpaper] = useState<Epaper | null>(null);
+  const [epapers, setEpapers] = useState<Epaper[]>([]);
   const [toasts, setToasts] = useState<ToastData[]>([]);
   const nextToastId = useRef(0);
 
@@ -51,18 +55,26 @@ export function SessionProvider({
     setToasts((list) => list.filter((t) => t.id !== id));
   }, []);
 
-  const refreshEpaper = useCallback(async () => {
-    setEpaper(await api.getEpaper(token));
+  const upsertEpaper = useCallback((e: Epaper) => {
+    setEpapers((list) =>
+      list.some((x) => x.id === e.id)
+        ? list.map((x) => (x.id === e.id ? e : x))
+        : [...list, e],
+    );
+  }, []);
+
+  const refreshEpapers = useCallback(async () => {
+    setEpapers(await api.listEpapers(token));
   }, [token]);
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
       try {
-        const [me, ep] = await Promise.all([api.me(token), api.getEpaper(token)]);
+        const [me, eps] = await Promise.all([api.me(token), api.listEpapers(token)]);
         if (cancelled) return;
         setUser(me);
-        setEpaper(ep);
+        setEpapers(eps);
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         if (/invalid or expired|user no longer|missing bearer/i.test(msg)) {
@@ -78,9 +90,10 @@ export function SessionProvider({
   const value: SessionValue = {
     token,
     user,
-    epaper,
-    setEpaper,
-    refreshEpaper,
+    epapers,
+    setEpapers,
+    upsertEpaper,
+    refreshEpapers,
     notify,
     logout: () => {
       auth.clear();

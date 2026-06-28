@@ -69,7 +69,7 @@ export function DisplayGeometryForm({
     setBusy(true);
     setError(null);
     try {
-      const next = await api.setGeometry(token, values);
+      const next = await api.setGeometry(token, epaper.id, values);
       setValues(pickGeometry(next));
       setSaved(true);
       onSaved(next);

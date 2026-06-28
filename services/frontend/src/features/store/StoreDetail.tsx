@@ -9,7 +9,9 @@ import { useSession } from "@/lib/session";
  * drops a copy into the user's collection. */
 export function StoreDetail() {
   const { type } = useParams<{ type: string }>();
-  const { token, epaper } = useSession();
+  const { token, epapers } = useSession();
+  // The store preview is generic; use the first device's geometry as a sample.
+  const epaper = epapers[0] ?? null;
   const navigate = useNavigate();
   const [item, setItem] = useState<StoreItem | null>(null);
   const [error, setError] = useState<string | null>(null);

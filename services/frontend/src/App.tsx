@@ -33,10 +33,10 @@ function Shell() {
                 Store
               </NavLink>
               <NavLink to="/dashboards" className={navClass}>
-                My dashboards
+                Dashboards
               </NavLink>
               <NavLink to="/settings" className={navClass}>
-                Settings
+                Epapers
               </NavLink>
             </nav>
           </div>

@@ -9,6 +9,7 @@ def epaper_model_to_read(epaper: Epaper, dashboard: Dashboard | None = None) -> 
     return EpaperRead(
         id=epaper.id,
         user_id=epaper.user_id,
+        name=epaper.name,
         slug=epaper.slug,
         dashboard_id=epaper.dashboard_id,
         dashboard=dashboard_model_to_read(dashboard) if dashboard is not None else None,

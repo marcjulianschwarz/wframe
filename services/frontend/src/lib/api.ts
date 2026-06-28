@@ -92,6 +92,7 @@ export interface EpaperRefresh {
 export interface Epaper extends EpaperGeometry, EpaperRefresh {
   id: string;
   user_id: string;
+  name: string;
   slug: string;
   dashboard_id: string | null;
   dashboard: Dashboard | null;
@@ -202,20 +203,32 @@ export const api = {
   deleteDashboard: (token: string, id: string) =>
     reqVoid(`/dashboards/${id}`, token, { method: "DELETE" }),
 
-  // --- epaper --- //
-  getEpaper: (token: string) => req<Epaper>("/epaper", token),
-  setDashboard: (token: string, dashboard_id: string | null) =>
-    req<Epaper>("/epaper", token, {
+  // --- epapers (one or more physical devices) --- //
+  listEpapers: (token: string) => req<Epaper[]>("/epapers", token),
+  createEpaper: (token: string, name: string) =>
+    req<Epaper>("/epapers", token, {
+      method: "POST",
+      body: JSON.stringify({ name }),
+    }),
+  renameEpaper: (token: string, id: string, name: string) =>
+    req<Epaper>(`/epapers/${id}`, token, {
+      method: "PATCH",
+      body: JSON.stringify({ name }),
+    }),
+  deleteEpaper: (token: string, id: string) =>
+    reqVoid(`/epapers/${id}`, token, { method: "DELETE" }),
+  setDashboard: (token: string, id: string, dashboard_id: string | null) =>
+    req<Epaper>(`/epapers/${id}/dashboard`, token, {
       method: "PATCH",
       body: JSON.stringify({ dashboard_id }),
     }),
-  setGeometry: (token: string, geometry: EpaperGeometry) =>
-    req<Epaper>("/epaper/geometry", token, {
+  setGeometry: (token: string, id: string, geometry: EpaperGeometry) =>
+    req<Epaper>(`/epapers/${id}/geometry`, token, {
       method: "PATCH",
       body: JSON.stringify(geometry),
     }),
-  setRefresh: (token: string, refresh: EpaperRefresh) =>
-    req<Epaper>("/epaper/refresh", token, {
+  setRefresh: (token: string, id: string, refresh: EpaperRefresh) =>
+    req<Epaper>(`/epapers/${id}/refresh`, token, {
       method: "PATCH",
       body: JSON.stringify(refresh),
     }),

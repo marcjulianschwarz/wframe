@@ -1,10 +1,12 @@
 import secrets
 import uuid
 
+from fastapi import HTTPException, status
+
 from app.features.dashboard.dashboard_service import DashboardService
 from app.features.epaper import force_serve
 from app.features.epaper.epaper_adapter import epaper_model_to_read
-from app.features.epaper.epaper_models import Epaper
+from app.features.epaper.epaper_models import DEFAULT_NAME, Epaper
 from app.features.epaper.epaper_repository import EpaperRepoProtocol
 from app.features.epaper.epaper_schemas import (
     EpaperGeometryUpdate,
@@ -30,29 +32,52 @@ class EpaperService:
             dashboard = await self.dashboards.repo.get(epaper.user_id, epaper.dashboard_id)
         return epaper_model_to_read(epaper, dashboard)
 
-    async def _get_or_create(self, user_id: uuid.UUID) -> Epaper:
-        epaper = await self.repo.get_by_user(user_id)
+    async def _owned(self, user_id: uuid.UUID, epaper_id: uuid.UUID) -> Epaper:
+        epaper = await self.repo.get_for_user(user_id, epaper_id)
         if epaper is None:
-            epaper = await self.repo.create(user_id, _new_slug())
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Epaper not found")
         return epaper
 
-    async def get_or_create_for_user(self, user_id: uuid.UUID) -> EpaperRead:
-        return await self._to_read(await self._get_or_create(user_id))
+    async def list_for_user(self, user_id: uuid.UUID) -> list[EpaperRead]:
+        """Every epaper the user owns. A user with none gets a first device
+        auto-provisioned so the UI always has something to configure."""
+        epapers = await self.repo.list_for_user(user_id)
+        if not epapers:
+            epapers = [await self.repo.create(user_id, _new_slug(), DEFAULT_NAME)]
+        return [await self._to_read(e) for e in epapers]
 
-    async def set_dashboard(self, user_id: uuid.UUID, dashboard_id: uuid.UUID | None) -> EpaperRead:
+    async def create(self, user_id: uuid.UUID, name: str) -> EpaperRead:
+        epaper = await self.repo.create(user_id, _new_slug(), name.strip())
+        return await self._to_read(epaper)
+
+    async def get(self, user_id: uuid.UUID, epaper_id: uuid.UUID) -> EpaperRead:
+        return await self._to_read(await self._owned(user_id, epaper_id))
+
+    async def rename(self, user_id: uuid.UUID, epaper_id: uuid.UUID, name: str) -> EpaperRead:
+        epaper = await self._owned(user_id, epaper_id)
+        epaper = await self.repo.rename(epaper, name.strip())
+        return await self._to_read(epaper)
+
+    async def delete(self, user_id: uuid.UUID, epaper_id: uuid.UUID) -> None:
+        epaper = await self._owned(user_id, epaper_id)
+        await self.repo.delete(epaper)
+
+    async def set_dashboard(
+        self, user_id: uuid.UUID, epaper_id: uuid.UUID, dashboard_id: uuid.UUID | None
+    ) -> EpaperRead:
         if dashboard_id is not None:
             # Ownership check: 404 if it isn't in this user's collection.
             _ = await self.dashboards.get_owned(user_id, dashboard_id)
-        epaper = await self._get_or_create(user_id)
+        epaper = await self._owned(user_id, epaper_id)
         epaper = await self.repo.set_dashboard_id(epaper, dashboard_id)
         # Let the device pick up the new dashboard on its next poll, not after the
         # refresh interval.
         force_serve.mark(epaper.id)
         return await self._to_read(epaper)
 
-    async def set_geometry(self, user_id: uuid.UUID, geometry: EpaperGeometryUpdate) -> EpaperRead:
-        from fastapi import HTTPException, status
-
+    async def set_geometry(
+        self, user_id: uuid.UUID, epaper_id: uuid.UUID, geometry: EpaperGeometryUpdate
+    ) -> EpaperRead:
         # The drawn image must fit within the screen at its given position.
         if geometry.image_x + geometry.image_width > geometry.screen_width:
             raise HTTPException(
@@ -69,7 +94,7 @@ class EpaperService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="image position cannot be negative",
             )
-        epaper = await self._get_or_create(user_id)
+        epaper = await self._owned(user_id, epaper_id)
         epaper = await self.repo.set_geometry(
             epaper,
             screen_width=geometry.screen_width,
@@ -84,8 +109,8 @@ class EpaperService:
         force_serve.mark(epaper.id)
         return await self._to_read(epaper)
 
-    async def set_refresh(self, user_id: uuid.UUID, refresh: EpaperRefreshUpdate) -> EpaperRead:
-        epaper = await self._get_or_create(user_id)
+    async def set_refresh(self, user_id: uuid.UUID, epaper_id: uuid.UUID, refresh: EpaperRefreshUpdate) -> EpaperRead:
+        epaper = await self._owned(user_id, epaper_id)
         epaper = await self.repo.set_refresh(
             epaper,
             paused=refresh.paused,

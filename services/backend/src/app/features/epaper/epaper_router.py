@@ -1,4 +1,5 @@
 import time
+import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -17,9 +18,11 @@ from app.features.epaper import force_serve
 from app.features.epaper.epaper_models import Epaper
 from app.features.epaper.epaper_repository import EpaperRepo
 from app.features.epaper.epaper_schemas import (
+    EpaperCreate,
     EpaperGeometryUpdate,
     EpaperRead,
     EpaperRefreshUpdate,
+    EpaperRename,
     EpaperUpdate,
 )
 from app.features.epaper.epaper_service import EpaperService
@@ -71,24 +74,53 @@ def get_dashboard_repo_for_serve(session: Annotated[AsyncSession, Depends(get_se
 EpaperServiceDep = Annotated[EpaperService, Depends(get_epaper_service)]
 
 
-@router.get("/epaper", response_model=EpaperRead)
-async def get_my_epaper(auth: AuthDep, service: EpaperServiceDep) -> EpaperRead:
-    return await service.get_or_create_for_user(auth.user.id)
+@router.get("/epapers", response_model=list[EpaperRead])
+async def list_my_epapers(auth: AuthDep, service: EpaperServiceDep) -> list[EpaperRead]:
+    return await service.list_for_user(auth.user.id)
 
 
-@router.patch("/epaper", response_model=EpaperRead)
-async def update_my_epaper(body: EpaperUpdate, auth: AuthDep, service: EpaperServiceDep) -> EpaperRead:
-    return await service.set_dashboard(auth.user.id, body.dashboard_id)
+@router.post("/epapers", response_model=EpaperRead, status_code=status.HTTP_201_CREATED)
+async def create_my_epaper(body: EpaperCreate, auth: AuthDep, service: EpaperServiceDep) -> EpaperRead:
+    return await service.create(auth.user.id, body.name)
 
 
-@router.patch("/epaper/geometry", response_model=EpaperRead)
-async def update_my_epaper_geometry(body: EpaperGeometryUpdate, auth: AuthDep, service: EpaperServiceDep) -> EpaperRead:
-    return await service.set_geometry(auth.user.id, body)
+@router.get("/epapers/{epaper_id}", response_model=EpaperRead)
+async def get_my_epaper(epaper_id: uuid.UUID, auth: AuthDep, service: EpaperServiceDep) -> EpaperRead:
+    return await service.get(auth.user.id, epaper_id)
 
 
-@router.patch("/epaper/refresh", response_model=EpaperRead)
-async def update_my_epaper_refresh(body: EpaperRefreshUpdate, auth: AuthDep, service: EpaperServiceDep) -> EpaperRead:
-    return await service.set_refresh(auth.user.id, body)
+@router.patch("/epapers/{epaper_id}", response_model=EpaperRead)
+async def rename_my_epaper(
+    epaper_id: uuid.UUID, body: EpaperRename, auth: AuthDep, service: EpaperServiceDep
+) -> EpaperRead:
+    return await service.rename(auth.user.id, epaper_id, body.name)
+
+
+@router.delete("/epapers/{epaper_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_my_epaper(epaper_id: uuid.UUID, auth: AuthDep, service: EpaperServiceDep) -> Response:
+    await service.delete(auth.user.id, epaper_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.patch("/epapers/{epaper_id}/dashboard", response_model=EpaperRead)
+async def set_my_epaper_dashboard(
+    epaper_id: uuid.UUID, body: EpaperUpdate, auth: AuthDep, service: EpaperServiceDep
+) -> EpaperRead:
+    return await service.set_dashboard(auth.user.id, epaper_id, body.dashboard_id)
+
+
+@router.patch("/epapers/{epaper_id}/geometry", response_model=EpaperRead)
+async def set_my_epaper_geometry(
+    epaper_id: uuid.UUID, body: EpaperGeometryUpdate, auth: AuthDep, service: EpaperServiceDep
+) -> EpaperRead:
+    return await service.set_geometry(auth.user.id, epaper_id, body)
+
+
+@router.patch("/epapers/{epaper_id}/refresh", response_model=EpaperRead)
+async def set_my_epaper_refresh(
+    epaper_id: uuid.UUID, body: EpaperRefreshUpdate, auth: AuthDep, service: EpaperServiceDep
+) -> EpaperRead:
+    return await service.set_refresh(auth.user.id, epaper_id, body)
 
 
 @router.get("/e/{slug}.bmp")

@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, Pencil, Play, Plus, Square, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Play, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/Button";
 import { ContextMenu } from "@/components/ContextMenu";
 import { Modal } from "@/components/Modal";
 import { CreateCustomForm } from "@/features/dashboard/CreateCustomForm";
+import { DeployTargetModal } from "@/features/dashboard/DeployTargetModal";
 import { EditDashboardModal } from "@/features/dashboard/EditDashboardModal";
-import { api, type Dashboard, type DashboardSource } from "@/lib/api";
+import { api, type Dashboard, type DashboardSource, type Epaper } from "@/lib/api";
 import { useSession } from "@/lib/session";
 
 type Filter = "all" | DashboardSource;
@@ -17,16 +18,19 @@ const FILTERS: { key: Filter; label: string }[] = [
 ];
 
 /** The user's collection: their added/created dashboards, with filtering. Each
- * row deploys to the epaper via its play button; edit/delete live in a per-row
- * context menu. */
+ * row deploys to an epaper via its play button; with one device it deploys
+ * directly, with several it opens a target picker. Edit/delete live in a
+ * per-row context menu. */
 export function CollectionPage() {
-  const { token, epaper, setEpaper, refreshEpaper, notify } = useSession();
+  const { token, epapers, upsertEpaper, refreshEpapers, notify } = useSession();
   const [items, setItems] = useState<Dashboard[]>([]);
   const [filter, setFilter] = useState<Filter>("all");
   const [error, setError] = useState<string | null>(null);
   const [deployingId, setDeployingId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<Dashboard | null>(null);
+  // When set, the target picker is open for this dashboard (multi-device case).
+  const [targeting, setTargeting] = useState<Dashboard | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -41,17 +45,19 @@ export function CollectionPage() {
   }, [load]);
 
   const shown = items.filter((d) => filter === "all" || d.source === filter);
-  const isDeployed = (d: Dashboard) => epaper?.dashboard_id === d.id;
+  const showingOn = (d: Dashboard): Epaper[] =>
+    epapers.filter((e) => e.dashboard_id === d.id);
 
-  // Send a dashboard to the epaper, or — when it's the one already live — stop
-  // it (clears the epaper; the device then freezes on its last image).
-  async function toggleDeploy(d: Dashboard) {
-    const live = isDeployed(d);
+  // Send (or, when already live on it, clear) a dashboard on a specific epaper.
+  async function deployTo(d: Dashboard, epaper: Epaper, clear: boolean) {
     setDeployingId(d.id);
     setError(null);
     try {
-      setEpaper(await api.setDashboard(token, live ? null : d.id));
-      notify("success", live ? `Stopped "${d.name}"` : `Sent "${d.name}" to your epaper`);
+      upsertEpaper(await api.setDashboard(token, epaper.id, clear ? null : d.id));
+      notify(
+        "success",
+        clear ? `Stopped "${d.name}" on ${epaper.name}` : `Sent "${d.name}" to ${epaper.name}`,
+      );
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setError(msg);
@@ -61,13 +67,24 @@ export function CollectionPage() {
     }
   }
 
+  // Play button: one device deploys/clears it directly; several open the picker.
+  async function onPlay(d: Dashboard) {
+    if (epapers.length === 1) {
+      const only = epapers[0];
+      await deployTo(d, only, only.dashboard_id === d.id);
+      return;
+    }
+    setTargeting(d);
+  }
+
   async function remove(d: Dashboard) {
     if (!confirm(`Delete "${d.name}"? This can't be undone.`)) return;
     setError(null);
     try {
       await api.deleteDashboard(token, d.id);
-      // Deleting the deployed dashboard clears it server-side (SET NULL).
-      if (isDeployed(d)) setEpaper(await api.getEpaper(token));
+      // Deleting a deployed dashboard clears it server-side (SET NULL) on every
+      // device showing it; pull the fresh epaper state so badges stay accurate.
+      if (showingOn(d).length > 0) await refreshEpapers();
       await load();
       notify("success", `Deleted "${d.name}"`);
     } catch (e) {
@@ -81,7 +98,7 @@ export function CollectionPage() {
     <section className="flex flex-col gap-m">
       <div className="flex items-start justify-between gap-m flex-wrap">
         <div>
-          <h2>My dashboards</h2>
+          <h2>Dashboards</h2>
           <p className="text-fg-2 text-s mt-xs">
             Hit play to send a dashboard to your epaper. Edit and delete live in
             the ⋯ menu.
@@ -116,7 +133,8 @@ export function CollectionPage() {
       ) : (
         <div className="flex flex-col gap-s">
           {shown.map((d) => {
-            const deployed = isDeployed(d);
+            const live = showingOn(d);
+            const deployed = live.length > 0;
             const busy = deployingId === d.id;
             return (
               <div
@@ -131,7 +149,9 @@ export function CollectionPage() {
                   <div className="flex items-center gap-s">
                     <span className="font-semibold text-fg-1 truncate">{d.name}</span>
                     {deployed && (
-                      <span className="text-s text-highlight font-semibold shrink-0">● Live</span>
+                      <span className="text-s text-highlight font-semibold shrink-0" title={live.map((e) => e.name).join(", ")}>
+                        ● Live on {live.length === 1 ? live[0].name : `${live.length} devices`}
+                      </span>
                     )}
                   </div>
                   <div className="text-s text-fg-2 truncate">
@@ -144,18 +164,14 @@ export function CollectionPage() {
                 <div className="flex items-center gap-xs shrink-0">
                   <button
                     type="button"
-                    aria-label={deployed ? `Stop "${d.name}"` : `Send "${d.name}" to epaper`}
-                    title={deployed ? "Stop (clear the epaper)" : "Send to epaper"}
-                    onClick={() => toggleDeploy(d)}
+                    aria-label={`Send "${d.name}" to an epaper`}
+                    title={epapers.length === 1 ? "Send to epaper" : "Choose epaper(s)"}
+                    onClick={() => void onPlay(d)}
                     disabled={busy}
-                    className={`flex h-9 w-9 items-center justify-center rounded-s text-white transition-all duration-fast hover:brightness-110 active:brightness-95 disabled:opacity-40 disabled:pointer-events-none ${
-                      deployed ? "bg-fg-danger" : "bg-highlight"
-                    }`}
+                    className="flex h-9 w-9 items-center justify-center rounded-s text-white bg-highlight transition-all duration-fast hover:brightness-110 active:brightness-95 disabled:opacity-40 disabled:pointer-events-none"
                   >
                     {busy ? (
                       <Loader2 size={18} className="animate-spin" />
-                    ) : deployed ? (
-                      <Square size={16} fill="currentColor" />
                     ) : (
                       <Play size={18} fill="currentColor" />
                     )}
@@ -207,10 +223,19 @@ export function CollectionPage() {
           onSaved={(updated) => {
             setEditing(null);
             setItems((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
-            // Keep the deployed dashboard's embedded copy in sync.
-            if (isDeployed(updated)) void refreshEpaper();
+            // Keep deployed copies in sync across every device showing it.
+            if (showingOn(updated).length > 0) void refreshEpapers();
             notify("success", `Saved "${updated.name}"`);
           }}
+        />
+      )}
+
+      {targeting && (
+        <DeployTargetModal
+          dashboard={targeting}
+          epapers={epapers}
+          onClose={() => setTargeting(null)}
+          onToggle={(epaper, clear) => deployTo(targeting, epaper, clear)}
         />
       )}
     </section>

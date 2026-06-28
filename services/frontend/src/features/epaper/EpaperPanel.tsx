@@ -15,7 +15,7 @@ export function EpaperPanel({ epaper }: { epaper: Epaper }) {
   return (
     <div className="bg-bg-1-light border border-border-1 rounded-n p-m flex flex-col gap-s shadow-normal">
       <div className="text-s text-fg-2 uppercase tracking-wider font-semibold">
-        Your epaper URL
+        Device URL
       </div>
       <div className="flex gap-s items-center">
         <code className="flex-1 font-mono text-s px-n py-s rounded-s bg-bg-2 border border-border-1 break-all">

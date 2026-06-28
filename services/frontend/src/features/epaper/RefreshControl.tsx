@@ -25,7 +25,7 @@ export function RefreshControl({
     setBusy(true);
     setError(null);
     try {
-      const next = await api.setRefresh(token, { paused, refresh_interval });
+      const next = await api.setRefresh(token, epaper.id, { paused, refresh_interval });
       setIntervalValue(next.refresh_interval);
       onSaved(next);
     } catch (e) {

@@ -13,9 +13,21 @@ MAX_DIMENSION = 4096
 MAX_REFRESH_INTERVAL = 86_400
 
 
+# Upper bound on the device label; matches the DB column width.
+MAX_NAME_LENGTH = 80
+
+
 class EpaperUpdate(BaseModel):
     # The collection dashboard to deploy. Null clears the epaper (shows nothing).
     dashboard_id: uuid.UUID | None = None
+
+
+class EpaperCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=MAX_NAME_LENGTH)
+
+
+class EpaperRename(BaseModel):
+    name: str = Field(min_length=1, max_length=MAX_NAME_LENGTH)
 
 
 class EpaperGeometryUpdate(BaseModel):
@@ -36,6 +48,7 @@ class EpaperRefreshUpdate(BaseModel):
 class EpaperRead(BaseModel):
     id: uuid.UUID
     user_id: uuid.UUID
+    name: str
     slug: str
     dashboard_id: uuid.UUID | None
     # The full deployed dashboard, resolved for convenience; null when none set.
