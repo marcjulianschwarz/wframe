@@ -1,4 +1,4 @@
-// @ui-source: concepts/modal@0.5.2
+// @ui-source: concepts/modal@0.5.3
 // Managed copy. Edits here are local to this app.
 // Improvements belong back in the ui repo's concepts/modal — port
 // them there and bump the version. Do not treat this as throwaway code.
@@ -102,7 +102,11 @@ export function Modal({
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-m animate-backdrop-fade"
+      // No fade on the backdrop: it paints opaque on first frame so swapping
+      // one modal for another (close A, open B in the same commit) doesn't flash
+      // the page through a transparent backdrop. The panel still animates via
+      // `enter`.
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-m"
       onMouseDown={(e) => {
         // Only close on a click that both starts and ends on the backdrop.
         if (e.target === e.currentTarget) onClose();
@@ -113,14 +117,14 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         tabIndex={-1}
-        className={`relative flex max-h-[90vh] w-full ${widthClass} flex-col overflow-hidden rounded-n border border-border-1 bg-bg-1-light shadow-high outline-none ${enterClass}`}
+        className={`relative flex max-h-[90vh] w-full ${widthClass} flex-col overflow-hidden rounded-n border border-ui-border bg-ui-surface-raised shadow-high outline-none ${enterClass}`}
       >
         {/* Close indicator, pinned to the panel's top-right corner. */}
         <button
           type="button"
           aria-label="Close"
           onClick={onClose}
-          className="absolute right-s top-s flex h-8 w-8 items-center justify-center rounded-s text-fg-2 transition-colors duration-fast ease-out hover:bg-bg-hover hover:text-fg-1"
+          className="absolute right-s top-s flex h-8 w-8 items-center justify-center rounded-s text-ui-secondary hover:bg-ui-surface-hover hover:text-ui-primary"
         >
           <X className="h-4 w-4" aria-hidden />
         </button>
@@ -129,7 +133,7 @@ export function Modal({
             "bar" layout divides them with full-width lines; "plain" inlines. */}
         {bar ? (
           <>
-            <header className="flex h-14 shrink-0 items-center border-b border-border-1 px-l">
+            <header className="flex h-14 shrink-0 items-center border-b border-ui-border px-l">
               <h3 className="text-l">{title}</h3>
             </header>
             <div
@@ -139,7 +143,7 @@ export function Modal({
               {children}
             </div>
             {actions && (
-              <footer className="flex h-14 shrink-0 items-center justify-end gap-s border-t border-border-1 px-l">
+              <footer className="flex h-14 shrink-0 items-center justify-end gap-s border-t border-ui-border px-l">
                 {actions}
               </footer>
             )}

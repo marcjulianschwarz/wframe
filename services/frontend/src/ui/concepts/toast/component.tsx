@@ -39,10 +39,10 @@ const STATUS_ICON: Record<ToastStatus, LucideIcon> = {
 };
 
 const STATUS_COLOR: Record<ToastStatus, string> = {
-  success: "text-fg-success",
-  error: "text-fg-danger",
-  warning: "text-fg-warning",
-  info: "text-fg-2",
+  success: "text-ui-success",
+  error: "text-ui-danger",
+  warning: "text-ui-warning",
+  info: "text-ui-info",
 };
 
 /**
@@ -119,7 +119,7 @@ export function Toast({
       role="status"
       aria-live="polite"
       onClick={close}
-      className={`pointer-events-auto flex w-72 max-w-[80vw] cursor-pointer items-center gap-s rounded-n border border-border-1 bg-bg-1-light px-m py-n text-m text-fg-1 shadow-high transition-all duration-base ease-out ${
+      className={`pointer-events-auto flex w-72 max-w-[80vw] cursor-pointer items-center gap-s rounded-n border border-ui-border bg-ui-surface-raised px-m py-n text-m text-ui-primary shadow-high transition-all duration-base ease-out ${
         shown
           ? "translate-x-0 translate-y-0 scale-100 opacity-100"
           : `${hiddenOffset(position)} scale-95 opacity-0`

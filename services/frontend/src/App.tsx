@@ -1,12 +1,14 @@
 import { useCallback, useState } from "react";
 import {
   BrowserRouter,
-  NavLink,
   Navigate,
   Route,
   Routes,
+  useLocation,
+  useNavigate,
 } from "react-router-dom";
-import { Button } from "@/ui/concepts/button/component";
+import { LogOut, Monitor, Store, Tv } from "lucide-react";
+import { Sidebar, SidebarItem } from "@/ui/concepts/sidebar/component";
 import { Login } from "@/features/auth/Login";
 import { CollectionPage } from "@/features/dashboard/CollectionPage";
 import { SettingsPage } from "@/features/epaper/SettingsPage";
@@ -15,47 +17,59 @@ import { StorePage } from "@/features/store/StorePage";
 import { auth } from "@/lib/auth";
 import { SessionProvider, useSession } from "@/lib/session";
 
-const navClass = ({ isActive }: { isActive: boolean }) =>
-  `px-n py-s rounded-s text-m font-semibold transition-colors duration-fast ${
-    isActive ? "text-fg-1 bg-bg-hover" : "text-fg-2 hover:text-fg-1"
-  }`;
+const NAV_ITEMS = [
+  { to: "/store", label: "Store", icon: Store },
+  { to: "/dashboards", label: "Dashboards", icon: Monitor },
+  { to: "/settings", label: "Epapers", icon: Tv },
+] as const;
 
 function Shell() {
   const { user, logout } = useSession();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
   return (
-    <div className="min-h-screen w-full">
-      <div className="w-[90%] sm:w-[80%] max-w-[1100px] mx-auto my-l flex flex-col gap-l">
-        <header className="flex items-center justify-between gap-m flex-wrap">
-          <div className="flex items-center gap-l">
-            <h1>wframe</h1>
-            <nav className="flex items-center gap-xs">
-              <NavLink to="/store" className={navClass}>
-                Store
-              </NavLink>
-              <NavLink to="/dashboards" className={navClass}>
-                Dashboards
-              </NavLink>
-              <NavLink to="/settings" className={navClass}>
-                Epapers
-              </NavLink>
-            </nav>
-          </div>
-          <div className="flex items-center gap-n">
-            {user && <span className="text-s text-fg-2">{user.email}</span>}
-            <Button variant="ghost" onClick={logout}>
+    <div className="flex min-h-screen text-ui-primary">
+      <Sidebar
+        title="wframe"
+        footer={
+          <>
+            {user && (
+              <p
+                className="mb-s truncate text-s text-ui-secondary"
+                title={user.email}
+              >
+                {user.email}
+              </p>
+            )}
+            <SidebarItem icon={<LogOut size={16} />} onClick={logout}>
               Sign out
-            </Button>
-          </div>
-        </header>
+            </SidebarItem>
+          </>
+        }
+      >
+        {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+          <SidebarItem
+            key={to}
+            icon={<Icon size={16} />}
+            active={pathname.startsWith(to)}
+            onClick={() => navigate(to)}
+          >
+            {label}
+          </SidebarItem>
+        ))}
+      </Sidebar>
 
-        <Routes>
-          <Route path="/store" element={<StorePage />} />
-          <Route path="/store/:type" element={<StoreDetail />} />
-          <Route path="/dashboards" element={<CollectionPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="*" element={<Navigate to="/dashboards" replace />} />
-        </Routes>
-      </div>
+      <main className="flex-1 overflow-x-hidden">
+        <div className="mx-auto w-[90%] max-w-[1100px] my-l">
+          <Routes>
+            <Route path="/store" element={<StorePage />} />
+            <Route path="/store/:type" element={<StoreDetail />} />
+            <Route path="/dashboards" element={<CollectionPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="*" element={<Navigate to="/dashboards" replace />} />
+          </Routes>
+        </div>
+      </main>
     </div>
   );
 }

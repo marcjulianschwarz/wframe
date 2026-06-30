@@ -13,7 +13,7 @@ export function EpaperPanel({ epaper }: { epaper: Epaper }) {
   }
 
   return (
-    <div className="bg-bg-1-light border border-border-1 rounded-n p-m flex flex-col gap-s shadow-normal">
+    <div className="flex flex-col gap-s">
       <div className="text-s text-fg-2 uppercase tracking-wider font-semibold">
         Device URL
       </div>

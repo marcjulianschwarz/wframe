@@ -12,13 +12,13 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClass: Record<Variant, string> = {
   default:
-    "bg-bg-1-light border border-border-1 text-fg-1 hover:bg-bg-hover hover:border-border-2 active:bg-bg-active",
+    "bg-ui-surface-raised border border-ui-border text-ui-primary hover:bg-ui-surface-hover hover:border-ui-border-strong active:bg-ui-surface-active",
   primary:
-    "bg-highlight border border-highlight text-white hover:brightness-110 active:brightness-95",
+    "bg-ui-accent border border-ui-accent text-ui-on-accent hover:bg-ui-accent-strong active:brightness-95",
   ghost:
-    "bg-transparent border border-transparent text-fg-2 hover:bg-bg-hover hover:text-fg-1",
+    "bg-transparent border border-transparent text-ui-secondary hover:bg-ui-surface-hover hover:text-ui-primary",
   danger:
-    "bg-bg-1-light border border-border-1 text-fg-danger hover:bg-bg-danger hover:border-border-2 active:bg-bg-danger",
+    "bg-ui-surface-raised border border-ui-border text-ui-danger hover:bg-ui-danger-bg hover:border-ui-danger-border",
 };
 
 export function Button({

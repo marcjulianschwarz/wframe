@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
+import { Check, Copy } from "lucide-react";
 import { Button } from "@/ui/concepts/button/component";
 import { api, type HaConnection } from "@/lib/api";
 
 /** Connect screen for the Home Assistant dashboard.
  *
- * Home Assistant *pushes* light states to wframe (a cloud-hosted wframe can't
+ * Home Assistant *pushes* sensor history to wframe (a cloud-hosted wframe can't
  * reach a home behind a router), so there's no data to enter here — only a
  * per-user ingest channel to set up. The user mints a connection, copies the
- * generated automation into their HA config, and lights start flowing. The
- * ingest token is a secret embedded in the webhook URL, so the snippet is
- * treated like the epaper URL: copy, don't share. */
+ * generated integration config into their HA config, and the 24h temperature
+ * chart starts flowing. The ingest token is a secret embedded in the URL, so
+ * the snippet is treated like the epaper URL: copy, don't share. */
 export function HomeAssistantForm({ token }: { token: string }) {
   const [conn, setConn] = useState<HaConnection | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,16 +40,14 @@ export function HomeAssistantForm({ token }: { token: string }) {
   if (loading) return <p className="text-fg-2 text-s">Loading…</p>;
 
   return (
-    <div className="bg-bg-1-light border border-border-1 rounded-n p-m flex flex-col gap-s">
-      <div className="text-s text-fg-2 uppercase tracking-wider font-semibold">
-        Home Assistant connection
-      </div>
-
+    <div className="flex flex-col gap-s mt-l border-t border-border-1 pt-l">
+      <h4 className="font-semibold text-fg-1">Configure Home Assistant</h4>
       {!conn ? (
         <>
           <p className="text-s text-fg-2">
-            Home Assistant pushes your lights to wframe. Connect to generate a
-            private webhook URL and an automation you paste into Home Assistant.
+            Home Assistant pushes your sensor history to wframe. Connect to
+            generate a private ingest URL and the integration config you paste
+            into Home Assistant.
           </p>
           <Button variant="primary" onClick={connect} disabled={busy} className="self-start">
             {busy ? "Connecting…" : "Connect Home Assistant"}
@@ -56,37 +55,16 @@ export function HomeAssistantForm({ token }: { token: string }) {
         </>
       ) : (
         <>
-          <CopyField label="Ingest token" value={conn.ingest_token} mono />
-          <CopyField label="Webhook URL" value={conn.webhook_url} mono />
-          <div className="flex flex-col gap-s pt-s border-t border-border-1">
-            <CopyField label="Automation YAML" value={conn.automation_yaml} block />
-            <p className="text-s text-fg-2">
-              Paste this into your Home Assistant{" "}
-              <span className="font-mono">configuration.yaml</span> and restart
-              HA. It pushes all your lights once a minute. Keep it private — the
-              URL contains your secret token.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-s pt-s border-t border-border-1">
-            <div className="text-s text-fg-2 uppercase tracking-wider font-semibold">
-              Temperature chart (24h)
-            </div>
-            <CopyField label="Sensor ingest URL" value={conn.sensor_webhook_url} mono />
-            <CopyField
-              label="Integration config"
-              value={conn.sensor_automation_yaml}
-              block
-            />
-            <p className="text-s text-fg-2">
-              For a 24h temperature chart, install the wframe Home Assistant
-              integration (it reads your sensor's history from the recorder and
-              pushes it here). Then paste the config above into{" "}
-              <span className="font-mono">configuration.yaml</span>, set your{" "}
-              <span className="font-mono">sensor</span> entity, and restart HA.
-              Keep it private — the URL contains your secret token.
-            </p>
-          </div>
+          <CopyField value={conn.sensor_webhook_url} mono />
+          <CopyField value={conn.sensor_automation_yaml} block />
+          <p className="text-s text-fg-2">
+            For a 24h temperature chart, install the wframe Home Assistant
+            integration (it reads your sensor's history from the recorder and
+            pushes it here). Then paste the config above into{" "}
+            <span className="font-mono">configuration.yaml</span>, set your{" "}
+            <span className="font-mono">sensor</span> entity, and restart HA.
+            Keep it private — the URL contains your secret token.
+          </p>
         </>
       )}
 
@@ -95,15 +73,14 @@ export function HomeAssistantForm({ token }: { token: string }) {
   );
 }
 
-/** A labelled value with a Copy button. ``block`` renders multi-line text in a
- * scrollable <pre>; otherwise it's a single inline <code> row. */
+/** A copyable code value with the Copy button pinned inside its top-right
+ * corner. ``block`` renders multi-line text in a scrollable <pre>; otherwise
+ * it's a single inline <code> row. */
 function CopyField({
-  label,
   value,
   mono,
   block,
 }: {
-  label: string;
   value: string;
   mono?: boolean;
   block?: boolean;
@@ -117,22 +94,27 @@ function CopyField({
   }
 
   return (
-    <div className="flex flex-col gap-xs">
-      <div className="text-s text-fg-2 uppercase tracking-wider">{label}</div>
-      <div className={`flex gap-s ${block ? "items-start" : "items-center"}`}>
-        {block ? (
-          <pre className="flex-1 p-n rounded-s bg-bg-2 border border-border-1 font-mono text-s overflow-x-auto whitespace-pre max-h-72">
-            {value}
-          </pre>
-        ) : (
-          <code
-            className={`flex-1 ${mono ? "font-mono" : ""} text-s px-n py-s rounded-s bg-bg-2 border border-border-1 break-all`}
-          >
-            {value}
-          </code>
-        )}
-        <Button onClick={copy}>{copied ? "Copied" : "Copy"}</Button>
-      </div>
+    <div className="relative rounded-s bg-bg-2 border border-border-1">
+      {block ? (
+        <pre className="p-n pr-12 font-mono text-s overflow-x-auto whitespace-pre max-h-72">
+          {value}
+        </pre>
+      ) : (
+        <code
+          className={`block px-n py-s pr-12 ${mono ? "font-mono" : ""} text-s break-all`}
+        >
+          {value}
+        </code>
+      )}
+      <Button
+        variant="ghost"
+        onClick={copy}
+        aria-label={copied ? "Copied" : "Copy"}
+        title={copied ? "Copied" : "Copy"}
+        className="absolute right-xs top-xs h-8 w-8 px-0"
+      >
+        {copied ? <Check size={16} /> : <Copy size={16} />}
+      </Button>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/ui/concepts/button/component";
 import { Input } from "@/components/Input";
 import { Modal } from "@/ui/concepts/modal/component";
@@ -20,11 +21,13 @@ interface Props {
   dashboard: Dashboard;
   onSaved: (d: Dashboard) => void;
   onClose: () => void;
+  /** Open the delete-confirmation flow for this dashboard. */
+  onDelete: () => void;
 }
 
 /** Edit one of the user's own dashboards in a modal: name, description, slug,
- * and (for custom ones) the URL. */
-export function EditDashboardModal({ dashboard, onSaved, onClose }: Props) {
+ * and (for custom ones) the URL. Delete lives in the footer. */
+export function EditDashboardModal({ dashboard, onSaved, onClose, onDelete }: Props) {
   const { token } = useSession();
   const [name, setName] = useState(dashboard.name);
   const [description, setDescription] = useState(dashboard.description ?? "");
@@ -58,10 +61,20 @@ export function EditDashboardModal({ dashboard, onSaved, onClose }: Props) {
   return (
     <Modal
       title="Edit dashboard"
+      layout="bar"
       width="xl"
       onClose={onClose}
       actions={
         <>
+          <Button
+            variant="danger"
+            className="mr-auto"
+            onClick={onDelete}
+            disabled={busy}
+          >
+            <Trash2 size={16} />
+            Delete
+          </Button>
           <Button variant="ghost" onClick={onClose} disabled={busy}>
             Cancel
           </Button>
