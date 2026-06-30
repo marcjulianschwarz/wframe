@@ -1,12 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, Play, Plus, Trash2 } from "lucide-react";
+import { Loader2, Play, Plus, Square, Trash2 } from "lucide-react";
 import { Button } from "@/ui/concepts/button/component";
 import { Tabs, TabList, Tab } from "@/ui/concepts/tabs/component";
 import { Modal } from "@/ui/concepts/modal/component";
 import { CreateCustomForm } from "@/features/dashboard/CreateCustomForm";
 import { DeployTargetModal } from "@/features/dashboard/DeployTargetModal";
 import { EditDashboardModal } from "@/features/dashboard/EditDashboardModal";
-import { api, type Dashboard, type DashboardSource, type Epaper } from "@/lib/api";
+import {
+  api,
+  type Dashboard,
+  type DashboardSource,
+  type Epaper,
+} from "@/lib/api";
 import { useSession } from "@/lib/session";
 
 type Filter = "all" | DashboardSource;
@@ -56,10 +61,14 @@ export function CollectionPage() {
     setDeployingId(d.id);
     setError(null);
     try {
-      upsertEpaper(await api.setDashboard(token, epaper.id, clear ? null : d.id));
+      upsertEpaper(
+        await api.setDashboard(token, epaper.id, clear ? null : d.id),
+      );
       notify(
         "success",
-        clear ? `Stopped "${d.name}" on ${epaper.name}` : `Sent "${d.name}" to ${epaper.name}`,
+        clear
+          ? `Stopped "${d.name}" on ${epaper.name}`
+          : `Sent "${d.name}" to ${epaper.name}`,
       );
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -140,6 +149,9 @@ export function CollectionPage() {
             const live = showingOn(d);
             const deployed = live.length > 0;
             const busy = deployingId === d.id;
+            // With a single device, the play button toggles, so when this
+            // dashboard is already live it acts as a stop. Surface that.
+            const willStop = epapers.length === 1 && deployed;
             return (
               <div
                 key={d.id}
@@ -161,10 +173,18 @@ export function CollectionPage() {
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-s">
-                    <span className="font-semibold text-ui-primary truncate">{d.name}</span>
+                    <span className="font-semibold text-ui-primary truncate">
+                      {d.name}
+                    </span>
                     {deployed && (
-                      <span className="text-s text-ui-accent font-semibold shrink-0" title={live.map((e) => e.name).join(", ")}>
-                        ● Live on {live.length === 1 ? live[0].name : `${live.length} devices`}
+                      <span
+                        className="text-s text-ui-accent font-semibold shrink-0"
+                        title={live.map((e) => e.name).join(", ")}
+                      >
+                        ● Live on{" "}
+                        {live.length === 1
+                          ? live[0].name
+                          : `${live.length} devices`}
                       </span>
                     )}
                   </div>
@@ -177,17 +197,33 @@ export function CollectionPage() {
                 </div>
                 <button
                   type="button"
-                  aria-label={`Send "${d.name}" to an epaper`}
-                  title={epapers.length === 1 ? "Send to epaper" : "Choose epaper(s)"}
+                  aria-label={
+                    willStop
+                      ? `Stop "${d.name}"`
+                      : `Send "${d.name}" to an epaper`
+                  }
+                  title={
+                    willStop
+                      ? "Stop on epaper"
+                      : epapers.length === 1
+                        ? "Send to epaper"
+                        : "Choose epaper(s)"
+                  }
                   onClick={(e) => {
                     e.stopPropagation();
                     void onPlay(d);
                   }}
                   disabled={busy}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-s text-ui-on-accent bg-ui-accent transition-all duration-fast hover:bg-ui-accent-strong active:brightness-95 disabled:opacity-40 disabled:pointer-events-none"
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-s transition-all duration-fast active:brightness-95 disabled:opacity-40 disabled:pointer-events-none ${
+                    willStop
+                      ? "bg-ui-danger-solid text-ui-danger-on hover:brightness-110"
+                      : "bg-ui-accent text-ui-on-accent hover:bg-ui-accent-strong"
+                  }`}
                 >
                   {busy ? (
                     <Loader2 size={18} className="animate-spin" />
+                  ) : willStop ? (
+                    <Square size={16} fill="currentColor" />
                   ) : (
                     <Play size={18} fill="currentColor" />
                   )}
@@ -199,13 +235,20 @@ export function CollectionPage() {
       )}
 
       {/* Create a custom dashboard — opens the form in a modal. */}
-      <Button variant="default" className="self-start" onClick={() => setCreating(true)}>
+      <Button
+        variant="default"
+        className="self-start"
+        onClick={() => setCreating(true)}
+      >
         <Plus size={16} />
         Create
       </Button>
 
       {creating && (
-        <Modal title="Create a custom dashboard" onClose={() => setCreating(false)}>
+        <Modal
+          title="Create a custom dashboard"
+          onClose={() => setCreating(false)}
+        >
           <CreateCustomForm
             onCreated={(d) => {
               setCreating(false);
@@ -226,7 +269,9 @@ export function CollectionPage() {
           }}
           onSaved={(updated) => {
             setEditing(null);
-            setItems((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
+            setItems((prev) =>
+              prev.map((d) => (d.id === updated.id ? updated : d)),
+            );
             // Keep deployed copies in sync across every device showing it.
             if (showingOn(updated).length > 0) void refreshEpapers();
             notify("success", `Saved "${updated.name}"`);
@@ -265,7 +310,9 @@ export function CollectionPage() {
           }
         >
           <p className="text-ui-secondary">
-            <span className="text-ui-primary font-semibold">{deleting.name}</span>{" "}
+            <span className="text-ui-primary font-semibold">
+              {deleting.name}
+            </span>{" "}
             will be permanently removed. This can't be undone.
             {showingOn(deleting).length > 0 &&
               " It's currently live and will be cleared from your device(s)."}
