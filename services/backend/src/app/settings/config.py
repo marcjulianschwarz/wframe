@@ -2,12 +2,22 @@ import os
 from functools import cached_property
 from typing import ClassVar, Literal
 
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from app.settings.infisical import inject_infisical_secrets
 
 Environment = Literal["LOCAL", "DEV", "PROD"]
 
 _env = os.getenv("ENVIRONMENT")
 _env_files = (".env", f".env.{_env}") if _env else ".env"
+
+# Order matters: load .env first so the INFISICAL_* creds are present, then pull
+# the remaining secrets from Infisical, then let Settings() read os.environ.
+load_dotenv(".env")
+if _env:
+    load_dotenv(f".env.{_env}")
+inject_infisical_secrets()
 
 
 class Settings(BaseSettings):

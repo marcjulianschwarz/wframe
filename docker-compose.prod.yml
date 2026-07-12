@@ -1,27 +1,35 @@
 services:
   backend:
-    build: ./services/backend
+    image: ${IMAGE_BASE:-ghcr.io/marcjulianschwarz/wframe}-backend:latest
+    pull_policy: always # always fetch the newest :latest on `up`
+    container_name: wframe-backend
     restart: always
     env_file: .env
-    ports:
-      - "9021:8000"
+    expose:
+      - "8000"
+    networks:
+      - autobahn-web
+      - wframe-internal
+      - secrets
     depends_on:
       postgres:
         condition: service_healthy
 
   frontend:
-    build:
-      context: ./services/frontend
-      args:
-        VITE_API_URL: ${VITE_API_URL}
+    image: ${IMAGE_BASE:-ghcr.io/marcjulianschwarz/wframe}-frontend:latest
+    pull_policy: always
+    container_name: wframe-frontend
     restart: always
-    ports:
-      - "9022:80"
+    expose:
+      - "80"
+    networks:
+      - autobahn-web
     depends_on:
       - backend
 
   postgres:
     image: postgres:17-alpine
+    container_name: wframe-postgres
     restart: always
     environment:
       POSTGRES_DB: ${DB_NAME}
@@ -29,6 +37,8 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     expose:
       - "5432"
+    networks:
+      - wframe-internal
     volumes:
       - wframe_pg:/var/lib/postgresql/data
     healthcheck:
@@ -36,6 +46,15 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+networks:
+  autobahn-web:
+    external: true
+  # Self-hosted Infisical lives here; created by the infisical compose project.
+  secrets:
+    external: true
+  # Private network for backend<->postgres, isolated from the proxy.
+  wframe-internal:
 
 volumes:
   wframe_pg:
