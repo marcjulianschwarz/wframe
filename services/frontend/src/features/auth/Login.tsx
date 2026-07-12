@@ -33,22 +33,22 @@ export function Login({ onLogin }: { onLogin: () => void }) {
   const isRegister = mode === "register";
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-l">
+    <div className="min-h-screen w-full flex items-center justify-center p-ui-l">
       <form
         onSubmit={submit}
-        className="w-full max-w-sm bg-bg-1-light border border-border-1 rounded-n p-l flex flex-col gap-m shadow-normal"
+        className="w-full max-w-sm bg-ui-surface-raised border border-ui-border rounded-ui-n p-ui-l flex flex-col gap-ui-m shadow-ui-normal"
       >
-        <div className="flex items-center gap-s">
-          <div className="w-8 h-8 rounded-s bg-highlight text-white flex items-center justify-center font-mono text-s font-bold">
+        <div className="flex items-center gap-ui-s">
+          <div className="w-8 h-8 rounded-ui-s bg-ui-accent text-white flex items-center justify-center font-ui-mono text-ui-s font-ui-bold">
             w
           </div>
-          <span className="font-mono text-m font-semibold">wframe</span>
+          <span className="font-ui-mono text-ui-m font-ui-semibold">wframe</span>
         </div>
 
         <h2>{isRegister ? "Create your account" : "Sign in"}</h2>
 
         {error && (
-          <div className="p-n rounded-s border border-border-1 bg-bg-danger text-fg-danger text-s">
+          <div className="p-ui-n rounded-ui-s border border-ui-border bg-ui-danger-bg text-ui-danger text-ui-s">
             {error}
           </div>
         )}
@@ -70,13 +70,13 @@ export function Login({ onLogin }: { onLogin: () => void }) {
           required
         />
         {isRegister && (
-          <p className="text-fg-2 text-s">At least 8 characters.</p>
+          <p className="text-ui-secondary text-ui-s">At least 8 characters.</p>
         )}
 
         <div className="flex items-center justify-between">
           <button
             type="button"
-            className="text-s text-fg-2 hover:text-fg-1 underline"
+            className="text-ui-s text-ui-secondary hover:text-ui-primary underline"
             onClick={() => {
               setMode(isRegister ? "login" : "register");
               setError(null);

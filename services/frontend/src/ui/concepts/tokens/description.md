@@ -1,4 +1,4 @@
-<!-- @ui-source: concepts/tokens@0.3.0 -->
+<!-- @ui-source: concepts/tokens@0.4.0 -->
 <!-- Managed copy. Edits here are local to this app. -->
 <!-- Improvements belong back in the ui repo's concepts/tokens — port -->
 <!-- them there and bump the version. Do not treat this as throwaway code. -->

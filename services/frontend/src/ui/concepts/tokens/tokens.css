@@ -1,4 +1,4 @@
-/* @ui-source: concepts/tokens@0.3.0 */
+/* @ui-source: concepts/tokens@0.4.0 */
 /* Managed copy. Edits here are local to this app. */
 /* Improvements belong back in the ui repo's concepts/tokens — port */
 /* them there and bump the version. Do not treat this as throwaway code. */
@@ -9,16 +9,17 @@
 :root {
     color-scheme: light dark;
 
-    /* ── Tier 1: primitive color scales ──────────────────────────────
-       Raw palette (Tailwind). No meaning attached — never consume these
-       directly in components; reference them via the semantic tokens
-       below. Steps: 100 / 300 / 500 / 700 / 900. */
+    /*
+        Tier 1: primitive color scales
+        Never consume these directly in components; reference them via the semantic tokens
+        below.
+    */
 
-    --brand-100: #e0e7ff;
-    --brand-300: #a5b4fc;
-    --brand-500: #6559ed;
-    --brand-700: #4338ca;
-    --brand-900: #312e81;
+    --brand-100: #cfe8d8; /* @ui-exception: app brand — darker green ramp */
+    --brand-300: #6cbf8b; /* @ui-exception: app brand — darker green ramp */
+    --brand-500: #16794a; /* @ui-exception: app brand — darker green ramp */
+    --brand-700: #0f5c38; /* @ui-exception: app brand — darker green ramp */
+    --brand-900: #0a3d25; /* @ui-exception: app brand — darker green ramp */
 
     --red-100: #fee2e2;
     --red-300: #fca5a5;
@@ -59,11 +60,19 @@
     --gray-500: rgb(180, 180, 178);
     --gray-600: rgb(118, 118, 122);
     --gray-900: rgb(28, 28, 30);
-    --white: rgb(255, 255, 255);
+    --white: rgb(255, 255, 255); /* theme-relative: flips in dark mode */
+    --black: rgb(0, 0, 0); /* theme-relative: flips in dark mode */
 
-    /* ── Tier 2: semantic tokens ─────────────────────────────────────
-       Role-based aliases that reference the primitives above. This is
-       the layer that flips for light/dark. Prefer these in components. */
+    /* Absolute constants — never flip. Use for text/icons that sit on a
+       saturated fill (e.g. white text on a red button) in either theme. */
+    --pure-white: rgb(255, 255, 255);
+    --pure-black: rgb(0, 0, 0);
+
+    /*
+        Tier 2: semantic tokens
+        Role-based aliases that reference the primitives above. This is
+        the layer that flips for light/dark. Use these in components.
+    */
 
     /* Surfaces — background fills, from the page up to pressed states. */
     --surface-base: var(--gray-50); /* page background */
@@ -73,32 +82,52 @@
     --surface-active: var(--gray-400); /* pressed / selected */
     --surface-disabled: var(--gray-100); /* disabled control bg */
 
-    --color-text-primary: var(--gray-900);
-    --color-text-secondary: var(--gray-600);
-    --color-text-muted: var(--gray-500); /* de-emphasized labels, hints */
+    /* Text — foreground colors for content on surfaces. */
+    --color-text-primary: var(--gray-900); /* body, headings */
+    --color-text-secondary: var(--gray-600); /* supporting text */
+    --color-text-muted: var(--gray-500); /* placeholders, hints */
     --color-text-inverse: var(--white); /* text on dark/inverted surfaces */
-    --color-text-link: var(--color-accent); /* inline links */
-    --color-text-on-accent: var(--white); /* text on the accent fill */
+    --color-text-link: var(--color-accent); /* hyperlinks */
 
     --color-accent: var(--brand-500);
     --color-accent-strong: var(--brand-700);
     --color-accent-soft: color-mix(in srgb, var(--brand-500) 12%, transparent);
+    --color-text-on-accent: var(--pure-white); /* text on a filled accent */
 
-    --color-danger: var(--red-500);
-    --color-success: var(--green-700);
-    --color-warning: var(--yellow-700);
-    --color-info: var(--blue-700);
-
+    /* Status — each role has: foreground (text/icon), bg (soft tint),
+       border (tint outline), solid (strong fill), on (text on the fill). */
+    --color-danger: var(--red-700);
     --color-danger-bg: var(--red-100);
+    --color-danger-border: var(--red-300);
+    --color-danger-solid: var(--red-500);
+    --color-danger-on: var(--pure-white);
+
+    --color-success: var(--green-700);
     --color-success-bg: var(--green-100);
+    --color-success-border: var(--green-300);
+    --color-success-solid: var(--green-500);
+    --color-success-on: var(--pure-white);
+
+    --color-warning: var(--yellow-700);
     --color-warning-bg: var(--yellow-100);
+    --color-warning-border: var(--yellow-300);
+    --color-warning-solid: var(--yellow-500);
+    --color-warning-on: var(--pure-black);
+
+    --color-info: var(--blue-700);
     --color-info-bg: var(--blue-100);
+    --color-info-border: var(--blue-300);
+    --color-info-solid: var(--blue-500);
+    --color-info-on: var(--pure-black);
 
-    --color-border: var(--gray-300);
-    --color-border-strong: var(--gray-500);
+    /* Overlay — scrim behind modals, drawers, popovers. */
+    --color-overlay: rgba(0, 0, 0, 0.4);
 
-    --border-normal: 1px solid var(--color-border);
-    --border-focused: 1px solid var(--color-border-strong);
+    /* Borders — dividers and outlines. */
+    --color-border-subtle: var(--gray-200); /* faint dividers, row lines */
+    --color-border: var(--gray-300); /* default control/card outline */
+    --color-border-strong: var(--gray-500); /* emphasized / hovered outline */
+    --color-border-focus: var(--color-accent); /* focused input outline */
 
     --font-sans:
         -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto,
@@ -112,6 +141,24 @@
     --font-size-l: 1.2rem;
     --font-size-xl: 2rem;
 
+    /* Weight — the ramp used across body, labels and headings. */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* Line height — unitless so it scales with font-size. `tight` for large
+       headings, `normal` for body copy. */
+    --leading-tight: 1.15;
+    --leading-snug: 1.35;
+    --leading-normal: 1.55;
+
+    /* Letter spacing — negative tightens large text, positive opens up
+       small uppercase labels. */
+    --tracking-tight: -0.02em;
+    --tracking-normal: 0em;
+    --tracking-wide: 0.02em;
+
     --space-xs: 0.2rem;
     --space-s: 0.5rem;
     --space-n: 0.8rem;
@@ -122,16 +169,26 @@
     --border-radius-s: 0.3rem;
     --border-radius-n: 0.7rem;
 
+    /* Border widths — themeable. Default is a hairline; thick for emphasis. */
+    --border-width: 1px;
+    --border-width-thick: 2px;
+
     --shadow-normal:
         0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.04);
     --shadow-high:
         0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
 
-    --duration-fast: 120ms;
-    --duration-base: 180ms;
+    --duration-fast: 120ms; /* hovers, small state changes */
+    --duration-base: 180ms; /* enters, larger transitions */
     --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
 
-    --focus-ring: 0 0 0 3px var(--color-accent-soft);
+    /* Spinner revolution speeds — all faster than the 1s default, since a
+       slow spinner reads as broken. */
+    --duration-spin: 0.8s;
+    --duration-spin-fast: 0.6s;
+    --duration-spin-faster: 0.4s;
+
+    --focus-ring: inset 0 0 0 2px var(--color-accent);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -150,21 +207,33 @@
         --white: rgb(30, 30, 32);
 
         /* Re-point semantic tokens at lighter primitive steps so colored
-           text/icons stay legible on dark surfaces. The back-compat
-           aliases inherit these automatically. */
+           text/icons stay legible on dark surfaces. Surfaces and most
+           text inherit automatically via the gray/white ramp above. */
         --color-accent: var(--brand-300);
         --color-accent-strong: var(--brand-500);
         --color-accent-soft: color-mix(in srgb, var(--brand-300) 18%, transparent);
 
+        /* Status: foreground lightens (-300), tint bg darkens (-900),
+           border to -700. The solid fill (-500) and its on-text are
+           saturated mid-tones that read in both themes — left as-is. */
         --color-danger: var(--red-300);
-        --color-success: var(--green-300);
-        --color-warning: var(--yellow-300);
-        --color-info: var(--blue-300);
-
         --color-danger-bg: var(--red-900);
+        --color-danger-border: var(--red-700);
+
+        --color-success: var(--green-300);
         --color-success-bg: var(--green-900);
+        --color-success-border: var(--green-700);
+
+        --color-warning: var(--yellow-300);
         --color-warning-bg: var(--yellow-900);
+        --color-warning-border: var(--yellow-700);
+
+        --color-info: var(--blue-300);
         --color-info-bg: var(--blue-900);
+        --color-info-border: var(--blue-700);
+
+        /* Deeper scrim in dark mode so it still reads against dark surfaces. */
+        --color-overlay: rgba(0, 0, 0, 0.6);
 
         --shadow-normal:
             0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -190,18 +259,17 @@
 html,
 body {
     max-width: 100vw;
-    overflow-x: hidden;
     min-height: 100%;
 }
 html {
     font-size: 16px;
 }
 body {
-    background: var(--surface-base);
+    background: var(--color-bg-primary);
     color: var(--color-text-primary);
     font-family: var(--font-sans);
     font-size: var(--font-size-m);
-    line-height: 1.55;
+    line-height: var(--leading-normal);
     font-feature-settings: "cv11", "ss01", "ss03";
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -217,18 +285,18 @@ h5,
 h6 {
     margin: 0;
     padding: 0;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
 }
 h1 {
     font-size: var(--font-size-xl);
-    font-weight: 650;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
+    font-weight: var(--font-weight-bold);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
 }
 h2 {
     font-size: var(--font-size-l);
-    line-height: 1.25;
-    letter-spacing: -0.01em;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-tight);
 }
 p + h1,
 p + h2,
@@ -245,4 +313,10 @@ p + h4 {
     outline: none;
     box-shadow: var(--focus-ring);
     border-radius: var(--border-radius-s);
+}
+
+/* Programmatic-focus containers (e.g. a modal panel) never receive keyboard
+   focus, so they must not paint the focus ring when focused on open. */
+[tabindex="-1"]:focus-visible {
+    box-shadow: none;
 }

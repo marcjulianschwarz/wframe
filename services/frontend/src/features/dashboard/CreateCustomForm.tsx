@@ -57,8 +57,8 @@ export function CreateCustomForm({ onCreated }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-s">
-      <label className="text-s text-fg-2 flex flex-col gap-xs">
+    <div className="flex flex-col gap-ui-s">
+      <label className="text-ui-s text-ui-secondary flex flex-col gap-ui-xs">
         Name
         <Input
           value={name}
@@ -67,7 +67,7 @@ export function CreateCustomForm({ onCreated }: Props) {
           disabled={busy}
         />
       </label>
-      <label className="text-s text-fg-2 flex flex-col gap-xs">
+      <label className="text-ui-s text-ui-secondary flex flex-col gap-ui-xs">
         Description <span className="opacity-60">(optional)</span>
         <Input
           value={description}
@@ -76,17 +76,17 @@ export function CreateCustomForm({ onCreated }: Props) {
           disabled={busy}
         />
       </label>
-      <label className="text-s text-fg-2 flex flex-col gap-xs">
+      <label className="text-ui-s text-ui-secondary flex flex-col gap-ui-xs">
         Slug
         <Input
           value={slug}
           onChange={(e) => setSlugEdited(slugify(e.target.value))}
           placeholder="my-dashboard"
           disabled={busy}
-          className="font-mono"
+          className="font-ui-mono"
         />
       </label>
-      <label className="text-s text-fg-2 flex flex-col gap-xs">
+      <label className="text-ui-s text-ui-secondary flex flex-col gap-ui-xs">
         URL
         <Input
           type="url"
@@ -97,11 +97,11 @@ export function CreateCustomForm({ onCreated }: Props) {
         />
       </label>
       {url.length > 0 && !urlValid && (
-        <div className="text-s text-fg-danger">
+        <div className="text-ui-s text-ui-danger">
           Enter a full URL starting with http:// or https://
         </div>
       )}
-      {error && <div className="text-s text-fg-danger">{error}</div>}
+      {error && <div className="text-ui-s text-ui-danger">{error}</div>}
       <Button variant="primary" className="self-start" onClick={submit} disabled={!canSubmit}>
         {busy ? "Creating…" : "Create dashboard"}
       </Button>

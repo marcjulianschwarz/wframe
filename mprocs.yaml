@@ -1,0 +1,7 @@
+procs:
+  backend:
+    cwd: services/backend
+    cmd: ["make", "dev"]
+  frontend:
+    cwd: services/frontend
+    cmd: ["make", "dev"]

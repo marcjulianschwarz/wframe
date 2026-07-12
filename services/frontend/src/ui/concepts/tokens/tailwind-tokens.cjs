@@ -1,4 +1,4 @@
-// @ui-source: concepts/tokens@0.3.0
+// @ui-source: concepts/tokens@0.4.0
 // Managed copy. Edits here are local to this app.
 // Improvements belong back in the ui repo's concepts/tokens — port
 // them there and bump the version. Do not treat this as throwaway code.
@@ -63,6 +63,9 @@ module.exports = {
     "ui-info-solid": "var(--color-info-solid)",
     "ui-info-on": "var(--color-info-on)",
 
+    // Overlay — bg-ui-overlay (scrim behind modals/drawers)
+    "ui-overlay": "var(--color-overlay)",
+
     // Borders — border-ui-*
     "ui-border-subtle": "var(--color-border-subtle)",
     "ui-border": "var(--color-border)",
@@ -70,40 +73,63 @@ module.exports = {
     "ui-border-focus": "var(--color-border-focus)",
   },
   fontFamily: {
-    sans: "var(--font-sans)",
-    mono: "var(--font-mono)",
+    "ui-sans": "var(--font-sans)",
+    "ui-mono": "var(--font-mono)",
   },
   fontSize: {
-    s: "var(--font-size-s)",
-    m: "var(--font-size-m)",
-    l: "var(--font-size-l)",
-    xl: "var(--font-size-xl)",
+    "ui-s": "var(--font-size-s)",
+    "ui-m": "var(--font-size-m)",
+    "ui-l": "var(--font-size-l)",
+    "ui-xl": "var(--font-size-xl)",
+  },
+  fontWeight: {
+    "ui-normal": "var(--font-weight-normal)",
+    "ui-medium": "var(--font-weight-medium)",
+    "ui-semibold": "var(--font-weight-semibold)",
+    "ui-bold": "var(--font-weight-bold)",
+  },
+  lineHeight: {
+    "ui-tight": "var(--leading-tight)",
+    "ui-snug": "var(--leading-snug)",
+    "ui-normal": "var(--leading-normal)",
+  },
+  letterSpacing: {
+    "ui-tight": "var(--tracking-tight)",
+    "ui-normal": "var(--tracking-normal)",
+    "ui-wide": "var(--tracking-wide)",
   },
   spacing: {
-    xs: "var(--space-xs)",
-    s: "var(--space-s)",
-    n: "var(--space-n)",
-    m: "var(--space-m)",
-    l: "var(--space-l)",
-    xl: "var(--space-xl)",
+    "ui-xs": "var(--space-xs)",
+    "ui-s": "var(--space-s)",
+    "ui-n": "var(--space-n)",
+    "ui-m": "var(--space-m)",
+    "ui-l": "var(--space-l)",
+    "ui-xl": "var(--space-xl)",
   },
   borderRadius: {
-    s: "var(--border-radius-s)",
-    n: "var(--border-radius-n)",
+    "ui-s": "var(--border-radius-s)",
+    "ui-n": "var(--border-radius-n)",
+  },
+  // Themeable border widths. `border-ui` is the default control/card outline;
+  // `border-ui-thick` for emphasis. Use these instead of Tailwind's fixed
+  // `border` so a theme can go hairline, heavy, or borderless.
+  borderWidth: {
+    ui: "var(--border-width)",
+    "ui-thick": "var(--border-width-thick)",
   },
   boxShadow: {
-    normal: "var(--shadow-normal)",
-    high: "var(--shadow-high)",
-    focus: "var(--focus-ring)",
+    "ui-normal": "var(--shadow-normal)",
+    "ui-high": "var(--shadow-high)",
+    "ui-focus": "var(--focus-ring)",
   },
   transitionDuration: {
-    fast: "var(--duration-fast)",
-    base: "var(--duration-base)",
-    spin: "var(--duration-spin)",
-    "spin-fast": "var(--duration-spin-fast)",
-    "spin-faster": "var(--duration-spin-faster)",
+    "ui-fast": "var(--duration-fast)",
+    "ui-base": "var(--duration-base)",
+    "ui-spin": "var(--duration-spin)",
+    "ui-spin-fast": "var(--duration-spin-fast)",
+    "ui-spin-faster": "var(--duration-spin-faster)",
   },
   transitionTimingFunction: {
-    out: "var(--ease-out)",
+    "ui-out": "var(--ease-out)",
   },
 };

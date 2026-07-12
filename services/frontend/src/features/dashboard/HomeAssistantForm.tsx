@@ -37,14 +37,14 @@ export function HomeAssistantForm({ token }: { token: string }) {
     }
   }
 
-  if (loading) return <p className="text-fg-2 text-s">Loading…</p>;
+  if (loading) return <p className="text-ui-secondary text-ui-s">Loading…</p>;
 
   return (
-    <div className="flex flex-col gap-s mt-l border-t border-border-1 pt-l">
-      <h4 className="font-semibold text-fg-1">Configure Home Assistant</h4>
+    <div className="flex flex-col gap-ui-s mt-ui-l border-t border-ui-border pt-ui-l">
+      <h4 className="font-ui-semibold text-ui-primary">Configure Home Assistant</h4>
       {!conn ? (
         <>
-          <p className="text-s text-fg-2">
+          <p className="text-ui-s text-ui-secondary">
             Home Assistant pushes your sensor history to wframe. Connect to
             generate a private ingest URL and the integration config you paste
             into Home Assistant.
@@ -57,18 +57,18 @@ export function HomeAssistantForm({ token }: { token: string }) {
         <>
           <CopyField value={conn.sensor_webhook_url} mono />
           <CopyField value={conn.sensor_automation_yaml} block />
-          <p className="text-s text-fg-2">
+          <p className="text-ui-s text-ui-secondary">
             For a 24h temperature chart, install the wframe Home Assistant
             integration (it reads your sensor's history from the recorder and
             pushes it here). Then paste the config above into{" "}
-            <span className="font-mono">configuration.yaml</span>, set your{" "}
-            <span className="font-mono">sensor</span> entity, and restart HA.
+            <span className="font-ui-mono">configuration.yaml</span>, set your{" "}
+            <span className="font-ui-mono">sensor</span> entity, and restart HA.
             Keep it private — the URL contains your secret token.
           </p>
         </>
       )}
 
-      {error && <div className="text-s text-fg-danger">{error}</div>}
+      {error && <div className="text-ui-s text-ui-danger">{error}</div>}
     </div>
   );
 }
@@ -94,14 +94,14 @@ function CopyField({
   }
 
   return (
-    <div className="relative rounded-s bg-bg-2 border border-border-1">
+    <div className="relative rounded-ui-s bg-ui-surface-sunken border border-ui-border">
       {block ? (
-        <pre className="p-n pr-12 font-mono text-s overflow-x-auto whitespace-pre max-h-72">
+        <pre className="p-ui-n pr-12 font-ui-mono text-ui-s overflow-x-auto whitespace-pre max-h-72">
           {value}
         </pre>
       ) : (
         <code
-          className={`block px-n py-s pr-12 ${mono ? "font-mono" : ""} text-s break-all`}
+          className={`block px-ui-n py-ui-s pr-12 ${mono ? "font-ui-mono" : ""} text-ui-s break-all`}
         >
           {value}
         </code>
@@ -111,7 +111,7 @@ function CopyField({
         onClick={copy}
         aria-label={copied ? "Copied" : "Copy"}
         title={copied ? "Copied" : "Copy"}
-        className="absolute right-xs top-xs h-8 w-8 px-0"
+        className="absolute right-ui-xs top-ui-xs h-8 w-8 px-0"
       >
         {copied ? <Check size={16} /> : <Copy size={16} />}
       </Button>

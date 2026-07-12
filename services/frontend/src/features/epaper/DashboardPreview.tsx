@@ -32,14 +32,14 @@ export function DashboardPreview({ previewUrl, bitmapSrc, epaper }: Props) {
   const outH = quarterTurn ? screenW : screenH;
 
   return (
-    <div className="relative bg-bg-1-light border border-border-1 rounded-n p-m flex justify-center h-[55vh]">
+    <div className="relative bg-ui-surface-raised border border-ui-border rounded-ui-n p-ui-m flex justify-center h-[55vh]">
       {loading && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-s text-fg-2 z-10">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-ui-s text-ui-secondary z-10">
           <span
-            className="inline-block w-6 h-6 rounded-full border-2 border-border-2 border-t-highlight animate-spin"
+            className="inline-block w-6 h-6 rounded-full border-2 border-ui-border-strong border-t-ui-accent animate-spin"
             aria-hidden
           />
-          <span className="text-s">
+          <span className="text-ui-s">
             {bitmapSrc ? "Fetching device image…" : "Loading preview…"}
           </span>
         </div>
@@ -52,7 +52,7 @@ export function DashboardPreview({ previewUrl, bitmapSrc, epaper }: Props) {
           width={outW}
           height={outH}
           style={{ imageRendering: "pixelated" }}
-          className={`h-full w-auto max-w-full object-contain transition-opacity duration-fast ${
+          className={`h-full w-auto max-w-full object-contain transition-opacity duration-ui-fast ${
             loading ? "opacity-0" : "opacity-100"
           }`}
           onLoad={() => setLoading(false)}
@@ -86,7 +86,7 @@ export function DashboardPreview({ previewUrl, bitmapSrc, epaper }: Props) {
                   transformOrigin: "top left",
                   transform: `scale(${imageW / NATIVE_W}, ${imageH / NATIVE_H})`,
                 }}
-                className={`border-0 transition-opacity duration-fast ${
+                className={`border-0 transition-opacity duration-ui-fast ${
                   loading ? "opacity-0" : "opacity-100"
                 }`}
                 onLoad={() => setLoading(false)}

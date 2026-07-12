@@ -59,17 +59,17 @@ export function StorePage() {
   }, [byType, items]);
 
   return (
-    <section className="flex flex-col gap-l">
+    <section className="flex flex-col gap-ui-l">
       <div>
         <h2>Store</h2>
-        <p className="text-ui-secondary text-s mt-xs">
+        <p className="text-ui-secondary text-ui-s mt-ui-xs">
           Browse built-in dashboards. Open one to preview it, then add it to your
           collection.
         </p>
       </div>
 
       {error && (
-        <div className="p-m rounded-n border border-ui-danger-border bg-ui-danger-bg text-ui-danger text-s">
+        <div className="p-ui-m rounded-ui-n border border-ui-danger-border bg-ui-danger-bg text-ui-danger text-ui-s">
           {error}
         </div>
       )}
@@ -77,9 +77,9 @@ export function StorePage() {
       {featured && <FeaturedCard item={featured} />}
 
       {sections.map((section) => (
-        <div key={section.id} className="flex flex-col gap-s">
-          <h3 className="text-m font-semibold text-ui-primary">{section.title}</h3>
-          <div className="flex gap-m overflow-x-auto pb-s -mx-xs px-xs snap-x">
+        <div key={section.id} className="flex flex-col gap-ui-s">
+          <h3 className="text-ui-m font-ui-semibold text-ui-primary">{section.title}</h3>
+          <div className="flex gap-ui-m overflow-x-auto pb-ui-s -mx-xs px-ui-xs snap-x">
             {section.items.map((item) => (
               <StoreTile key={item.type} item={item} />
             ))}
@@ -95,18 +95,18 @@ function FeaturedCard({ item }: { item: StoreItem }) {
   return (
     <Link
       to={`/store/${item.type}`}
-      className="group flex flex-col sm:flex-row gap-l rounded-n border-2 border-transparent bg-ui-surface-raised p-l cursor-pointer transition-colors duration-fast hover:border-ui-accent"
+      className="group flex flex-col sm:flex-row gap-ui-l rounded-ui-n border-2 border-transparent bg-ui-surface-raised p-ui-l cursor-pointer transition-colors duration-ui-fast hover:border-ui-accent"
     >
       <div className="shrink-0 self-center sm:self-start">
         <StoreThumb type={item.type} className="w-40" />
       </div>
-      <div className="flex flex-col gap-s">
-        <span className="text-xs font-semibold uppercase tracking-wide text-ui-accent">
+      <div className="flex flex-col gap-ui-s">
+        <span className="text-xs font-ui-semibold uppercase tracking-ui-wide text-ui-accent">
           Featured
         </span>
-        <h3 className="text-l text-ui-primary">{item.title}</h3>
-        <p className="text-m text-ui-secondary flex-1">{item.description}</p>
-        <span className="mt-s text-m font-semibold text-ui-accent group-hover:underline">
+        <h3 className="text-ui-l text-ui-primary">{item.title}</h3>
+        <p className="text-ui-m text-ui-secondary flex-1">{item.description}</p>
+        <span className="mt-ui-s text-ui-m font-ui-semibold text-ui-accent group-hover:underline">
           Preview & add →
         </span>
       </div>
@@ -119,14 +119,14 @@ function StoreTile({ item }: { item: StoreItem }) {
   return (
     <Link
       to={`/store/${item.type}`}
-      className="group flex w-44 shrink-0 snap-start flex-col gap-s rounded-n border-2 border-transparent bg-ui-surface-raised py-s px-m cursor-pointer transition-colors duration-fast hover:border-ui-accent"
+      className="group flex w-44 shrink-0 snap-start flex-col gap-ui-s rounded-ui-n border-2 border-transparent bg-ui-surface-raised py-ui-s px-ui-m cursor-pointer transition-colors duration-ui-fast hover:border-ui-accent"
     >
       <StoreThumb type={item.type} className="w-full" />
       <div>
-        <div className="text-m font-semibold text-ui-primary leading-tight group-hover:text-ui-accent">
+        <div className="text-ui-m font-ui-semibold text-ui-primary leading-ui-tight group-hover:text-ui-accent">
           {item.title}
         </div>
-        <div className="text-s text-ui-secondary line-clamp-2">
+        <div className="text-ui-s text-ui-secondary line-clamp-2">
           {item.description}
         </div>
       </div>

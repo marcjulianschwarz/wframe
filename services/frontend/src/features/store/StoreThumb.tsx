@@ -57,7 +57,7 @@ export function StoreThumb({ type, className = "" }: Props) {
           src={api.previewUrl(type)}
           width={NATIVE_W}
           height={NATIVE_H}
-          className={`border-0 transition-opacity duration-fast ${
+          className={`border-0 transition-opacity duration-ui-fast ${
             loading ? "opacity-0" : "opacity-100"
           }`}
           style={{ pointerEvents: "none" }}

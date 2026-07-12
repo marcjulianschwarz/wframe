@@ -16,6 +16,7 @@ from app.features.bitmap.github_router import router as github_router
 from app.features.bitmap.ha_router import router as ha_router
 from app.features.bitmap.image_router import router as image_router
 from app.features.bitmap.location_router import router as location_router
+from app.features.bitmap.vag_router import router as vag_router
 from app.features.dashboard.dashboard_router import router as dashboard_router
 from app.features.epaper.epaper_router import router as epaper_router
 from app.features.user.user_router import router as user_router
@@ -84,6 +85,7 @@ app.include_router(location_router)
 app.include_router(github_router)
 app.include_router(ha_router)
 app.include_router(image_router)
+app.include_router(vag_router)
 
 
 @app.get("/")

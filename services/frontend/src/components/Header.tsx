@@ -8,19 +8,19 @@ interface Props {
 export function Header({ user, onLogout }: Props) {
   const initial = user?.email?.[0]?.toUpperCase() ?? "?";
   return (
-    <header className="w-full flex items-center justify-between px-l py-m">
-      <div className="flex items-center gap-s">
-        <div className="w-8 h-8 rounded-s bg-highlight text-white flex items-center justify-center font-mono text-s font-bold">
+    <header className="w-full flex items-center justify-between px-ui-l py-ui-m">
+      <div className="flex items-center gap-ui-s">
+        <div className="w-8 h-8 rounded-ui-s bg-ui-accent text-white flex items-center justify-center font-ui-mono text-ui-s font-ui-bold">
           w
         </div>
-        <span className="font-mono text-m font-semibold tracking-tight">
+        <span className="font-ui-mono text-ui-m font-ui-semibold tracking-ui-tight">
           wframe
         </span>
       </div>
       {user && (
         <button
           onClick={onLogout}
-          className="w-8 h-8 rounded-full bg-highlight-soft text-highlight flex items-center justify-center font-semibold text-s hover:opacity-80 transition-opacity duration-fast ease-out"
+          className="w-8 h-8 rounded-full bg-ui-accent-soft text-ui-accent flex items-center justify-center font-ui-semibold text-ui-s hover:opacity-80 transition-opacity duration-ui-fast ease-ui-out"
           title="Sign out"
         >
           {initial}

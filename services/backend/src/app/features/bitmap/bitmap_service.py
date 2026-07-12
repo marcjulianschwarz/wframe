@@ -34,6 +34,7 @@ class BitmapService:
             DashboardType.WEATHER,
             DashboardType.GITHUB,
             DashboardType.IMAGE,
+            DashboardType.VAG,
         ):
             return renderer_factory(dashboard_type, session=self.session, user_id=dashboard.user_id)
         return renderer_factory(dashboard_type)
@@ -48,6 +49,9 @@ class BitmapService:
             data = await self._renderer(dashboard).render()
             _ = await self.repo.save(dashboard.id, data)
         except Exception:
+            # A DB error inside the render leaves the transaction aborted, which
+            # would make the fallback query below fail too. Reset it first.
+            await self.session.rollback()
             existing = await self.repo.get_latest(dashboard.id)
             if existing is None:
                 raise

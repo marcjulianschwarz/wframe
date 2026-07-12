@@ -1,4 +1,4 @@
-// @ui-source: concepts/modal@0.5.3
+// @ui-source: concepts/modal@0.5.4
 // Managed copy. Edits here are local to this app.
 // Improvements belong back in the ui repo's concepts/modal — port
 // them there and bump the version. Do not treat this as throwaway code.
@@ -106,7 +106,7 @@ export function Modal({
       // one modal for another (close A, open B in the same commit) doesn't flash
       // the page through a transparent backdrop. The panel still animates via
       // `enter`.
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-m"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ui-overlay p-ui-m"
       onMouseDown={(e) => {
         // Only close on a click that both starts and ends on the backdrop.
         if (e.target === e.currentTarget) onClose();
@@ -117,14 +117,14 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         tabIndex={-1}
-        className={`relative flex max-h-[90vh] w-full ${widthClass} flex-col overflow-hidden rounded-n border border-ui-border bg-ui-surface-raised shadow-high outline-none ${enterClass}`}
+        className={`relative flex max-h-[90vh] w-full ${widthClass} flex-col overflow-hidden rounded-ui-n border border-ui-border bg-ui-surface-raised shadow-ui-high outline-none ${enterClass}`}
       >
         {/* Close indicator, pinned to the panel's top-right corner. */}
         <button
           type="button"
           aria-label="Close"
           onClick={onClose}
-          className="absolute right-s top-s flex h-8 w-8 items-center justify-center rounded-s text-ui-secondary hover:bg-ui-surface-hover hover:text-ui-primary"
+          className="absolute right-ui-s top-ui-s flex h-8 w-8 items-center justify-center rounded-ui-s text-ui-secondary hover:bg-ui-surface-hover hover:text-ui-primary"
         >
           <X className="h-4 w-4" aria-hidden />
         </button>
@@ -133,32 +133,32 @@ export function Modal({
             "bar" layout divides them with full-width lines; "plain" inlines. */}
         {bar ? (
           <>
-            <header className="flex h-14 shrink-0 items-center border-b border-ui-border px-l">
-              <h3 className="text-l">{title}</h3>
+            <header className="flex h-14 shrink-0 items-center border-b border-ui-border px-ui-l">
+              <h3 className="text-ui-l">{title}</h3>
             </header>
             <div
               ref={scrollRef}
-              className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-l py-m"
+              className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-ui-l py-ui-m"
             >
               {children}
             </div>
             {actions && (
-              <footer className="flex h-14 shrink-0 items-center justify-end gap-s border-t border-ui-border px-l">
+              <footer className="flex h-14 shrink-0 items-center justify-end gap-ui-s border-t border-ui-border px-ui-l">
                 {actions}
               </footer>
             )}
           </>
         ) : (
-          <div className="flex min-h-0 flex-1 flex-col p-l">
-            <h3 className="shrink-0 text-l">{title}</h3>
+          <div className="flex min-h-0 flex-1 flex-col p-ui-l">
+            <h3 className="shrink-0 text-ui-l">{title}</h3>
             <div
               ref={scrollRef}
-              className="min-h-0 flex-1 overflow-y-auto overscroll-contain pt-s"
+              className="min-h-0 flex-1 overflow-y-auto overscroll-contain pt-ui-s"
             >
               {children}
             </div>
             {actions && (
-              <div className="mt-l flex shrink-0 justify-end gap-s">
+              <div className="mt-ui-l flex shrink-0 justify-end gap-ui-s">
                 {actions}
               </div>
             )}

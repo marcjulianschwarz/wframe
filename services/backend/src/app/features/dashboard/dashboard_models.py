@@ -18,6 +18,7 @@ class DashboardType(str, enum.Enum):
     HOMEASSISTANT = "homeassistant"
     HOMEASSISTANT_TEMP = "homeassistant_temp"
     IMAGE = "image"
+    VAG = "vag"
 
 
 class DashboardSource(str, enum.Enum):
@@ -70,6 +71,10 @@ DASHBOARD_CATALOG: dict[DashboardType, dict[str, str]] = {
     DashboardType.IMAGE: {
         "title": "Image",
         "description": "Show an uploaded image fullscreen, dithered for epaper.",
+    },
+    DashboardType.VAG: {
+        "title": "VAG Abfahrten",
+        "description": "Live departures for your VGN stop (Nürnberg), with real-time delays.",
     },
 }
 

@@ -39,7 +39,7 @@ export function DeployTargetModal({
         </Button>
       }
     >
-      <div className="flex flex-col gap-s">
+      <div className="flex flex-col gap-ui-s">
         {epapers.map((e) => {
           const live = e.dashboard_id === dashboard.id;
           const busy = busyId === e.id;
@@ -49,15 +49,15 @@ export function DeployTargetModal({
               type="button"
               disabled={busy}
               onClick={() => void toggle(e)}
-              className={`flex items-center justify-between gap-m p-m rounded-n border text-left transition-all duration-fast disabled:opacity-50 ${
+              className={`flex items-center justify-between gap-ui-m p-ui-m rounded-ui-n border text-left transition-all duration-ui-fast disabled:opacity-50 ${
                 live
-                  ? "bg-highlight-soft border-highlight"
-                  : "bg-bg-1-light border-border-1 hover:border-border-2"
+                  ? "bg-ui-accent-soft border-ui-accent"
+                  : "bg-ui-surface-raised border-ui-border hover:border-ui-border-strong"
               }`}
             >
               <div className="min-w-0">
-                <div className="font-semibold text-fg-1 truncate">{e.name}</div>
-                <div className="text-s text-fg-2 truncate">
+                <div className="font-ui-semibold text-ui-primary truncate">{e.name}</div>
+                <div className="text-ui-s text-ui-secondary truncate">
                   {live
                     ? "Showing this — tap to stop"
                     : e.dashboard
@@ -66,7 +66,7 @@ export function DeployTargetModal({
                 </div>
               </div>
               {live && (
-                <span className="flex h-7 w-7 items-center justify-center rounded-s bg-highlight text-white shrink-0">
+                <span className="flex h-7 w-7 items-center justify-center rounded-ui-s bg-ui-accent text-white shrink-0">
                   <Check size={16} />
                 </span>
               )}

@@ -35,15 +35,15 @@ export function DisplayGeometryForm({
   }
 
   return (
-    <div className="flex flex-col gap-s">
-      <p className="text-s text-fg-2">
+    <div className="flex flex-col gap-ui-s">
+      <p className="text-ui-s text-ui-secondary">
         Screen size in pixels, and the size and position of the rendered
         dashboard drawn on it.
       </p>
-      <div className="grid grid-cols-2 gap-s mt-xs">
+      <div className="grid grid-cols-2 gap-ui-s mt-ui-xs">
         {FIELDS.map((f) => (
-          <label key={f.key} className="flex flex-col gap-xs">
-            <span className="text-s text-fg-2">{f.label}</span>
+          <label key={f.key} className="flex flex-col gap-ui-xs">
+            <span className="text-ui-s text-ui-secondary">{f.label}</span>
             <Input
               type="number"
               inputMode="numeric"
@@ -55,15 +55,15 @@ export function DisplayGeometryForm({
           </label>
         ))}
       </div>
-      <label className="flex flex-col gap-xs">
-        <span className="text-s text-fg-2">Rotation</span>
+      <label className="flex flex-col gap-ui-xs">
+        <span className="text-ui-s text-ui-secondary">Rotation</span>
         <select
           value={String(value.rotation)}
           onChange={(e) =>
             onChange({ ...value, rotation: Number.parseInt(e.target.value, 10) as Rotation })
           }
           disabled={disabled}
-          className="w-full px-m py-n rounded-s border border-border-1 bg-bg-1-light text-fg-1 text-m hover:border-border-2 focus:border-highlight focus:shadow-focus outline-none transition-colors duration-fast ease-out"
+          className="w-full px-ui-m py-ui-n rounded-ui-s border border-ui-border bg-ui-surface-raised text-ui-primary text-ui-m hover:border-ui-border-strong focus:border-ui-accent focus:shadow-ui-focus outline-none transition-colors duration-ui-fast ease-ui-out"
         >
           {ROTATIONS.map((r) => (
             <option key={r} value={r}>
@@ -73,7 +73,7 @@ export function DisplayGeometryForm({
         </select>
       </label>
       {!fits && (
-        <div className="text-s text-fg-danger">
+        <div className="text-ui-s text-ui-danger">
           The image extends past the {overflowX ? "right" : "bottom"} edge of the
           screen.
         </div>

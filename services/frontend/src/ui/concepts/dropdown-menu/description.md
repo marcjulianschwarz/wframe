@@ -1,4 +1,4 @@
-<!-- @ui-source: concepts/dropdown-menu@0.2.0 -->
+<!-- @ui-source: concepts/dropdown-menu@0.2.1 -->
 <!-- Managed copy. Edits here are local to this app. -->
 <!-- Improvements belong back in the ui repo's concepts/dropdown-menu — port -->
 <!-- them there and bump the version. Do not treat this as throwaway code. -->
@@ -41,5 +41,6 @@ The menu never traps you: Escape, an outside click, or making a choice all dismi
 
 ## Changelog
 
+- **0.2.1** — Trigger radius now uses the `rounded-ui-s` token instead of Tailwind's hardcoded `rounded-md`.
 - **0.2.0** — `DropdownTrigger` now forwards standard button attributes (`aria-label`, `title`, `disabled`, …) and takes an `unstyled` prop so it can host a bare icon trigger (e.g. a `⋯` button) with the look supplied via `className`.
 - **0.1.0** — Initial version: composable trigger/content/item/separator/label, outside-click + Escape dismissal, roving arrow-key focus, `align` start/end, `destructive` and `disabled` items, edge-to-edge rows with a `modal-pop` enter.

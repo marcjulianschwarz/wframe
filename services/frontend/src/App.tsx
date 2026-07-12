@@ -27,15 +27,24 @@ function Shell() {
   const { user, logout } = useSession();
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(
+    () => localStorage.getItem("sidebar-collapsed") === "true",
+  );
+  const onCollapsedChange = useCallback((next: boolean) => {
+    setCollapsed(next);
+    localStorage.setItem("sidebar-collapsed", String(next));
+  }, []);
   return (
     <div className="flex min-h-screen text-ui-primary">
       <Sidebar
         title="wframe"
+        collapsed={collapsed}
+        onCollapsedChange={onCollapsedChange}
         footer={
           <>
-            {user && (
+            {user && !collapsed && (
               <p
-                className="mb-s truncate text-s text-ui-secondary"
+                className="mb-ui-s truncate text-ui-s text-ui-secondary"
                 title={user.email}
               >
                 {user.email}
@@ -60,7 +69,7 @@ function Shell() {
       </Sidebar>
 
       <main className="flex-1 overflow-x-hidden">
-        <div className="mx-auto w-[90%] max-w-[1100px] my-l">
+        <div className="mx-auto w-[90%] max-w-[1100px] my-ui-l">
           <Routes>
             <Route path="/store" element={<StorePage />} />
             <Route path="/store/:type" element={<StoreDetail />} />

@@ -1,4 +1,4 @@
-// @ui-source: concepts/dropdown-menu@0.2.0
+// @ui-source: concepts/dropdown-menu@0.2.1
 // Managed copy. Edits here are local to this app.
 // Improvements belong back in the ui repo's concepts/dropdown-menu — port
 // them there and bump the version. Do not treat this as throwaway code.
@@ -81,7 +81,7 @@ export interface DropdownTriggerProps
 // The default bordered/raised look. Pass `className` to extend it, or set
 // `unstyled` to drop it entirely (e.g. for an icon-only "⋯" trigger).
 const TRIGGER_BASE =
-  "inline-flex items-center justify-center gap-s rounded-md border border-ui-border bg-ui-surface-raised px-m py-s text-m font-semibold leading-none text-ui-primary transition-all duration-fast ease-out hover:bg-ui-surface-hover hover:border-ui-border-strong active:bg-ui-surface-active";
+  "inline-flex items-center justify-center gap-ui-s rounded-ui-s border border-ui-border bg-ui-surface-raised px-ui-m py-ui-s text-ui-m font-ui-semibold leading-none text-ui-primary transition-all duration-ui-fast ease-ui-out hover:bg-ui-surface-hover hover:border-ui-border-strong active:bg-ui-surface-active";
 
 /**
  * The control that toggles the menu. Renders a `<button>` so it's focusable and
@@ -187,7 +187,7 @@ export function DropdownContent({ children, align = "start" }: DropdownContentPr
       role="menu"
       aria-orientation="vertical"
       onKeyDown={onKeyDown}
-      className={`absolute z-50 mt-xs min-w-40 origin-top overflow-hidden rounded-n border border-ui-border bg-ui-surface-raised shadow-high outline-none animate-modal-pop ${
+      className={`absolute z-50 mt-ui-xs min-w-40 origin-top overflow-hidden rounded-ui-n border border-ui-border bg-ui-surface-raised shadow-ui-high outline-none animate-modal-pop ${
         align === "end" ? "right-0" : "left-0"
       }`}
     >
@@ -231,7 +231,7 @@ export function DropdownItem({
       // Move focus to whichever item the mouse is over, so the keyboard's
       // focus highlight follows the pointer instead of leaving two rows lit.
       onMouseEnter={(e) => e.currentTarget.focus()}
-      className={`flex w-full items-center gap-s px-m py-s text-left text-m outline-none transition-colors duration-fast ease-out disabled:opacity-50 disabled:pointer-events-none ${
+      className={`flex w-full items-center gap-ui-s px-ui-m py-ui-s text-left text-ui-m outline-none transition-colors duration-ui-fast ease-ui-out disabled:opacity-50 disabled:pointer-events-none ${
         destructive
           ? "text-ui-danger focus:bg-ui-surface-hover"
           : "text-ui-primary focus:bg-ui-surface-hover"
@@ -250,7 +250,7 @@ export function DropdownSeparator() {
 /** A non-interactive group heading. */
 export function DropdownLabel({ children }: { children: ReactNode }) {
   return (
-    <div className="px-m py-xs text-s font-semibold text-ui-secondary">
+    <div className="px-ui-m py-ui-xs text-ui-s font-ui-semibold text-ui-secondary">
       {children}
     </div>
   );

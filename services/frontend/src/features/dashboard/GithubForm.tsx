@@ -40,11 +40,11 @@ export function GithubForm({ token }: { token: string }) {
   }
 
   return (
-    <div className="bg-bg-1-light border border-border-1 rounded-n p-m flex flex-col gap-s">
-      <div className="text-s text-fg-2 uppercase tracking-wider font-semibold">
+    <div className="bg-ui-surface-raised border border-ui-border rounded-ui-n p-ui-m flex flex-col gap-ui-s">
+      <div className="text-ui-s text-ui-secondary uppercase tracking-wider font-ui-semibold">
         GitHub username
       </div>
-      <div className="flex gap-s items-start">
+      <div className="flex gap-ui-s items-start">
         <Input
           type="text"
           placeholder="octocat"
@@ -64,15 +64,15 @@ export function GithubForm({ token }: { token: string }) {
         </Button>
       </div>
       {username.length > 0 && !valid && (
-        <div className="text-s text-fg-danger">
+        <div className="text-ui-s text-ui-danger">
           Letters, numbers, and hyphens only (max 39 characters).
         </div>
       )}
-      {error && <div className="text-s text-fg-danger">{error}</div>}
+      {error && <div className="text-ui-s text-ui-danger">{error}</div>}
       {saved && !error && (
-        <div className="text-s text-fg-2">
+        <div className="text-ui-s text-ui-secondary">
           Showing the public profile for{" "}
-          <span className="font-mono">@{saved}</span>.
+          <span className="font-ui-mono">@{saved}</span>.
         </div>
       )}
     </div>

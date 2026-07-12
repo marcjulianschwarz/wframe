@@ -260,6 +260,42 @@ def _image_preview() -> str:
 </body></html>"""
 
 
+# --------------------------------------------------------------------------- #
+# vag — reuses the real renderer's HTML with canned departures
+# --------------------------------------------------------------------------- #
+def _vag_preview() -> str:
+    from app.features.bitmap.renderers.vag import Departures, render_html
+
+    now = datetime.now().replace(second=0, microsecond=0)
+
+    def dep(line: str, direction: str, product: str, mins: int, delay: int, platform: str) -> dict[str, str]:
+        return {
+            "Linienname": line,
+            "Richtungstext": direction,
+            "AbfahrtszeitSoll": (now + timedelta(minutes=mins - delay)).isoformat(),
+            "AbfahrtszeitIst": (now + timedelta(minutes=mins)).isoformat(),
+            "Produkt": product,
+            "HaltesteigText": platform,
+        }
+
+    data = {
+        "Metadata": {"Timestamp": now.isoformat()},
+        "Haltestellenname": "Plärrer (Nürnberg)",
+        "Abfahrten": [
+            dep("U1", "Langwasser Süd", "UBahn", 0, 0, "2"),
+            dep("U2", "Röthenbach", "UBahn", 2, 1, "1"),
+            dep("4", "Gibitzenhof", "Tram", 4, 0, "A"),
+            dep("U1", "Fürth Hardhöhe", "UBahn", 6, 0, "1"),
+            dep("6", "Doku-Zentrum", "Tram", 9, 3, "B"),
+            dep("34", "Gebersdorf", "Bus", 12, 0, "C"),
+            dep("U3", "Nordwestring", "UBahn", 15, 0, "2"),
+            dep("283", "Worzeldorf", "Bus", 21, 0, "D"),
+        ],
+        "Sonderinformationen": [],
+    }
+    return render_html("Plärrer (Nürnberg)", Departures.model_validate(data), now)
+
+
 def _homeassistant_temp_preview() -> str:
     import math
     import time
@@ -287,6 +323,7 @@ _PREVIEWS = {
     DashboardType.HN_ZEITUNG: _hn_preview,
     DashboardType.LIFE: _life_preview,
     DashboardType.CUSTOM_URL: _custom_url_preview,
+    DashboardType.VAG: _vag_preview,
 }
 
 

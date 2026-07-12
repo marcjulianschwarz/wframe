@@ -12,13 +12,13 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClass: Record<Variant, string> = {
   default:
-    "bg-ui-surface-raised border border-ui-border text-ui-primary hover:bg-ui-surface-hover hover:border-ui-border-strong active:bg-ui-surface-active",
+    "bg-ui-surface-raised border-ui border-ui-border text-ui-primary hover:bg-ui-surface-hover hover:border-ui-border-strong active:bg-ui-surface-active",
   primary:
-    "bg-ui-accent border border-ui-accent text-ui-on-accent hover:bg-ui-accent-strong active:brightness-95",
+    "bg-ui-accent border-ui border-ui-accent text-ui-on-accent hover:bg-ui-accent-strong active:brightness-95",
   ghost:
-    "bg-transparent border border-transparent text-ui-secondary hover:bg-ui-surface-hover hover:text-ui-primary",
+    "bg-transparent border-ui border-transparent text-ui-secondary hover:bg-ui-surface-hover hover:text-ui-primary",
   danger:
-    "bg-ui-surface-raised border border-ui-border text-ui-danger hover:bg-ui-danger-bg hover:border-ui-danger-border",
+    "bg-ui-surface-raised border-ui border-ui-border text-ui-danger hover:bg-ui-danger-bg hover:border-ui-danger-border",
 };
 
 export function Button({
@@ -28,7 +28,7 @@ export function Button({
 }: Props) {
   return (
     <button
-      className={`inline-flex items-center justify-center gap-s px-m py-s rounded-md font-semibold text-m leading-none transition-all duration-fast ease-out active:translate-y-px disabled:opacity-50 disabled:pointer-events-none ${variantClass[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-ui-s px-ui-m py-ui-s rounded-ui-s font-ui-semibold text-ui-m leading-none transition-all duration-ui-fast ease-ui-out active:translate-y-px disabled:opacity-50 disabled:pointer-events-none ${variantClass[variant]} ${className}`}
       {...rest}
     />
   );

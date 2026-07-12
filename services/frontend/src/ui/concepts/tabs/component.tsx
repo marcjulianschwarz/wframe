@@ -47,7 +47,7 @@ export function Tabs({
   const baseId = useId();
   return (
     <TabsContext.Provider value={{ value, setValue: onValueChange, baseId }}>
-      <div className={`flex flex-col gap-m ${className}`}>{children}</div>
+      <div className={`flex flex-col gap-ui-m ${className}`}>{children}</div>
     </TabsContext.Provider>
   );
 }
@@ -128,12 +128,12 @@ export function TabList({
       role="tablist"
       aria-label={ariaLabel}
       onKeyDown={onKeyDown}
-      className={`relative flex items-center gap-l border-b border-ui-border ${className}`}
+      className={`relative flex items-center gap-ui-l border-b border-ui-border ${className}`}
     >
       {children}
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-px h-0.5 bg-ui-accent transition-all duration-base ease-out"
+        className="pointer-events-none absolute -bottom-px h-0.5 bg-ui-accent transition-all duration-ui-base ease-ui-out"
         style={{
           left: indicator.left,
           width: indicator.width,
@@ -165,7 +165,7 @@ export function Tab({ value, children, disabled, className = "" }: TabProps) {
       tabIndex={active ? 0 : -1}
       disabled={disabled}
       onClick={() => setValue(value)}
-      className={`inline-flex items-center justify-center gap-s px-xs pb-s font-semibold text-m leading-none transition-colors duration-fast ease-out focus:outline-none focus-visible:!shadow-none focus-visible:!rounded-none focus-visible:text-ui-primary disabled:opacity-50 disabled:pointer-events-none ${
+      className={`inline-flex items-center justify-center gap-ui-s px-ui-xs pb-ui-s font-ui-semibold text-ui-m leading-none transition-colors duration-ui-fast ease-ui-out focus:outline-none focus-visible:!shadow-none focus-visible:!rounded-none focus-visible:text-ui-primary disabled:opacity-50 disabled:pointer-events-none ${
         active
           ? "text-ui-primary"
           : "text-ui-secondary hover:text-ui-primary"

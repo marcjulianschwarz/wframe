@@ -9,7 +9,8 @@ export type DashboardType =
   | "github"
   | "homeassistant"
   | "homeassistant_temp"
-  | "image";
+  | "image"
+  | "vag";
 
 export type ImageAlgorithm = "floyd_steinberg" | "ordered" | "threshold" | "atkinson";
 export type ImageFit = "contain" | "cover" | "stretch";
@@ -35,6 +36,13 @@ export interface HaConnection {
   sensor_webhook_url: string;
   automation_yaml: string;
   sensor_automation_yaml: string;
+}
+
+/** A VGN stop (Nürnberg transit) for the VAG departures dashboard. */
+export interface VagStop {
+  name: string;
+  vgn_number: number;
+  products: string | null;
 }
 
 export interface Location {
@@ -279,6 +287,15 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify({ algorithm, fit, contrast }),
     }),
+
+  // --- vag (Nürnberg transit) --- //
+  /** Fetch the saved VGN stop (404 if not set yet). */
+  getVagStop: (token: string) => req<VagStop>("/vag", token),
+  setVagStop: (token: string, stop: VagStop) =>
+    req<VagStop>("/vag", token, { method: "PUT", body: JSON.stringify(stop) }),
+  /** Search VGN stops by name (proxied through the backend). */
+  searchVagStops: (token: string, name: string) =>
+    req<VagStop[]>(`/vag/stops?name=${encodeURIComponent(name)}`, token),
 
   // --- home assistant --- //
   /** Fetch the existing HA connection (404 if not minted yet). */

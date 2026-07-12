@@ -38,6 +38,24 @@ class GithubProfile(Base, TimestampMixin):
     username: Mapped[str] = mapped_column(String(39), nullable=False)
 
 
+class VagStop(Base, TimestampMixin):
+    """Per-user VGN stop for the VAG departures dashboard. The renderer reads it
+    to fetch live departures from the VAG Abfahrtsmonitor API."""
+
+    __tablename__: str = "vag_stops"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    # VGNKennung — the stop id the departures endpoint is keyed by.
+    vgn_number: Mapped[int] = mapped_column(nullable=False)
+    # e.g. "Bus,Tram,UBahn" as returned by the stop search.
+    products: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+
 class ImageUpload(Base, TimestampMixin):
     """Per-user source image for the Image dashboard.
 

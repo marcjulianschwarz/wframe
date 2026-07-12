@@ -63,8 +63,8 @@ export function ImageForm({ token }: { token: string }) {
   }
 
   return (
-    <div className="bg-bg-1-light border border-border-1 rounded-n p-m flex flex-col gap-s">
-      <div className="text-s text-fg-2 uppercase tracking-wider font-semibold">Image</div>
+    <div className="bg-ui-surface-raised border border-ui-border rounded-ui-n p-ui-m flex flex-col gap-ui-s">
+      <div className="text-ui-s text-ui-secondary uppercase tracking-wider font-ui-semibold">Image</div>
       <input
         ref={fileInput}
         type="file"
@@ -76,23 +76,23 @@ export function ImageForm({ token }: { token: string }) {
           e.target.value = ""; // allow re-selecting the same file
         }}
       />
-      <div className="flex items-center gap-s flex-wrap">
+      <div className="flex items-center gap-ui-s flex-wrap">
         <Button onClick={() => fileInput.current?.click()} disabled={busy}>
           {busy ? "Uploading…" : config ? "Replace image" : "Upload image"}
         </Button>
-        {config && <span className="text-s text-fg-2 font-mono">{config.content_type}</span>}
+        {config && <span className="text-ui-s text-ui-secondary font-ui-mono">{config.content_type}</span>}
       </div>
       {!config && !error && (
-        <div className="text-s text-fg-2">
+        <div className="text-ui-s text-ui-secondary">
           Upload an image (PNG, JPEG, GIF, WebP, or BMP, max 8&nbsp;MB) to show it fullscreen.
         </div>
       )}
       {config && (
         <>
-          <label className="text-s text-fg-2 flex flex-col gap-xs">
+          <label className="text-ui-s text-ui-secondary flex flex-col gap-ui-xs">
             Dithering
             <select
-              className="bg-bg-1 border border-border-1 rounded-n p-xs text-fg-1"
+              className="bg-ui-surface-base border border-ui-border rounded-ui-n p-ui-xs text-ui-primary"
               value={config.algorithm}
               disabled={busy}
               onChange={(e) =>
@@ -106,10 +106,10 @@ export function ImageForm({ token }: { token: string }) {
               ))}
             </select>
           </label>
-          <label className="text-s text-fg-2 flex flex-col gap-xs">
+          <label className="text-ui-s text-ui-secondary flex flex-col gap-ui-xs">
             Fit
             <select
-              className="bg-bg-1 border border-border-1 rounded-n p-xs text-fg-1"
+              className="bg-ui-surface-base border border-ui-border rounded-ui-n p-ui-xs text-ui-primary"
               value={config.fit}
               disabled={busy}
               onChange={(e) =>
@@ -123,9 +123,9 @@ export function ImageForm({ token }: { token: string }) {
               ))}
             </select>
           </label>
-          <label className="text-s text-fg-2 flex flex-col gap-xs">
+          <label className="text-ui-s text-ui-secondary flex flex-col gap-ui-xs">
             <span>
-              Contrast <span className="font-mono">{contrast.toFixed(2)}×</span>
+              Contrast <span className="font-ui-mono">{contrast.toFixed(2)}×</span>
               <span className="opacity-60"> — lower to recover detail</span>
             </span>
             <input
@@ -144,7 +144,7 @@ export function ImageForm({ token }: { token: string }) {
           </label>
         </>
       )}
-      {error && <div className="text-s text-fg-danger">{error}</div>}
+      {error && <div className="text-ui-s text-ui-danger">{error}</div>}
     </div>
   );
 }

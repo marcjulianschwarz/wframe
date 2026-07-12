@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/ui/concepts/button/component";
 import { Input } from "@/components/Input";
 import { Modal } from "@/ui/concepts/modal/component";
@@ -14,11 +15,15 @@ export function EpaperEditModal({
   appearance,
   onClose,
   onAppearanceSaved,
+  onDelete,
+  deleting,
 }: {
   epaper: Epaper;
   appearance: EpaperAppearance;
   onClose: () => void;
   onAppearanceSaved: (next: EpaperAppearance) => void;
+  onDelete: () => void;
+  deleting: boolean;
 }) {
   const { token, upsertEpaper, notify } = useSession();
   const [name, setName] = useState(epaper.name);
@@ -52,6 +57,15 @@ export function EpaperEditModal({
       onClose={onClose}
       actions={
         <>
+          <Button
+            variant="danger"
+            disabled={busy || deleting}
+            onClick={onDelete}
+            className="mr-auto"
+          >
+            <Trash2 size={16} />
+            Delete
+          </Button>
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
@@ -65,9 +79,9 @@ export function EpaperEditModal({
         </>
       }
     >
-      <div className="flex flex-col gap-m">
-        <label className="flex flex-col gap-xs">
-          <span className="text-s text-fg-2">Name</span>
+      <div className="flex flex-col gap-ui-m">
+        <label className="flex flex-col gap-ui-xs">
+          <span className="text-ui-s text-ui-secondary">Name</span>
           <Input
             autoFocus
             value={name}

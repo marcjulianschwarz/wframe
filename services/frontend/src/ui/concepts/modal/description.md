@@ -1,4 +1,4 @@
-<!-- @ui-source: concepts/modal@0.5.3 -->
+<!-- @ui-source: concepts/modal@0.5.4 -->
 <!-- Managed copy. Edits here are local to this app. -->
 <!-- Improvements belong back in the ui repo's concepts/modal — port -->
 <!-- them there and bump the version. Do not treat this as throwaway code. -->
@@ -36,6 +36,7 @@ The combination of scroll lock + backdrop dim + focus move. Closing on both Esca
 
 ## Changelog
 
+- **0.5.4** — Backdrop scrim now uses the `--color-overlay` token (bg-ui-overlay) instead of a hardcoded `bg-black/40`; deepens in dark mode.
 - **0.5.3** — Backdrop no longer fades in (it paints opaque immediately); only the panel animates. Stops the white flash when one modal is swapped for another in the same commit.
 - **0.5.2** — Block wheel/touch scroll over the backdrop margin so the background can't scroll at all.
 - **0.5.1** — Contain scroll (`overscroll-contain`) so the background never scrolls behind the modal.

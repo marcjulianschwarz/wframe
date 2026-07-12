@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, Play, Plus, Square, Trash2 } from "lucide-react";
 import { Button } from "@/ui/concepts/button/component";
+import { Card } from "@/ui/concepts/card/component";
 import { Tabs, TabList, Tab } from "@/ui/concepts/tabs/component";
 import { Modal } from "@/ui/concepts/modal/component";
 import { CreateCustomForm } from "@/features/dashboard/CreateCustomForm";
@@ -110,11 +111,11 @@ export function CollectionPage() {
   }
 
   return (
-    <section className="flex flex-col gap-m">
-      <div className="flex items-start justify-between gap-m flex-wrap">
+    <section className="flex flex-col gap-ui-m">
+      <div className="flex items-start justify-between gap-ui-m flex-wrap">
         <div>
           <h2>Dashboards</h2>
-          <p className="text-ui-secondary text-s mt-xs">
+          <p className="text-ui-secondary text-ui-s mt-ui-xs">
             Hit play to send a dashboard to your epaper. Click a card to rename
             or delete it.
           </p>
@@ -122,7 +123,7 @@ export function CollectionPage() {
       </div>
 
       {error && (
-        <div className="p-m rounded-n border border-ui-danger-border bg-ui-danger-bg text-ui-danger text-s">
+        <div className="p-ui-m rounded-ui-n border border-ui-danger-border bg-ui-danger-bg text-ui-danger text-ui-s">
           {error}
         </div>
       )}
@@ -138,13 +139,13 @@ export function CollectionPage() {
       </Tabs>
 
       {shown.length === 0 ? (
-        <div className="p-l rounded-n border border-dashed border-ui-border text-ui-secondary text-s text-center">
+        <div className="p-ui-l rounded-ui-n border border-dashed border-ui-border text-ui-secondary text-ui-s text-center">
           {items.length === 0
             ? "No dashboards yet. Add one from the store or create a custom one."
             : "No dashboards match this filter."}
         </div>
       ) : (
-        <div className="flex flex-col gap-s">
+        <div className="flex flex-col gap-ui-s">
           {shown.map((d) => {
             const live = showingOn(d);
             const deployed = live.length > 0;
@@ -153,8 +154,10 @@ export function CollectionPage() {
             // dashboard is already live it acts as a stop. Surface that.
             const willStop = epapers.length === 1 && deployed;
             return (
-              <div
+              <Card
                 key={d.id}
+                variant="outlined"
+                interactive
                 role="button"
                 tabIndex={0}
                 aria-label={`Edit "${d.name}"`}
@@ -165,20 +168,18 @@ export function CollectionPage() {
                     setEditing(d);
                   }
                 }}
-                className={`p-m rounded-n border transition-all duration-fast ease-out flex items-center gap-m text-left cursor-pointer outline-none focus-visible:border-ui-border-focus ${
-                  deployed
-                    ? "bg-ui-accent-soft border-ui-accent"
-                    : "bg-ui-surface-raised border-ui-border hover:border-ui-border-strong"
+                className={`flex items-center gap-ui-m text-left ${
+                  deployed ? "bg-ui-accent-soft border-ui-accent" : ""
                 }`}
               >
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-s">
-                    <span className="font-semibold text-ui-primary truncate">
+                  <div className="flex items-center gap-ui-s">
+                    <span className="font-ui-semibold text-ui-primary truncate">
                       {d.name}
                     </span>
                     {deployed && (
                       <span
-                        className="text-s text-ui-accent font-semibold shrink-0"
+                        className="text-ui-s text-ui-accent font-ui-semibold shrink-0"
                         title={live.map((e) => e.name).join(", ")}
                       >
                         ● Live on{" "}
@@ -188,10 +189,10 @@ export function CollectionPage() {
                       </span>
                     )}
                   </div>
-                  <div className="text-s text-ui-secondary truncate">
+                  <div className="text-ui-s text-ui-secondary truncate">
                     {d.description || (d.custom_url ?? d.type)}
                   </div>
-                  <div className="text-s font-mono text-ui-secondary mt-xs">
+                  <div className="text-ui-s font-ui-mono text-ui-secondary mt-ui-xs">
                     {d.source} · {d.slug}
                   </div>
                 </div>
@@ -214,7 +215,7 @@ export function CollectionPage() {
                     void onPlay(d);
                   }}
                   disabled={busy}
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-s transition-all duration-fast active:brightness-95 disabled:opacity-40 disabled:pointer-events-none ${
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-ui-s transition-all duration-ui-fast active:brightness-95 disabled:opacity-40 disabled:pointer-events-none ${
                     willStop
                       ? "bg-ui-danger-solid text-ui-danger-on hover:brightness-110"
                       : "bg-ui-accent text-ui-on-accent hover:bg-ui-accent-strong"
@@ -228,7 +229,7 @@ export function CollectionPage() {
                     <Play size={18} fill="currentColor" />
                   )}
                 </button>
-              </div>
+              </Card>
             );
           })}
         </div>
@@ -310,7 +311,7 @@ export function CollectionPage() {
           }
         >
           <p className="text-ui-secondary">
-            <span className="text-ui-primary font-semibold">
+            <span className="text-ui-primary font-ui-semibold">
               {deleting.name}
             </span>{" "}
             will be permanently removed. This can't be undone.

@@ -1,0 +1,216 @@
+/* @ui-source: concepts/tokens@0.4.0 */
+/* Managed copy. Edits here are local to this app. */
+/* Improvements belong back in the ui repo's concepts/tokens — port */
+/* them there and bump the version. Do not treat this as throwaway code. */
+/*
+    "Forest" — same sharp / technical personality as the ayu theme, but with a
+    green brand ramp instead of orange. VARIABLES ONLY (no @tailwind / reset).
+
+    Scoped to [data-theme="forest"] on <html> so it deterministically beats the
+    base :root tokens regardless of stylesheet load order.
+*/
+
+:root[data-theme="forest"] {
+    color-scheme: light dark;
+
+    /* Tier 1: primitive color scales. Green as the brand ramp. */
+    --brand-100: #dcf5e3;
+    --brand-300: #86e0a3;
+    --brand-500: #22c55e; /* brand green */
+    --brand-700: #15803d;
+    --brand-900: #0c4a26;
+
+    --red-100: #ffe3e3;
+    --red-300: #ff9a9a;
+    --red-500: #f26d78;
+    --red-700: #c23b46;
+    --red-900: #6e1f26;
+
+    --green-100: #dcf5e3;
+    --green-300: #86e0a3;
+    --green-500: #22c55e;
+    --green-700: #15803d;
+    --green-900: #0c4a26;
+
+    --blue-100: #dcefff;
+    --blue-300: #8fc7ff;
+    --blue-500: #59c2ff;
+    --blue-700: #2b8fd6;
+    --blue-900: #154a70;
+
+    --yellow-100: #fff4d6;
+    --yellow-300: #ffdd8a;
+    --yellow-500: #ffcc66;
+    --yellow-700: #cc9a33;
+    --yellow-900: #6e5115;
+
+    --orange-100: #fff1e0;
+    --orange-300: #ffcb8a;
+    --orange-500: #ff8f40;
+    --orange-700: #e06a1f;
+    --orange-900: #8a3d0e;
+
+    /* Neutral ramp — cool slate ink (matches the ayu technical feel). */
+    --gray-50: rgb(250, 250, 250);
+    --gray-100: rgb(242, 243, 245);
+    --gray-200: rgb(230, 232, 235);
+    --gray-300: rgb(214, 217, 222);
+    --gray-400: rgb(178, 183, 191);
+    --gray-500: rgb(140, 146, 156);
+    --gray-600: rgb(94, 100, 112);
+    --gray-900: rgb(30, 34, 42);
+    --white: rgb(255, 255, 255);
+    --black: rgb(0, 0, 0);
+
+    --pure-white: rgb(255, 255, 255);
+    --pure-black: rgb(0, 0, 0);
+
+    /* Tier 2: semantic tokens. */
+    --surface-base: var(--gray-50);
+    --surface-raised: var(--white);
+    --surface-sunken: var(--gray-100);
+    --surface-hover: var(--gray-200);
+    --surface-active: var(--gray-400);
+    --surface-disabled: var(--gray-100);
+
+    --color-text-primary: var(--gray-900);
+    --color-text-secondary: var(--gray-600);
+    --color-text-muted: var(--gray-500);
+    --color-text-inverse: var(--white);
+    --color-text-link: var(--color-accent);
+
+    --color-accent: var(--brand-500);
+    --color-accent-strong: var(--brand-700);
+    --color-accent-soft: color-mix(in srgb, var(--brand-500) 14%, transparent);
+    --color-text-on-accent: var(--pure-white); /* white reads well on green */
+
+    --color-danger: var(--red-700);
+    --color-danger-bg: var(--red-100);
+    --color-danger-border: var(--red-300);
+    --color-danger-solid: var(--red-500);
+    --color-danger-on: var(--pure-white);
+
+    --color-success: var(--green-700);
+    --color-success-bg: var(--green-100);
+    --color-success-border: var(--green-300);
+    --color-success-solid: var(--green-500);
+    --color-success-on: var(--pure-white);
+
+    --color-warning: var(--yellow-700);
+    --color-warning-bg: var(--yellow-100);
+    --color-warning-border: var(--yellow-300);
+    --color-warning-solid: var(--yellow-500);
+    --color-warning-on: var(--pure-black);
+
+    --color-info: var(--blue-700);
+    --color-info-bg: var(--blue-100);
+    --color-info-border: var(--blue-300);
+    --color-info-solid: var(--blue-500);
+    --color-info-on: var(--pure-black);
+
+    /* Borders — harder/more present than the soft theme. */
+    --color-border-subtle: var(--gray-200);
+    --color-border: var(--gray-300);
+    --color-border-strong: var(--gray-500);
+    --color-border-focus: var(--color-accent);
+
+    /* Type — clean grotesk for the technical feel. */
+    --font-sans:
+        "Inter", "Söhne", -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono:
+        ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+        "Liberation Mono", monospace;
+
+    --font-size-s: 0.8rem;
+    --font-size-m: 1rem;
+    --font-size-l: 1.2rem;
+    --font-size-xl: 2rem;
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    --leading-tight: 1.15;
+    --leading-snug: 1.35;
+    --leading-normal: 1.55;
+
+    /* Sharper tracking — tight display, slightly open uppercase. */
+    --tracking-tight: -0.01em;
+    --tracking-normal: 0em;
+    --tracking-wide: 0.04em;
+
+    --space-xs: 0.2rem;
+    --space-s: 0.5rem;
+    --space-n: 0.8rem;
+    --space-m: 1rem;
+    --space-l: 2rem;
+    --space-xl: 4rem;
+
+    /* Squared corners — the biggest tell of the "technical" look. */
+    --border-radius-s: 0;
+    --border-radius-n: 0;
+
+    /* Heavier borders reinforce the crisp, drawn-with-a-ruler feel. */
+    --border-width: 2px;
+    --border-width-thick: 3px;
+
+    /* Hard, flat shadows — a single crisp offset instead of soft blur. */
+    --shadow-normal: 0 0 0 1px rgba(30, 34, 42, 0.08);
+    --shadow-high:
+        2px 2px 0 0 rgba(30, 34, 42, 0.12), 0 0 0 1px rgba(30, 34, 42, 0.1);
+
+    /* Snappier motion. */
+    --duration-fast: 80ms;
+    --duration-base: 120ms;
+    --ease-out: cubic-bezier(0.2, 0.9, 0.3, 1);
+
+    --duration-spin: 0.8s;
+    --duration-spin-fast: 0.6s;
+    --duration-spin-faster: 0.4s;
+
+    --focus-ring: inset 0 0 0 2px var(--color-accent);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root[data-theme="forest"] {
+        color-scheme: dark;
+
+        /* Ayu Mirage-style dark ink. */
+        --gray-50: rgb(31, 36, 48);
+        --gray-100: rgb(38, 44, 58);
+        --gray-200: rgb(50, 57, 74);
+        --gray-300: rgb(60, 68, 88);
+        --gray-400: rgb(86, 95, 118);
+        --gray-500: rgb(112, 122, 148);
+        --gray-600: rgb(150, 159, 182);
+        --gray-900: rgb(203, 204, 198);
+        --white: rgb(36, 41, 54);
+
+        --color-accent: var(--brand-300);
+        --color-accent-strong: var(--brand-500);
+        --color-accent-soft: color-mix(in srgb, var(--brand-300) 20%, transparent);
+        --color-text-on-accent: var(--pure-black);
+
+        --color-danger: var(--red-300);
+        --color-danger-bg: var(--red-900);
+        --color-danger-border: var(--red-700);
+
+        --color-success: var(--green-300);
+        --color-success-bg: var(--green-900);
+        --color-success-border: var(--green-700);
+
+        --color-warning: var(--yellow-300);
+        --color-warning-bg: var(--yellow-900);
+        --color-warning-border: var(--yellow-700);
+
+        --color-info: var(--blue-300);
+        --color-info-bg: var(--blue-900);
+        --color-info-border: var(--blue-700);
+
+        --shadow-normal: 0 0 0 1px rgba(0, 0, 0, 0.5);
+        --shadow-high:
+            2px 2px 0 0 rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.5);
+    }
+}

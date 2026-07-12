@@ -3,7 +3,9 @@ import { Plus } from "lucide-react";
 import { Button } from "@/ui/concepts/button/component";
 import { Input } from "@/components/Input";
 import { Modal } from "@/ui/concepts/modal/component";
-import { EpaperCard } from "@/features/epaper/EpaperCard";
+// Temporarily using EpaperCardNew (Card-component-based) for comparison.
+// Original EpaperCard kept at ./EpaperCard for side-by-side review.
+import { EpaperCardNew as EpaperCard } from "@/features/epaper/EpaperCardNew";
 import { AppearancePicker } from "@/features/epaper/AppearancePicker";
 import { setAppearance, type EpaperAppearance } from "@/features/epaper/appearance";
 import { api } from "@/lib/api";
@@ -44,11 +46,11 @@ export function SettingsPage() {
   }
 
   return (
-    <section className="flex flex-col gap-m">
-      <div className="flex items-start justify-between gap-m flex-wrap">
+    <section className="flex flex-col gap-ui-m">
+      <div className="flex items-start justify-between gap-ui-m flex-wrap">
         <div>
           <h2>Epapers</h2>
-          <p className="text-fg-2 text-s mt-xs">
+          <p className="text-ui-secondary text-ui-s mt-ui-xs">
             Each device has its own URL, refresh control, and display geometry.
             Use the buttons on a card to configure it.
           </p>
@@ -60,9 +62,9 @@ export function SettingsPage() {
       </div>
 
       {epapers.length === 0 ? (
-        <p className="text-fg-2 text-s">Loading…</p>
+        <p className="text-ui-secondary text-ui-s">Loading…</p>
       ) : (
-        <div className="grid gap-s sm:grid-cols-2">
+        <div className="grid gap-ui-s sm:grid-cols-2">
           {epapers.map((e) => (
             <EpaperCard key={e.id} epaper={e} />
           ))}
@@ -86,9 +88,9 @@ export function SettingsPage() {
             </>
           }
         >
-          <div className="flex flex-col gap-m">
-            <label className="flex flex-col gap-xs">
-              <span className="text-s text-fg-2">Name</span>
+          <div className="flex flex-col gap-ui-m">
+            <label className="flex flex-col gap-ui-xs">
+              <span className="text-ui-s text-ui-secondary">Name</span>
               <Input
                 autoFocus
                 placeholder="Living room"
@@ -102,7 +104,7 @@ export function SettingsPage() {
               />
             </label>
             <AppearancePicker value={appearance} onChange={setLocalAppearance} />
-            <p className="text-s text-fg-2">
+            <p className="text-ui-s text-ui-secondary">
               A new device URL is generated automatically. You can paste it into
               your ESPHome config or download the ready-made package.
             </p>

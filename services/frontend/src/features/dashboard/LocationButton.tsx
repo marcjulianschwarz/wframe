@@ -47,26 +47,26 @@ export function LocationButton({ token }: { token: string }) {
   }
 
   return (
-    <div className="bg-bg-1-light border border-border-1 rounded-n p-m flex flex-col gap-s">
-      <div className="text-s text-fg-2 uppercase tracking-wider font-semibold">
+    <div className="bg-ui-surface-raised border border-ui-border rounded-ui-n p-ui-m flex flex-col gap-ui-s">
+      <div className="text-ui-s text-ui-secondary uppercase tracking-wider font-ui-semibold">
         Weather location
       </div>
-      <div className="flex items-center gap-s flex-wrap">
+      <div className="flex items-center gap-ui-s flex-wrap">
         <Button onClick={requestLocation} disabled={busy}>
           {busy ? "Locating…" : loc ? "Update location" : "Allow location"}
         </Button>
         {loc && (
-          <span className="text-s text-fg-2 font-mono">
+          <span className="text-ui-s text-ui-secondary font-ui-mono">
             {loc.latitude.toFixed(3)}, {loc.longitude.toFixed(3)}
           </span>
         )}
       </div>
       {!loc && !error && (
-        <div className="text-s text-fg-2">
+        <div className="text-ui-s text-ui-secondary">
           The weather dashboard needs your location to fetch a local forecast.
         </div>
       )}
-      {error && <div className="text-s text-fg-danger">{error}</div>}
+      {error && <div className="text-ui-s text-ui-danger">{error}</div>}
     </div>
   );
 }

@@ -15,9 +15,9 @@ export function RefreshControl({
   disabled?: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-s">
-      <div className="flex items-center gap-s">
-        <span className="text-s text-fg-2 flex-1">
+    <div className="flex flex-col gap-ui-s">
+      <div className="flex items-center gap-ui-s">
+        <span className="text-ui-s text-ui-secondary flex-1">
           {value.paused
             ? "Stopped — the display is frozen on its last image."
             : "Running — the display redraws on the interval below."}
@@ -30,8 +30,8 @@ export function RefreshControl({
           {value.paused ? "Resume" : "Stop"}
         </Button>
       </div>
-      <label className="flex flex-col gap-xs">
-        <span className="text-s text-fg-2">Refresh interval (seconds)</span>
+      <label className="flex flex-col gap-ui-xs">
+        <span className="text-ui-s text-ui-secondary">Refresh interval (seconds)</span>
         <Input
           type="number"
           inputMode="numeric"
@@ -44,7 +44,7 @@ export function RefreshControl({
           disabled={disabled}
         />
       </label>
-      <span className="text-s text-fg-2">
+      <span className="text-ui-s text-ui-secondary">
         0 redraws on every device poll (~5s). Higher values save panel wear.
       </span>
     </div>

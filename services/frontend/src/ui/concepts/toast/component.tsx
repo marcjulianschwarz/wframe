@@ -68,7 +68,7 @@ export function ToastViewport({
 
   return (
     <div
-      className={`pointer-events-none fixed z-50 flex flex-col gap-s p-m ${vertical} ${horizontal} ${
+      className={`pointer-events-none fixed z-50 flex flex-col gap-ui-s p-ui-m ${vertical} ${horizontal} ${
         isBottom ? "flex-col-reverse" : "flex-col"
       }`}
     >
@@ -110,7 +110,7 @@ export function Toast({
 
   function close() {
     setShown(false);
-    // Wait out the exit transition (matches duration-base) before unmounting.
+    // Wait out the exit transition (matches duration-ui-base) before unmounting.
     setTimeout(onDismiss, 180);
   }
 
@@ -119,7 +119,7 @@ export function Toast({
       role="status"
       aria-live="polite"
       onClick={close}
-      className={`pointer-events-auto flex w-72 max-w-[80vw] cursor-pointer items-center gap-s rounded-n border border-ui-border bg-ui-surface-raised px-m py-n text-m text-ui-primary shadow-high transition-all duration-base ease-out ${
+      className={`pointer-events-auto flex w-72 max-w-[80vw] cursor-pointer items-center gap-ui-s rounded-ui-n border border-ui-border bg-ui-surface-raised px-ui-m py-ui-n text-ui-m text-ui-primary shadow-ui-high transition-all duration-ui-base ease-ui-out ${
         shown
           ? "translate-x-0 translate-y-0 scale-100 opacity-100"
           : `${hiddenOffset(position)} scale-95 opacity-0`
@@ -129,7 +129,7 @@ export function Toast({
         className={`h-5 w-5 shrink-0 ${STATUS_COLOR[toast.status]}`}
         aria-hidden
       />
-      <span className="leading-snug">{toast.message}</span>
+      <span className="leading-ui-snug">{toast.message}</span>
     </div>
   );
 }

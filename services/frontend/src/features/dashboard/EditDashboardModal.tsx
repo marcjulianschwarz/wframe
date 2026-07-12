@@ -7,6 +7,7 @@ import { GithubForm } from "@/features/dashboard/GithubForm";
 import { HomeAssistantForm } from "@/features/dashboard/HomeAssistantForm";
 import { ImageForm } from "@/features/dashboard/ImageForm";
 import { LocationButton } from "@/features/dashboard/LocationButton";
+import { VagForm } from "@/features/dashboard/VagForm";
 import { api, type Dashboard } from "@/lib/api";
 import { useSession } from "@/lib/session";
 
@@ -84,12 +85,12 @@ export function EditDashboardModal({ dashboard, onSaved, onClose, onDelete }: Pr
         </>
       }
     >
-      <div className="flex flex-col gap-s">
-        <label className="text-s text-fg-2 flex flex-col gap-xs">
+      <div className="flex flex-col gap-ui-s">
+        <label className="text-ui-s text-ui-secondary flex flex-col gap-ui-xs">
           Name
           <Input value={name} onChange={(e) => setName(e.target.value)} disabled={busy} autoFocus />
         </label>
-        <label className="text-s text-fg-2 flex flex-col gap-xs">
+        <label className="text-ui-s text-ui-secondary flex flex-col gap-ui-xs">
           Description <span className="opacity-60">(optional)</span>
           <Input
             value={description}
@@ -97,23 +98,23 @@ export function EditDashboardModal({ dashboard, onSaved, onClose, onDelete }: Pr
             disabled={busy}
           />
         </label>
-        <label className="text-s text-fg-2 flex flex-col gap-xs">
+        <label className="text-ui-s text-ui-secondary flex flex-col gap-ui-xs">
           Slug
           <Input
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
             disabled={busy}
-            className="font-mono"
+            className="font-ui-mono"
           />
         </label>
         {isCustom && (
-          <label className="text-s text-fg-2 flex flex-col gap-xs">
+          <label className="text-ui-s text-ui-secondary flex flex-col gap-ui-xs">
             URL
             <Input type="url" value={url} onChange={(e) => setUrl(e.target.value)} disabled={busy} />
           </label>
         )}
         {isCustom && url.length > 0 && !urlValid && (
-          <div className="text-s text-fg-danger">
+          <div className="text-ui-s text-ui-danger">
             Enter a full URL starting with http:// or https://
           </div>
         )}
@@ -123,7 +124,8 @@ export function EditDashboardModal({ dashboard, onSaved, onClose, onDelete }: Pr
         {(dashboard.type === "homeassistant" ||
           dashboard.type === "homeassistant_temp") && <HomeAssistantForm token={token} />}
         {dashboard.type === "image" && <ImageForm token={token} />}
-        {error && <div className="text-s text-fg-danger">{error}</div>}
+        {dashboard.type === "vag" && <VagForm token={token} />}
+        {error && <div className="text-ui-s text-ui-danger">{error}</div>}
       </div>
     </Modal>
   );
