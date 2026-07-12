@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Frame, Pencil, RefreshCw, Settings2, Trash2 } from "lucide-react";
+import { Frame, Pencil, RefreshCw, Settings2 } from "lucide-react";
 import { Button } from "@/ui/concepts/button/component";
 import { Modal } from "@/ui/concepts/modal/component";
 import {
@@ -104,6 +104,7 @@ export function EpaperCard({ epaper }: { epaper: Epaper }) {
       await api.deleteEpaper(token, epaper.id);
       setEpapers(epapers.filter((e) => e.id !== epaper.id));
       notify("success", `Deleted "${epaper.name}"`);
+      setModal(null);
     } catch (e) {
       notify("error", e instanceof Error ? e.message : String(e));
     } finally {
@@ -142,17 +143,6 @@ export function EpaperCard({ epaper }: { epaper: Epaper }) {
             )}
           </div>
         </div>
-
-        <button
-          type="button"
-          aria-label={`Delete "${epaper.name}"`}
-          title="Delete device"
-          onClick={() => void remove()}
-          disabled={busy}
-          className="flex h-8 w-8 items-center justify-center rounded-s text-fg-2 hover:bg-bg-danger hover:text-fg-danger transition-colors duration-fast disabled:opacity-40 disabled:pointer-events-none shrink-0"
-        >
-          <Trash2 size={16} />
-        </button>
       </div>
 
       <div className="flex flex-wrap gap-s">
@@ -176,6 +166,8 @@ export function EpaperCard({ epaper }: { epaper: Epaper }) {
           appearance={appearance}
           onClose={() => setModal(null)}
           onAppearanceSaved={setAppearance}
+          onDelete={() => void remove()}
+          deleting={busy}
         />
       )}
 
