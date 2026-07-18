@@ -11,10 +11,23 @@ export type DashboardType =
   | "homeassistant_temp"
   | "image"
   | "vag"
-  | "font_test";
+  | "font_test"
+  | "welcome"
+  | "calendar";
 
 export type ImageAlgorithm = "floyd_steinberg" | "ordered" | "threshold" | "atkinson";
 export type ImageFit = "contain" | "cover" | "stretch";
+
+/** The user's Welcome dashboard text: a heading and the smaller lines below it. */
+export interface WelcomeConfig {
+  heading: string;
+  body: string;
+}
+
+/** The user's Calendar dashboard feed: a published iCalendar (ICS/webcal) URL. */
+export interface CalendarConfig {
+  ics_url: string;
+}
 
 /** The user's current Image dashboard config (never the bytes). */
 export interface ImageConfig {
@@ -311,6 +324,24 @@ export const api = {
   /** Search VGN stops by name (proxied through the backend). */
   searchVagStops: (token: string, name: string) =>
     req<VagStop[]>(`/vag/stops?name=${encodeURIComponent(name)}`, token),
+
+  // --- welcome --- //
+  /** Fetch the Welcome text (404 if never set — the renderer uses defaults). */
+  getWelcome: (token: string) => req<WelcomeConfig>("/welcome", token),
+  setWelcome: (token: string, heading: string, body: string) =>
+    req<WelcomeConfig>("/welcome", token, {
+      method: "PUT",
+      body: JSON.stringify({ heading, body }),
+    }),
+
+  // --- calendar --- //
+  /** Fetch the Calendar feed URL (404 if never set). */
+  getCalendar: (token: string) => req<CalendarConfig>("/calendar", token),
+  setCalendar: (token: string, ics_url: string) =>
+    req<CalendarConfig>("/calendar", token, {
+      method: "PUT",
+      body: JSON.stringify({ ics_url }),
+    }),
 
   // --- home assistant --- //
   /** Fetch the existing HA connection (404 if not minted yet). */

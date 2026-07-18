@@ -26,8 +26,10 @@
   --shadow-sketch: 3px 3px 0 rgba(42, 37, 30, 0.9);
   --shadow-soft: 0 6px 18px rgba(42, 37, 30, 0.12);
 
-  --font-hand: "Comic Sans MS", "Chalkboard SE", "Comic Neue", "Segoe Print", system-ui, sans-serif;
   --font-body: ui-rounded, "Nunito", "Segoe UI Rounded", system-ui, sans-serif;
+  /* Formerly a hand-drawn comic font; now just the body font so `font-hand`
+     usages render normally. */
+  --font-hand: var(--font-body);
 }
 
 /* App-wide zoom: scales the whole UI like browser zoom (layout, px, rem, images

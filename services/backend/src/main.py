@@ -12,11 +12,13 @@ from app.auth.auth_router import router as auth_router
 from app.database.status import DBPoolStatus, get_db_pool_status_value
 from app.database.test_connection import test_db_connection
 from app.features.bitmap.bitmap_router import router as bitmap_router
+from app.features.bitmap.calendar_router import router as calendar_router
 from app.features.bitmap.github_router import router as github_router
 from app.features.bitmap.ha_router import router as ha_router
 from app.features.bitmap.image_router import router as image_router
 from app.features.bitmap.location_router import router as location_router
 from app.features.bitmap.vag_router import router as vag_router
+from app.features.bitmap.welcome_router import router as welcome_router
 from app.features.dashboard.dashboard_router import router as dashboard_router
 from app.features.epaper.epaper_router import router as epaper_router
 from app.features.user.user_router import router as user_router
@@ -86,6 +88,8 @@ app.include_router(github_router)
 app.include_router(ha_router)
 app.include_router(image_router)
 app.include_router(vag_router)
+app.include_router(welcome_router)
+app.include_router(calendar_router)
 
 
 @app.get("/")

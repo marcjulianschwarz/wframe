@@ -87,6 +87,48 @@ class ImageUpload(Base, TimestampMixin):
     contrast: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
 
 
+class WelcomeConfig(Base, TimestampMixin):
+    """Per-user text for the Welcome dashboard.
+
+    A big heading plus a few smaller lines beneath it, all free text so the user
+    can write in their own language. The renderer lays these out centered on the
+    panel; no network or AI, just the stored strings.
+    """
+
+    __tablename__: str = "welcome_configs"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    heading: Mapped[str] = mapped_column(String(120), nullable=False)
+    # The smaller lines under the heading, one string per line (newline-joined in
+    # storage). Optional — the heading alone is a valid Welcome.
+    body: Mapped[str] = mapped_column(String(1000), nullable=False, default="")
+
+
+class CalendarConfig(Base, TimestampMixin):
+    """Per-user calendar feed for the Calendar dashboard.
+
+    Holds a single published iCalendar (ICS) URL — typically a webcal/https link
+    from iCloud, Google Calendar, etc. The renderer fetches it on demand and
+    lists the upcoming events; the events themselves are never stored, only the
+    feed URL. Treat the URL as a secret: for published iCloud calendars it is a
+    capability URL that grants read access to anyone who has it, so it must never
+    be logged.
+    """
+
+    __tablename__: str = "calendar_configs"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    ics_url: Mapped[str] = mapped_column(String(2048), nullable=False)
+
+
 class HaConnection(Base, TimestampMixin):
     """Per-user Home Assistant ingest channel.
 

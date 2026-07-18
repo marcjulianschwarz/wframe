@@ -3,6 +3,7 @@ import { Check, Copy, Download, Trash2 } from "lucide-react";
 import { Modal } from "@/components/Modal";
 import { api, type Epaper } from "@/lib/api";
 import { useSession } from "@/lib/session";
+import { useEpaperActions, useEpapers, useRemoveEpaper } from "@/lib/queries";
 import { downloadWframePackage } from "./esphomeBundle";
 
 /** Settings for an epaper: rename it, copy its device URL / download the ESPHome
@@ -16,7 +17,10 @@ export function EpaperEditModal({
   onClose: () => void;
   onDeleted: () => void;
 }) {
-  const { token, epapers, upsertEpaper, notify } = useSession();
+  const { token, notify } = useSession();
+  const epapers = useEpapers();
+  const { rename } = useEpaperActions();
+  const removeEpaper = useRemoveEpaper();
   const [name, setName] = useState(epaper.name);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -28,7 +32,7 @@ export function EpaperEditModal({
     setBusy(true);
     try {
       if (trimmed !== epaper.name) {
-        upsertEpaper(await api.renameEpaper(token, epaper.id, trimmed));
+        await rename.mutateAsync({ id: epaper.id, name: trimmed });
       }
       notify("success", "Saved device");
       onClose();
@@ -51,6 +55,7 @@ export function EpaperEditModal({
     setBusy(true);
     try {
       await api.deleteEpaper(token, epaper.id);
+      removeEpaper(epaper.id);
       notify("success", `Deleted "${epaper.name}"`);
       onDeleted();
     } catch (e) {

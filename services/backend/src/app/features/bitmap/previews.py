@@ -296,6 +296,33 @@ def _vag_preview() -> str:
     return render_html("Plärrer (Nürnberg)", Departures.model_validate(data), now)
 
 
+def _welcome_preview() -> str:
+    from app.features.bitmap.renderers.welcome import _DEFAULT_BODY, render_html
+
+    return render_html("Welcome", _DEFAULT_BODY)
+
+
+def _calendar_preview() -> str:
+    from app.features.bitmap.renderers.calendar import Event, render_html
+
+    now = datetime.now()
+    base = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    def at(days: int, hour: int, minute: int = 0) -> datetime:
+        return base + timedelta(days=days, hours=hour, minutes=minute)
+
+    events = [
+        Event("Team standup", at(0, 9, 30), all_day=False, location="Zoom"),
+        Event("Dentist", at(0, 14), all_day=False, location="Hauptstr. 12"),
+        Event("Anna's birthday", at(1, 0), all_day=True),
+        Event("Design review", at(2, 11), all_day=False, location="Room 4B"),
+        Event("Flight to Berlin", at(3, 7, 15), all_day=False, location="NUE T1"),
+        Event("Dinner with Sam", at(4, 19, 30), all_day=False),
+        Event("Sprint planning", at(6, 10), all_day=False),
+    ]
+    return render_html(events, now)
+
+
 def _homeassistant_temp_preview() -> str:
     import math
     import time
@@ -324,6 +351,8 @@ _PREVIEWS = {
     DashboardType.LIFE: _life_preview,
     DashboardType.CUSTOM_URL: _custom_url_preview,
     DashboardType.VAG: _vag_preview,
+    DashboardType.WELCOME: _welcome_preview,
+    DashboardType.CALENDAR: _calendar_preview,
 }
 
 

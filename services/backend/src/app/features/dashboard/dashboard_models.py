@@ -20,6 +20,8 @@ class DashboardType(str, enum.Enum):
     IMAGE = "image"
     VAG = "vag"
     FONT_TEST = "font_test"
+    WELCOME = "welcome"
+    CALENDAR = "calendar"
 
 
 class DashboardSource(str, enum.Enum):
@@ -80,6 +82,14 @@ DASHBOARD_CATALOG: dict[DashboardType, dict[str, str]] = {
     DashboardType.FONT_TEST: {
         "title": "Font Test",
         "description": "A specimen sheet comparing fonts at several sizes on your epaper.",
+    },
+    DashboardType.WELCOME: {
+        "title": "Welcome",
+        "description": "A big welcome heading with your own text below — in any language.",
+    },
+    DashboardType.CALENDAR: {
+        "title": "Calendar",
+        "description": "Your upcoming events from a published iCalendar (ICS/webcal) link.",
     },
 }
 

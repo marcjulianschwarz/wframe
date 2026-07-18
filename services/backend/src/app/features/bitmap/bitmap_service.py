@@ -38,6 +38,8 @@ class BitmapService:
             DashboardType.GITHUB,
             DashboardType.IMAGE,
             DashboardType.VAG,
+            DashboardType.WELCOME,
+            DashboardType.CALENDAR,
         ):
             return renderer_factory(dashboard_type, session=self.session, user_id=dashboard.user_id)
         return renderer_factory(dashboard_type)

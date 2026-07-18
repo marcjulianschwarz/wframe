@@ -13,6 +13,7 @@ from app.features.bitmap.renderers.base import (
     composite_onto_screen,
     html_to_bmp,
 )
+from app.features.bitmap.renderers.calendar import CalendarRenderer
 from app.features.bitmap.renderers.custom_url import CustomUrlRenderer
 from app.features.bitmap.renderers.dashboard import DashboardRendererImpl
 from app.features.bitmap.renderers.font_test import FontTestRenderer
@@ -23,6 +24,7 @@ from app.features.bitmap.renderers.image import ImageRenderer
 from app.features.bitmap.renderers.life import LifeRenderer
 from app.features.bitmap.renderers.vag import VagRenderer
 from app.features.bitmap.renderers.weather import WeatherRenderer
+from app.features.bitmap.renderers.welcome import WelcomeRenderer
 from app.features.dashboard.dashboard_models import DashboardType
 
 __all__ = [
@@ -45,6 +47,7 @@ __all__ = [
     "ImageRenderer",
     "VagRenderer",
     "FontTestRenderer",
+    "CalendarRenderer",
     "renderer_factory",
 ]
 
@@ -78,6 +81,8 @@ def renderer_factory(
         DashboardType.GITHUB,
         DashboardType.IMAGE,
         DashboardType.VAG,
+        DashboardType.WELCOME,
+        DashboardType.CALENDAR,
     ):
         if session is None or user_id is None:
             raise ValueError(f"{dashboard_type} requires session and user_id")
@@ -89,5 +94,9 @@ def renderer_factory(
             return ImageRenderer(session=session, user_id=user_id)
         if dashboard_type == DashboardType.VAG:
             return VagRenderer(session=session, user_id=user_id)
+        if dashboard_type == DashboardType.WELCOME:
+            return WelcomeRenderer(session=session, user_id=user_id)
+        if dashboard_type == DashboardType.CALENDAR:
+            return CalendarRenderer(session=session, user_id=user_id)
         return GithubRenderer(session=session, user_id=user_id)
     assert_never(dashboard_type)
