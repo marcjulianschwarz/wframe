@@ -1,4 +1,5 @@
 import { type EpaperRefresh } from "@/lib/api";
+import { useT } from "@/lib/i18n";
 
 /** Controlled form for stop/resume and the redraw interval. The parent owns the
  * value and saves it. Stopping freezes the display on its last image; the
@@ -12,24 +13,23 @@ export function RefreshControl({
   onChange: (next: EpaperRefresh) => void;
   disabled?: boolean;
 }) {
+  const t = useT();
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
         <span className="text-sm text-soft flex-1">
-          {value.paused
-            ? "Stopped — the display is frozen on its last image."
-            : "Running — the display redraws on the interval below."}
+          {value.paused ? t("refresh.stopped") : t("refresh.running")}
         </span>
         <button
           className={value.paused ? "btn btn-accent" : "btn"}
           disabled={disabled}
           onClick={() => onChange({ ...value, paused: !value.paused })}
         >
-          {value.paused ? "Resume" : "Stop"}
+          {value.paused ? t("refresh.resume") : t("refresh.stop")}
         </button>
       </div>
       <label className="flex flex-col gap-1">
-        <span className="field-label">Refresh interval (seconds)</span>
+        <span className="field-label">{t("refresh.interval")}</span>
         <input
           className="field"
           type="number"
@@ -44,7 +44,7 @@ export function RefreshControl({
         />
       </label>
       <span className="text-xs text-soft">
-        0 redraws on every device poll (~5s). Higher values save panel wear.
+        {t("refresh.intervalHint")}
       </span>
     </div>
   );

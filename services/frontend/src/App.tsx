@@ -5,6 +5,9 @@ import { Login } from "@/features/auth/Login";
 import { Home } from "@/features/canvas/Home";
 import { DevicePage } from "@/features/canvas/DevicePage";
 import { DashboardsPage } from "@/features/canvas/DashboardsPage";
+import { SettingsPage } from "@/features/settings/SettingsPage";
+import { StorePage } from "@/features/store/StorePage";
+import { ViewPage } from "@/features/dashboard/ViewPage";
 import { api } from "@/lib/api";
 import { auth } from "@/lib/auth";
 import { qk } from "@/lib/queries";
@@ -23,6 +26,9 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/dashboards" element={<DashboardsPage />} />
+            <Route path="/store" element={<StorePage />} />
+            <Route path="/views/:id" element={<ViewPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="/device/:id" element={<DevicePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

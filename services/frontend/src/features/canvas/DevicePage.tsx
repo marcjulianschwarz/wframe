@@ -13,6 +13,7 @@ import {
   type Rotation,
 } from "@/lib/api";
 import { useSession } from "@/lib/session";
+import { useT } from "@/lib/i18n";
 import { useDashboards, useEpaperActions, useEpapers } from "@/lib/queries";
 import { frameSize, usePreview } from "./usePreview";
 
@@ -37,6 +38,7 @@ export function DevicePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { notify } = useSession();
+  const t = useT();
   const dash = useDashboards();
   const epapers = useEpapers();
   const actions = useEpaperActions();
@@ -56,9 +58,9 @@ export function DevicePage() {
   if (!epaper) {
     return (
       <div className="min-h-screen px-6 py-6 flex flex-col items-center gap-4">
-        <p className="text-soft text-lg">This device doesn’t exist.</p>
+        <p className="text-soft text-lg">{t("device.notExist")}</p>
         <Link to="/" className="btn">
-          <ArrowLeft size={16} /> Back to devices
+          <ArrowLeft size={16} /> {t("device.backToDevices")}
         </Link>
       </div>
     );
@@ -77,7 +79,7 @@ export function DevicePage() {
         id: epaper!.id,
         dashboardId: cleared ? null : dashboard.id,
       });
-      notify("success", cleared ? "Cleared dashboard" : `Showing "${dashboard.name}"`);
+      notify("success", cleared ? t("device.clearedView") : t("device.showingName", { name: dashboard.name }));
     } catch (e) {
       fail(e);
     }
@@ -97,7 +99,7 @@ export function DevicePage() {
     actions.refreshNow.mutate(epaper!.id, {
       onSuccess: () => {
         bump();
-        notify("success", "Refreshing…");
+        notify("success", t("device.refreshing"));
       },
       onError: fail,
     });
@@ -118,7 +120,7 @@ export function DevicePage() {
       { id: epaper!.id, geometry },
       {
         onSuccess: () => {
-          notify("success", "Saved geometry");
+          notify("success", t("device.savedGeometry"));
           setModal(null);
         },
         onError: fail,
@@ -132,7 +134,7 @@ export function DevicePage() {
       { id: epaper!.id, refresh },
       {
         onSuccess: () => {
-          notify("success", "Saved refresh settings");
+          notify("success", t("device.savedRefresh"));
           setModal(null);
         },
         onError: fail,
@@ -144,22 +146,22 @@ export function DevicePage() {
     <div className="min-h-screen px-6 py-6 max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
-        <Link to="/" className="icon-btn" aria-label="Back to devices">
+        <Link to="/" className="icon-btn" aria-label={t("device.backToDevices")}>
           <ArrowLeft size={18} />
         </Link>
         <h1 className="text-2xl font-bold m-0 truncate">{epaper.name}</h1>
         <span
           className={`live-dot ${live ? "" : "live-dot-off"}`}
           role="status"
-          aria-label={live ? "Live" : epaper.paused ? "Paused" : "No dashboard"}
+          aria-label={live ? t("device.live") : epaper.paused ? t("device.paused") : t("device.noView")}
         />
         <div className="ml-auto flex items-center gap-2">
           <button className="btn" disabled={busy || epaper.paused || !hasDashboard} onClick={() => void refreshNow()}>
-            <RefreshCw size={16} /> Refresh
+            <RefreshCw size={16} /> {t("device.refresh")}
           </button>
           <button className="btn" disabled={busy || !hasDashboard} onClick={() => void togglePause()}>
             {epaper.paused ? <Play size={16} /> : <Pause size={16} />}
-            {epaper.paused ? "Resume" : "Pause"}
+            {epaper.paused ? t("device.resume") : t("device.pause")}
           </button>
         </div>
       </div>
@@ -174,27 +176,27 @@ export function DevicePage() {
             {hasDashboard && src ? (
               <img
                 src={src}
-                alt={`${epaper.name} preview`}
+                alt={t("device.preview", { name: epaper.name })}
                 className="w-full h-full object-contain"
                 style={{ imageRendering: "pixelated" }}
                 draggable={false}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-faint text-sm text-center px-2 bg-[var(--paper-2)]">
-                {hasDashboard ? "Rendering…" : "No dashboard yet"}
+                {hasDashboard ? t("device.rendering") : t("device.noViewYet")}
               </div>
             )}
           </div>
 
           {/* Settings */}
           <div className="flex items-center gap-1.5">
-            <button className="icon-btn" title="Settings" onClick={() => setModal("settings")}>
+            <button className="icon-btn" title={t("nav.settings")} onClick={() => setModal("settings")}>
               <Settings size={16} />
             </button>
-            <button className="icon-btn" title="Refresh rate" onClick={openRefresh}>
+            <button className="icon-btn" title={t("device.refreshRate")} onClick={openRefresh}>
               <Timer size={16} />
             </button>
-            <button className="icon-btn" title="Geometry" onClick={openGeometry}>
+            <button className="icon-btn" title={t("device.geometry")} onClick={openGeometry}>
               <Ruler size={16} />
             </button>
           </div>
@@ -202,14 +204,14 @@ export function DevicePage() {
 
         {/* What it's showing */}
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-bold mb-1">What it’s showing</h2>
+          <h2 className="text-lg font-bold mb-1">{t("device.whatShowing")}</h2>
           <p className="text-soft text-sm mb-4">
-            Pick a dashboard to display. A rotating playlist is coming here.
+            {t("device.pickView")}
           </p>
 
           {dash.dashboards.length === 0 ? (
             <p className="text-soft text-sm">
-              No dashboards yet — add one from the Store on the home screen.
+              {t("device.noViewsAdd")}
             </p>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -238,13 +240,13 @@ export function DevicePage() {
 
       {modal === "geometry" && geometry && (
         <Modal
-          title={`Geometry — ${epaper.name}`}
+          title={t("device.geometryTitle", { name: epaper.name })}
           onClose={() => setModal(null)}
           actions={
             <>
-              <button className="btn btn-ghost" onClick={() => setModal(null)}>Cancel</button>
+              <button className="btn btn-ghost" onClick={() => setModal(null)}>{t("action.cancel")}</button>
               <button className="btn btn-accent" disabled={busy} onClick={() => void saveGeometry()}>
-                {busy ? "Saving…" : "Save"}
+                {busy ? t("action.saving") : t("action.save")}
               </button>
             </>
           }
@@ -255,13 +257,13 @@ export function DevicePage() {
 
       {modal === "refresh" && refresh && (
         <Modal
-          title={`Refresh — ${epaper.name}`}
+          title={t("device.refreshTitle", { name: epaper.name })}
           onClose={() => setModal(null)}
           actions={
             <>
-              <button className="btn btn-ghost" onClick={() => setModal(null)}>Cancel</button>
+              <button className="btn btn-ghost" onClick={() => setModal(null)}>{t("action.cancel")}</button>
               <button className="btn btn-accent" disabled={busy} onClick={() => void saveRefresh()}>
-                {busy ? "Saving…" : "Save"}
+                {busy ? t("action.saving") : t("action.save")}
               </button>
             </>
           }
@@ -286,11 +288,12 @@ function DashboardTile({
   current: boolean;
   onPick: () => void;
 }) {
+  const t = useT();
   return (
     <button
       className="sketch relative flex flex-col gap-1 p-3 text-left h-full"
       style={current ? { boxShadow: "3px 3px 0 var(--accent)" } : undefined}
-      title={current ? "Showing — tap to clear" : `Show "${dashboard.name}"`}
+      title={current ? t("device.showingTapClear") : t("device.showView", { name: dashboard.name })}
       onClick={onPick}
     >
       {current && (
@@ -303,11 +306,11 @@ function DashboardTile({
       )}
       <span className="font-bold break-words pr-5">{dashboard.name}</span>
       <span className="text-xs text-soft break-words">
-        {dashboard.description || dashboard.custom_url || dashboard.type || "custom"}
+        {dashboard.description || dashboard.custom_url || dashboard.type || t("views.custom.fallback")}
       </span>
       {current && (
         <span className="text-xs font-bold mt-1" style={{ color: "var(--accent)" }}>
-          Live now
+          {t("device.liveNow")}
         </span>
       )}
     </button>

@@ -23,7 +23,6 @@ export function DashboardConfig({ type }: { type: DashboardType | null }) {
     return <HomeAssistantConfig />;
   if (type === "image") return <ImageConfig />;
   if (type === "vag") return <VagConfig />;
-  if (type === "welcome") return <WelcomeConfig />;
   if (type === "calendar") return <CalendarConfig />;
   return null;
 }
@@ -43,91 +42,6 @@ function ErrorLine({ children }: { children: React.ReactNode }) {
     <div className="text-sm" style={{ color: "var(--danger)" }}>
       {children}
     </div>
-  );
-}
-
-function WelcomeConfig() {
-  const { token } = useSession();
-  const [heading, setHeading] = useState("");
-  const [body, setBody] = useState("");
-  const [saved, setSaved] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    api
-      .getWelcome(token)
-      .then((w) => {
-        setHeading(w.heading);
-        setBody(w.body);
-      })
-      .catch(() => {
-        // No config yet — leave the fields blank; the renderer uses defaults.
-      });
-  }, [token]);
-
-  const valid = heading.trim().length > 0;
-
-  async function save() {
-    if (!valid) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const w = await api.setWelcome(token, heading.trim(), body);
-      setHeading(w.heading);
-      setBody(w.body);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 1500);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <ConfigBox title="Welcome text">
-      <label className="flex flex-col gap-1">
-        <span className="field-label">Heading</span>
-        <input
-          className="field"
-          type="text"
-          placeholder="Welcome"
-          value={heading}
-          maxLength={120}
-          onChange={(e) => setHeading(e.target.value)}
-          disabled={busy}
-        />
-      </label>
-      <label className="flex flex-col gap-1">
-        <span className="field-label">Text below (one line each)</span>
-        <textarea
-          className="field"
-          rows={7}
-          placeholder={
-            "Hello & good to see you\n\n" +
-            "Make yourself at home.\n" +
-            "Enjoy your stay!\n\n" +
-            "See you soon"
-          }
-          value={body}
-          maxLength={1000}
-          onChange={(e) => setBody(e.target.value)}
-          disabled={busy}
-        />
-      </label>
-      <button className="btn self-start" onClick={() => void save()} disabled={!valid || busy}>
-        {busy ? "Saving…" : saved ? "Saved" : "Save"}
-      </button>
-      {!valid && heading.length > 0 && <ErrorLine>The heading can't be empty.</ErrorLine>}
-      {error && <ErrorLine>{error}</ErrorLine>}
-      <div className="text-sm text-soft">
-        Written in any language — shown exactly as you type it. Tip: a single short
-        line before a <span className="font-bold">blank line</span> becomes a small
-        kicker above the heading, and a single line after a trailing blank line
-        becomes a footer at the bottom.
-      </div>
-    </ConfigBox>
   );
 }
 

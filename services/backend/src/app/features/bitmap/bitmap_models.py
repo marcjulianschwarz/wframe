@@ -102,10 +102,14 @@ class WelcomeConfig(Base, TimestampMixin):
         ForeignKey("users.id", ondelete="CASCADE"),
         primary_key=True,
     )
+    # A small kicker line above the heading. Optional.
+    eyebrow: Mapped[str] = mapped_column(String(120), nullable=False, default="")
     heading: Mapped[str] = mapped_column(String(120), nullable=False)
     # The smaller lines under the heading, one string per line (newline-joined in
     # storage). Optional — the heading alone is a valid Welcome.
     body: Mapped[str] = mapped_column(String(1000), nullable=False, default="")
+    # A small footer line at the bottom. Optional.
+    footer: Mapped[str] = mapped_column(String(120), nullable=False, default="")
 
 
 class CalendarConfig(Base, TimestampMixin):

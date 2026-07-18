@@ -1,0 +1,219 @@
+/** English UI strings — the source of truth for all translation keys.
+ *
+ * Keys are dotted by area (`nav.*`, `device.*`, `store.*`, …). `{name}`-style
+ * placeholders are filled by the translator's `vars` argument. The `de` locale
+ * must provide the same keys (enforced by its `Record<TKey, string>` type).
+ *
+ * "View" is the user-facing word for what used to be called a "dashboard" (a
+ * thing you place on an epaper); the backend enum/routes still say dashboard. */
+export const en = {
+  // --- generic / actions --- //
+  "action.save": "Save",
+  "action.saving": "Saving…",
+  "action.saved": "Saved",
+  "action.cancel": "Cancel",
+  "action.delete": "Delete",
+  "action.copy": "Copy",
+  "action.copied": "Copied",
+  "action.create": "Create",
+  "action.creating": "Creating…",
+
+  // --- nav / home --- //
+  "nav.device": "Device",
+  "nav.views": "Views",
+  "nav.manageViews": "Manage your views",
+  "nav.addEpaper": "Add an epaper",
+  "nav.settings": "Settings",
+  "nav.signOut": "Sign out",
+  "nav.signOutAs": "Sign out ({email})",
+  "home.noDevices": "No devices yet — add one to get started.",
+  "home.addedEpaper": "Added an epaper",
+  "home.newEpaper": "New epaper",
+
+  // --- device card / page --- //
+  "device.open": "Open {name}",
+  "device.preview": "{name} preview",
+  "device.rendering": "Rendering…",
+  "device.noViewYet": "No view yet",
+  "device.refreshNow": "Refresh now",
+  "device.refresh": "Refresh",
+  "device.resume": "Resume",
+  "device.pause": "Pause",
+  "device.stop": "Stop",
+  "device.stopClear": "Stop — clear the view from this device",
+  "device.refreshRate": "Refresh rate",
+  "device.geometry": "Geometry",
+  "device.notExist": "This device doesn’t exist.",
+  "device.backToDevices": "Back to devices",
+  "device.live": "Live",
+  "device.paused": "Paused",
+  "device.noView": "No view",
+  "device.statusNoView": "No view",
+  "device.statusLiveContinuous": "Live · updates continuously",
+  "device.statusLiveNext": "Live · next update {countdown}",
+  "device.whatShowing": "What it’s showing",
+  "device.pickView": "Pick a view to display. A rotating playlist is coming here.",
+  "device.noViewsAdd": "No views yet — add one from the Store on the home screen.",
+  "device.showingTapClear": "Showing — tap to clear",
+  "device.showView": "Show “{name}”",
+  "device.liveNow": "Live now",
+  "device.refreshing": "Refreshing…",
+  "device.refreshingName": "Refreshing {name}…",
+  "device.resumedName": "Resumed {name}",
+  "device.pausedName": "Paused {name}",
+  "device.stoppedName": "Stopped {name}",
+  "device.clearedView": "Cleared view",
+  "device.showingName": "Showing “{name}”",
+  "device.savedGeometry": "Saved geometry",
+  "device.savedRefresh": "Saved refresh settings",
+  "device.savedDevice": "Saved device",
+  "device.geometryTitle": "Geometry — {name}",
+  "device.refreshTitle": "Refresh — {name}",
+  "device.settingsTitle": "Settings — {name}",
+
+  // --- epaper settings modal --- //
+  "epaper.name": "Name",
+  "epaper.deviceUrl": "Device URL",
+  "epaper.urlHint":
+    "Paste into your ESPHome config as streaming_bmp.url, or download the ready-made package. Keep it private — it's a secret URL.",
+  "epaper.downloadPackage": "Download wframe.yaml",
+  "epaper.deleteConfirm": "Delete “{name}”? This can't be undone.",
+  "epaper.deletedName": "Deleted “{name}”",
+  "epaper.needOne": "You need at least one epaper",
+  "epaper.deleteThis": "Delete this epaper",
+
+  // --- views library --- //
+  "views.title": "Views",
+  "views.backToDevices": "Back to devices",
+  "views.store": "Store",
+  "views.custom": "Custom",
+  "views.createCustom": "Create a custom view",
+  "views.createTitle": "Create a view",
+  "views.createdName": "Created “{name}”",
+  "views.editTitle": "Edit view",
+  "views.noneYet": "No views yet — add one from the Store or make your own.",
+  "views.stoppedName": "Stopped “{name}”",
+  "views.savedName": "Saved “{name}”",
+  "views.deletedName": "Deleted “{name}”",
+  "views.deleteConfirm": "Delete “{name}”? This can't be undone.",
+  "views.stopEverywhere": "Stop everywhere",
+  "views.stopShort": "Stop",
+  "views.devicesCount": "{count} devices",
+  "views.custom.fallback": "custom",
+
+  // --- create custom view form --- //
+  "custom.name": "Name",
+  "custom.namePlaceholder": "My view",
+  "custom.description": "Description (optional)",
+  "custom.descriptionPlaceholder": "What this shows",
+  "custom.slug": "Slug",
+  "custom.slugPlaceholder": "my-view",
+  "custom.url": "URL",
+  "custom.urlPlaceholder": "https://example.com/my-page",
+  "custom.urlInvalid": "Enter a full URL starting with http:// or https://",
+  "custom.createView": "Create view",
+
+  // --- store --- //
+  "store.title": "Store",
+  "store.tapToAdd": "Tap to add a built-in view to your desk.",
+  "store.addedName": "Added “{name}”",
+  "store.previewOf": "{type} preview",
+  "store.searchPlaceholder": "Search views…",
+  "store.searchLabel": "Search the store",
+  "store.noResults": "No views match “{query}”.",
+  "store.backToDevices": "Back to devices",
+  "store.add": "Add",
+  "store.adding": "Adding…",
+
+  // Store catalog, keyed by dashboard type. Kept in sync with the backend
+  // DASHBOARD_CATALOG; translated client-side so the store reads in-language.
+  "store.dashboard.title": "Overview",
+  "store.dashboard.description": "Weather, calendar, stats, and a daily quote.",
+  "store.hn_zeitung.title": "HN Zeitung",
+  "store.hn_zeitung.description": "Newspaper-style top Hacker News stories with AI summaries.",
+  "store.life.title": "Life",
+  "store.life.description": "Conway's Game of Life — evolving cellular automaton.",
+  "store.custom_url.title": "Custom URL",
+  "store.custom_url.description": "Render any web page you point it at, as a bitmap.",
+  "store.weather.title": "Weather",
+  "store.weather.description": "Live 24h temperature chart and stats for your location.",
+  "store.github.title": "GitHub",
+  "store.github.description": "A public profile card: stars, top repos, and languages.",
+  "store.homeassistant.title": "Home Assistant — Lights",
+  "store.homeassistant.description":
+    "Your lights and their brightness, pushed live from Home Assistant.",
+  "store.homeassistant_temp.title": "Home Assistant — Temperature",
+  "store.homeassistant_temp.description": "A 24h temperature chart from a Home Assistant sensor.",
+  "store.image.title": "Image",
+  "store.image.description": "Show an uploaded image fullscreen, dithered for epaper.",
+  "store.vag.title": "VAG Abfahrten",
+  "store.vag.description": "Live departures for your VGN stop (Nürnberg), with real-time delays.",
+  "store.font_test.title": "Font Test",
+  "store.font_test.description": "A specimen sheet comparing fonts at several sizes on your epaper.",
+  "store.welcome.title": "Welcome",
+  "store.welcome.description": "A big welcome heading with your own text below — in any language.",
+  "store.calendar.title": "Calendar",
+  "store.calendar.description":
+    "Your upcoming events from a published iCalendar (ICS/webcal) link.",
+
+  // --- geometry form --- //
+  "geometry.intro":
+    "Screen size in pixels, and the size and position of the rendered view drawn on it.",
+  "geometry.screenWidth": "Screen width",
+  "geometry.screenHeight": "Screen height",
+  "geometry.imageWidth": "Image width",
+  "geometry.imageHeight": "Image height",
+  "geometry.imageX": "Image X",
+  "geometry.imageY": "Image Y",
+  "geometry.rotation": "Rotation",
+  "geometry.overflowRight": "The image extends past the right edge of the screen.",
+  "geometry.overflowBottom": "The image extends past the bottom edge of the screen.",
+
+  // --- refresh control --- //
+  "refresh.stopped": "Stopped — the display is frozen on its last image.",
+  "refresh.running": "Running — the display redraws on the interval below.",
+  "refresh.stop": "Stop",
+  "refresh.resume": "Resume",
+  "refresh.interval": "Refresh interval (seconds)",
+  "refresh.intervalHint": "0 redraws on every device poll (~5s). Higher values save panel wear.",
+
+  // --- settings page --- //
+  "settings.title": "Settings",
+  "settings.language": "Language",
+  "settings.languageHint": "Choose the language for the wframe web app.",
+  "settings.backToDevices": "Back to devices",
+
+  // --- auth --- //
+  "auth.createAccount": "Create your account",
+  "auth.signIn": "Sign in",
+  "auth.emailPlaceholder": "you@example.com",
+  "auth.passwordPlaceholder": "password",
+  "auth.minChars": "At least 8 characters.",
+  "auth.haveAccount": "Have an account? Sign in",
+  "auth.createAccountLink": "Create an account",
+  "auth.register": "Register",
+
+  // --- view edit modal fields --- //
+  "viewEdit.name": "Name",
+  "viewEdit.url": "URL",
+
+  // --- view detail page --- //
+  "viewPage.notExist": "This view doesn’t exist.",
+  "viewPage.backToViews": "Back to views",
+  "viewPage.preview": "Preview",
+  "viewPage.configuration": "Configuration",
+  "viewPage.unsavedHint": "Changes apply only when you press Save.",
+  "viewPage.saved": "Saved “{name}”",
+  "viewPage.deleted": "Deleted “{name}”",
+  "viewPage.deleteConfirm": "Delete “{name}”? This can't be undone.",
+  "viewPage.welcomeEyebrow": "Kicker (small line above heading)",
+  "viewPage.welcomeHeading": "Heading",
+  "viewPage.welcomeBody": "Body (one line each)",
+  "viewPage.welcomeFooter": "Footer (small line at the bottom)",
+  "viewPage.calendarUrl": "Calendar feed (ICS link)",
+  "viewPage.calendarHint":
+    "Paste a published iCalendar link (iCloud, Google Calendar). Keep it private — anyone with the link can read the calendar.",
+  "viewPage.githubUsername": "GitHub username",
+  "viewPage.vagStop": "VGN stop",
+  "viewPage.configImmediateNote": "These settings save immediately.",
+} as const;

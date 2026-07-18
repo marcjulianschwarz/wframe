@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { LayoutGrid, LogOut, Plus } from "lucide-react";
+import { LayoutGrid, LogOut, Plus, Settings } from "lucide-react";
 import { type Epaper } from "@/lib/api";
 import { useSession } from "@/lib/session";
+import { useT } from "@/lib/i18n";
 import { useEpaperActions, useEpapers, useUser } from "@/lib/queries";
 import { DeviceCard } from "./DeviceCard";
 
@@ -10,14 +11,15 @@ import { DeviceCard } from "./DeviceCard";
  * the dashboard library lives on its own /dashboards page. */
 export function Home() {
   const { logout, notify } = useSession();
+  const t = useT();
   const user = useUser();
   const epapers = useEpapers();
   const { create } = useEpaperActions();
 
   async function addEpaper() {
     try {
-      await create.mutateAsync("New epaper");
-      notify("success", "Added an epaper");
+      await create.mutateAsync(t("home.newEpaper"));
+      notify("success", t("home.addedEpaper"));
     } catch (e) {
       notify("error", e instanceof Error ? e.message : String(e));
     }
@@ -29,17 +31,20 @@ export function Home() {
       <div className="flex items-center justify-between mb-8">
         <span className="text-2xl font-bold">wframe</span>
         <div className="flex items-center gap-2">
-          <button className="btn" disabled={create.isPending} onClick={() => void addEpaper()} title="Add an epaper">
+          <button className="btn" disabled={create.isPending} onClick={() => void addEpaper()} title={t("nav.addEpaper")}>
             <Plus size={16} />
-            Device
+            {t("nav.device")}
           </button>
-          <Link className="btn" to="/dashboards" title="Manage your dashboards">
+          <Link className="btn" to="/dashboards" title={t("nav.manageViews")}>
             <LayoutGrid size={16} />
-            Dashboards
+            {t("nav.views")}
+          </Link>
+          <Link className="icon-btn" to="/settings" title={t("nav.settings")} aria-label={t("nav.settings")}>
+            <Settings size={16} />
           </Link>
           <button
             className="icon-btn"
-            title={user?.email ? `Sign out (${user.email})` : "Sign out"}
+            title={user?.email ? t("nav.signOutAs", { email: user.email }) : t("nav.signOut")}
             onClick={logout}
           >
             <LogOut size={16} />
@@ -53,7 +58,7 @@ export function Home() {
           <DeviceCard key={e.id} epaper={e} />
         ))}
         {epapers.length === 0 && (
-          <p className="text-soft text-sm text-lg">No devices yet — add one to get started.</p>
+          <p className="text-soft text-sm text-lg">{t("home.noDevices")}</p>
         )}
       </div>
     </div>

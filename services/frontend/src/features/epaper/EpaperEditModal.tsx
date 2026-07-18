@@ -3,6 +3,7 @@ import { Check, Copy, Download, Trash2 } from "lucide-react";
 import { Modal } from "@/components/Modal";
 import { api, type Epaper } from "@/lib/api";
 import { useSession } from "@/lib/session";
+import { useT } from "@/lib/i18n";
 import { useEpaperActions, useEpapers, useRemoveEpaper } from "@/lib/queries";
 import { downloadWframePackage } from "./esphomeBundle";
 
@@ -18,6 +19,7 @@ export function EpaperEditModal({
   onDeleted: () => void;
 }) {
   const { token, notify } = useSession();
+  const t = useT();
   const epapers = useEpapers();
   const { rename } = useEpaperActions();
   const removeEpaper = useRemoveEpaper();
@@ -34,7 +36,7 @@ export function EpaperEditModal({
       if (trimmed !== epaper.name) {
         await rename.mutateAsync({ id: epaper.id, name: trimmed });
       }
-      notify("success", "Saved device");
+      notify("success", t("device.savedDevice"));
       onClose();
     } catch (e) {
       notify("error", e instanceof Error ? e.message : String(e));
@@ -51,12 +53,12 @@ export function EpaperEditModal({
 
   async function remove() {
     if (isLast) return;
-    if (!confirm(`Delete "${epaper.name}"? This can't be undone.`)) return;
+    if (!confirm(t("epaper.deleteConfirm", { name: epaper.name }))) return;
     setBusy(true);
     try {
       await api.deleteEpaper(token, epaper.id);
       removeEpaper(epaper.id);
-      notify("success", `Deleted "${epaper.name}"`);
+      notify("success", t("epaper.deletedName", { name: epaper.name }));
       onDeleted();
     } catch (e) {
       notify("error", e instanceof Error ? e.message : String(e));
@@ -67,35 +69,35 @@ export function EpaperEditModal({
 
   return (
     <Modal
-      title={`Settings — ${epaper.name}`}
+      title={t("device.settingsTitle", { name: epaper.name })}
       onClose={onClose}
       actions={
         <>
           <button
             className="btn btn-danger mr-auto"
             disabled={busy || isLast}
-            title={isLast ? "You need at least one epaper" : "Delete this epaper"}
+            title={isLast ? t("epaper.needOne") : t("epaper.deleteThis")}
             onClick={() => void remove()}
           >
             <Trash2 size={16} />
-            Delete
+            {t("action.delete")}
           </button>
           <button className="btn btn-ghost" onClick={onClose}>
-            Cancel
+            {t("action.cancel")}
           </button>
           <button
             className="btn btn-accent"
             disabled={busy || !name.trim()}
             onClick={() => void save()}
           >
-            {busy ? "Saving…" : "Save"}
+            {busy ? t("action.saving") : t("action.save")}
           </button>
         </>
       }
     >
       <div className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">
-          <span className="field-label">Name</span>
+          <span className="field-label">{t("epaper.name")}</span>
           <input
             className="field"
             autoFocus
@@ -110,7 +112,7 @@ export function EpaperEditModal({
         </label>
 
         <div className="flex flex-col gap-2">
-          <span className="field-label">Device URL</span>
+          <span className="field-label">{t("epaper.deviceUrl")}</span>
           <div className="flex gap-2 items-center">
             <code
               className="flex-1 text-xs px-3 py-2 rounded-xl border-2 break-all bg-[var(--paper-2)]"
@@ -120,19 +122,18 @@ export function EpaperEditModal({
             </code>
             <button className="btn" onClick={() => void copyUrl()}>
               {copied ? <Check size={16} /> : <Copy size={16} />}
-              {copied ? "Copied" : "Copy"}
+              {copied ? t("action.copied") : t("action.copy")}
             </button>
           </div>
           <span className="text-sm text-soft">
-            Paste into your ESPHome config as <code>streaming_bmp.url</code>, or
-            download the ready-made package. Keep it private — it's a secret URL.
+            {t("epaper.urlHint")}
           </span>
           <button
             className="btn self-start"
             onClick={() => downloadWframePackage(epaper)}
           >
             <Download size={16} />
-            Download wframe.yaml
+            {t("epaper.downloadPackage")}
           </button>
         </div>
       </div>

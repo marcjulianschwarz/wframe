@@ -297,9 +297,17 @@ def _vag_preview() -> str:
 
 
 def _welcome_preview() -> str:
-    from app.features.bitmap.renderers.welcome import _DEFAULT_BODY, render_html
+    from app.features.bitmap.renderers.welcome import (
+        _DEFAULT_BODY,
+        _DEFAULT_EYEBROW,
+        _DEFAULT_FOOTER,
+        _DEFAULT_HEADING,
+        render_html,
+    )
 
-    return render_html("Welcome", _DEFAULT_BODY)
+    return render_html(
+        _DEFAULT_HEADING, _DEFAULT_BODY, eyebrow=_DEFAULT_EYEBROW, footer=_DEFAULT_FOOTER
+    )
 
 
 def _calendar_preview() -> str:
@@ -361,3 +369,40 @@ def preview_html(dashboard_type: DashboardType) -> str:
     if fn is None:
         raise ValueError(f"No preview for {dashboard_type}")
     return fn()
+
+
+def draft_preview_html(
+    dashboard_type: DashboardType,
+    *,
+    welcome_eyebrow: str | None = None,
+    welcome_heading: str | None = None,
+    welcome_body: str | None = None,
+    welcome_footer: str | None = None,
+) -> str:
+    """Live HTML preview reflecting *unsaved* edits for the view editor.
+
+    For the text-configurable Welcome type we render the renderer's own
+    ``render_html`` with the draft values, so the preview updates as the user
+    types — before anything is saved. For every other type there is no free-text
+    config to preview synchronously, so we fall back to the canned example.
+    """
+    if dashboard_type == DashboardType.WELCOME:
+        from app.features.bitmap.renderers.welcome import _DEFAULT_HEADING, render_html
+
+        # Any provided draft field is used verbatim (including empty strings);
+        # only a missing field falls back — and the only sensible fallback is a
+        # non-empty heading so the poster isn't blank.
+        return render_html(
+            welcome_heading or _DEFAULT_HEADING,
+            welcome_body or "",
+            eyebrow=welcome_eyebrow or "",
+            footer=welcome_footer or "",
+        )
+
+    if dashboard_type == DashboardType.CALENDAR:
+        # Calendar text config is just the feed URL, which we can't fetch
+        # synchronously here; the draft preview shows the sample agenda so the
+        # user sees the layout. The saved render will use their real feed.
+        return _calendar_preview()
+
+    return preview_html(dashboard_type)

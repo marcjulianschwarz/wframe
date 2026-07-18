@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, Pause, Play, RefreshCw, Square } from "lucide-react";
 import { type Epaper } from "@/lib/api";
 import { useSession } from "@/lib/session";
+import { useT } from "@/lib/i18n";
 import { useEpaperActions } from "@/lib/queries";
 import { Tooltip } from "@/components/Tooltip";
 import { frameSize, usePreview } from "./usePreview";
@@ -14,6 +15,7 @@ import { formatCountdown, secondsUntilNextRefresh } from "./refresh";
  * so home stays glanceable. */
 export function DeviceCard({ epaper }: { epaper: Epaper }) {
   const { notify } = useSession();
+  const t = useT();
   const navigate = useNavigate();
   const { src, bump } = usePreview(epaper);
   const { setDashboard, setRefresh, refreshNow } = useEpaperActions();
@@ -33,12 +35,12 @@ export function DeviceCard({ epaper }: { epaper: Epaper }) {
   const secsUntil = showsCountdown ? secondsUntilNextRefresh(epaper.refresh_interval) : null;
 
   const statusLabel = !hasDashboard
-    ? "No dashboard"
+    ? t("device.statusNoView")
     : epaper.paused
-      ? "Paused"
+      ? t("device.paused")
       : epaper.refresh_interval <= 0
-        ? "Live · updates continuously"
-        : `Live · next update ${formatCountdown(secsUntil ?? 0)}`;
+        ? t("device.statusLiveContinuous")
+        : t("device.statusLiveNext", { countdown: formatCountdown(secsUntil ?? 0) });
 
   const open = () => navigate(`/device/${epaper.id}`);
 
@@ -65,20 +67,20 @@ export function DeviceCard({ epaper }: { epaper: Epaper }) {
       <button
         className="sketch relative overflow-hidden bg-black epaper-screen p-0"
         style={{ width: w, height: h, borderRadius: 16 }}
-        aria-label={`Open ${epaper.name}`}
+        aria-label={t("device.open", { name: epaper.name })}
         onClick={open}
       >
         {hasDashboard && src ? (
           <img
             src={src}
-            alt={`${epaper.name} preview`}
+            alt={t("device.preview", { name: epaper.name })}
             className="w-full h-full object-contain pointer-events-none"
             style={{ imageRendering: "pixelated" }}
             draggable={false}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-faint text-sm text-center px-2 bg-[var(--paper-2)]">
-            {hasDashboard ? "Rendering…" : "No dashboard yet"}
+            {hasDashboard ? t("device.rendering") : t("device.noViewYet")}
           </div>
         )}
       </button>
@@ -87,13 +89,13 @@ export function DeviceCard({ epaper }: { epaper: Epaper }) {
       <div className="flex items-center gap-1.5">
         <button
           className="icon-btn"
-          title="Refresh now"
+          title={t("device.refreshNow")}
           disabled={refreshNow.isPending || epaper.paused || !hasDashboard}
           onClick={() =>
             refreshNow.mutate(epaper.id, {
               onSuccess: () => {
                 bump();
-                notify("success", `Refreshing ${epaper.name}…`);
+                notify("success", t("device.refreshingName", { name: epaper.name }));
               },
               onError: fail,
             })
@@ -104,7 +106,7 @@ export function DeviceCard({ epaper }: { epaper: Epaper }) {
 
         <button
           className="icon-btn"
-          title={epaper.paused ? "Resume" : "Pause"}
+          title={epaper.paused ? t("device.resume") : t("device.pause")}
           disabled={setRefresh.isPending || !hasDashboard}
           onClick={() =>
             setRefresh.mutate(
@@ -114,7 +116,12 @@ export function DeviceCard({ epaper }: { epaper: Epaper }) {
               },
               {
                 onSuccess: () =>
-                  notify("success", epaper.paused ? `Resumed ${epaper.name}` : `Paused ${epaper.name}`),
+                  notify(
+                    "success",
+                    epaper.paused
+                      ? t("device.resumedName", { name: epaper.name })
+                      : t("device.pausedName", { name: epaper.name }),
+                  ),
                 onError: fail,
               },
             )
@@ -132,12 +139,12 @@ export function DeviceCard({ epaper }: { epaper: Epaper }) {
         {hasDashboard && (
           <button
             className="icon-btn"
-            title="Stop — clear the dashboard from this device"
+            title={t("device.stopClear")}
             disabled={setDashboard.isPending}
             onClick={() =>
               setDashboard.mutate(
                 { id: epaper.id, dashboardId: null },
-                { onSuccess: () => notify("success", `Stopped ${epaper.name}`), onError: fail },
+                { onSuccess: () => notify("success", t("device.stoppedName", { name: epaper.name })), onError: fail },
               )
             }
           >

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { api, type Dashboard } from "@/lib/api";
 import { useSession } from "@/lib/session";
+import { useT } from "@/lib/i18n";
 
 /** Lowercase kebab slug, mirroring the backend's slugify so the auto-filled
  * preview matches what will be saved. */
@@ -19,6 +20,7 @@ interface Props {
  * editable auto-generated slug, and the URL to render. */
 export function CreateCustomForm({ onCreated }: Props) {
   const { token } = useSession();
+  const t = useT();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
@@ -57,49 +59,49 @@ export function CreateCustomForm({ onCreated }: Props) {
   return (
     <div className="flex flex-col gap-3">
       <label className="flex flex-col gap-1">
-        <span className="field-label">Name</span>
+        <span className="field-label">{t("custom.name")}</span>
         <input
           className="field"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="My dashboard"
+          placeholder={t("custom.namePlaceholder")}
           disabled={busy}
         />
       </label>
       <label className="flex flex-col gap-1">
-        <span className="field-label">Description (optional)</span>
+        <span className="field-label">{t("custom.description")}</span>
         <input
           className="field"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="What this shows"
+          placeholder={t("custom.descriptionPlaceholder")}
           disabled={busy}
         />
       </label>
       <label className="flex flex-col gap-1">
-        <span className="field-label">Slug</span>
+        <span className="field-label">{t("custom.slug")}</span>
         <input
           className="field"
           value={slug}
           onChange={(e) => setSlugEdited(slugify(e.target.value))}
-          placeholder="my-dashboard"
+          placeholder={t("custom.slugPlaceholder")}
           disabled={busy}
         />
       </label>
       <label className="flex flex-col gap-1">
-        <span className="field-label">URL</span>
+        <span className="field-label">{t("custom.url")}</span>
         <input
           className="field"
           type="url"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://example.com/my-page"
+          placeholder={t("custom.urlPlaceholder")}
           disabled={busy}
         />
       </label>
       {url.length > 0 && !urlValid && (
         <div className="text-sm" style={{ color: "var(--danger)" }}>
-          Enter a full URL starting with http:// or https://
+          {t("custom.urlInvalid")}
         </div>
       )}
       {error && (
@@ -108,7 +110,7 @@ export function CreateCustomForm({ onCreated }: Props) {
         </div>
       )}
       <button className="btn btn-accent self-start" onClick={submit} disabled={!canSubmit}>
-        {busy ? "Creating…" : "Create dashboard"}
+        {busy ? t("action.creating") : t("custom.createView")}
       </button>
     </div>
   );

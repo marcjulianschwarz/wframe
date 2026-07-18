@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { type Dashboard, type Epaper } from "@/lib/api";
+import { useT } from "@/lib/i18n";
 
 /** A dashboard, shown as a little card in the library. Clicking the body edits
  * it. When it's live on one or more boards, it shows where, with a stop button
@@ -18,6 +19,7 @@ export function DashboardCard({
   /** Clear this dashboard from every device showing it. */
   onStop: () => void;
 }) {
+  const t = useT();
   const live = liveOn.length > 0;
   return (
     <div
@@ -34,25 +36,25 @@ export function DashboardCard({
       </span>
 
       <span className="text-xs text-soft break-words">
-        {dashboard.description || dashboard.custom_url || dashboard.type || "custom"}
+        {dashboard.description || dashboard.custom_url || dashboard.type || t("views.custom.fallback")}
       </span>
 
       {live && (
         <div className="flex items-start gap-1.5 mt-1">
           <span className="live-dot shrink-0 mt-0.5" style={{ width: 9, height: 9 }} />
           <span className="text-xs font-bold text-soft break-words flex-1">
-            {liveOn.length === 1 ? liveOn[0].name : `${liveOn.length} devices`}
+            {liveOn.length === 1 ? liveOn[0].name : t("views.devicesCount", { count: liveOn.length })}
           </span>
           <button
             className="chip"
             style={{ padding: "1px 8px", fontSize: 11 }}
-            title="Stop everywhere"
+            title={t("views.stopEverywhere")}
             onClick={(e) => {
               e.stopPropagation();
               onStop();
             }}
           >
-            <X size={12} className="inline -mt-0.5" /> Stop
+            <X size={12} className="inline -mt-0.5" /> {t("views.stopShort")}
           </button>
         </div>
       )}

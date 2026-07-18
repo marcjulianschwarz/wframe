@@ -18,10 +18,14 @@ export type DashboardType =
 export type ImageAlgorithm = "floyd_steinberg" | "ordered" | "threshold" | "atkinson";
 export type ImageFit = "contain" | "cover" | "stretch";
 
-/** The user's Welcome dashboard text: a heading and the smaller lines below it. */
+/** The user's Welcome dashboard text. Each visual role is its own field: an
+ * optional kicker (eyebrow), the heading, the body lines (newline-separated),
+ * and an optional footer. */
 export interface WelcomeConfig {
+  eyebrow: string;
   heading: string;
   body: string;
+  footer: string;
 }
 
 /** The user's Calendar dashboard feed: a published iCalendar (ICS/webcal) URL. */
@@ -274,6 +278,27 @@ export const api = {
   previewUrl: (dashboard_type: DashboardType): string =>
     `${BASE}/bitmaps/${dashboard_type}/preview`,
 
+  /** Live example HTML for a built-in type reflecting *unsaved* draft edits, for
+   * the view editor's preview iframe. Text-configurable types (Welcome) reflect
+   * the passed draft; others show the canned sample. Unauthed, canned-data only. */
+  draftPreviewUrl: (
+    dashboard_type: DashboardType,
+    draft?: {
+      welcome_eyebrow?: string;
+      welcome_heading?: string;
+      welcome_body?: string;
+      welcome_footer?: string;
+    },
+  ): string => {
+    const params = new URLSearchParams();
+    if (draft?.welcome_eyebrow !== undefined) params.set("welcome_eyebrow", draft.welcome_eyebrow);
+    if (draft?.welcome_heading !== undefined) params.set("welcome_heading", draft.welcome_heading);
+    if (draft?.welcome_body !== undefined) params.set("welcome_body", draft.welcome_body);
+    if (draft?.welcome_footer !== undefined) params.set("welcome_footer", draft.welcome_footer);
+    const qs = params.toString();
+    return `${BASE}/bitmaps/${dashboard_type}/draft-preview${qs ? `?${qs}` : ""}`;
+  },
+
   getLocation: (token: string) => req<Location>("/location", token),
   setLocation: (token: string, latitude: number, longitude: number, place?: string) =>
     req<Location>("/location", token, {
@@ -328,10 +353,10 @@ export const api = {
   // --- welcome --- //
   /** Fetch the Welcome text (404 if never set — the renderer uses defaults). */
   getWelcome: (token: string) => req<WelcomeConfig>("/welcome", token),
-  setWelcome: (token: string, heading: string, body: string) =>
+  setWelcome: (token: string, config: WelcomeConfig) =>
     req<WelcomeConfig>("/welcome", token, {
       method: "PUT",
-      body: JSON.stringify({ heading, body }),
+      body: JSON.stringify(config),
     }),
 
   // --- calendar --- //

@@ -9,7 +9,7 @@ from app.auth.auth import AuthDep
 from app.database.session import get_session
 from app.features.bitmap.bitmap_repository import BitmapRepo
 from app.features.bitmap.bitmap_service import BitmapService
-from app.features.bitmap.previews import preview_html
+from app.features.bitmap.previews import draft_preview_html, preview_html
 from app.features.dashboard.dashboard_models import DashboardType
 from app.features.dashboard.dashboard_router import DashboardServiceDep
 
@@ -36,6 +36,31 @@ async def preview(dashboard_type: DashboardType) -> HTMLResponse:
     canned data only — no network, DB, or AI — so it's safe to serve unauthed
     and embed directly."""
     return HTMLResponse(content=preview_html(dashboard_type))
+
+
+@router.get("/{dashboard_type}/draft-preview", response_class=HTMLResponse)
+async def draft_preview(
+    dashboard_type: DashboardType,
+    welcome_eyebrow: str | None = None,
+    welcome_heading: str | None = None,
+    welcome_body: str | None = None,
+    welcome_footer: str | None = None,
+) -> HTMLResponse:
+    """Live example HTML reflecting unsaved edits, for the view editor's preview.
+
+    Like ``/preview`` it uses only the passed draft values and canned data — no
+    network, DB, or AI — so it's safe to serve unauthed and embed in an iframe.
+    Text-configurable types (Welcome) reflect the draft; others show the sample.
+    """
+    return HTMLResponse(
+        content=draft_preview_html(
+            dashboard_type,
+            welcome_eyebrow=welcome_eyebrow,
+            welcome_heading=welcome_heading,
+            welcome_body=welcome_body,
+            welcome_footer=welcome_footer,
+        )
+    )
 
 
 @router.post("/dashboards/{dashboard_id}/render")

@@ -7,10 +7,10 @@ then runs it through the normal supersampled → 1-bit BMP pipeline. Everything 
 plain black/white with strong structure so it reads well on the panel. No
 network, no AI — just the stored strings.
 
-The ``body`` string is free text; its lines are split into three roles by blank
-lines: an optional *eyebrow* (a single short line before a blank line), the main
-paragraph lines, and an optional *footer* (a single line after a trailing blank
-line). Most users just type a few lines and get heading + those lines.
+Each visual role is its own stored field: ``eyebrow`` (kicker), ``heading``,
+``body`` (one line per row, newline-separated), and ``footer``. Empty roles are
+simply omitted — nothing is inferred from position, so a blank kicker never
+promotes a body line.
 """
 
 from __future__ import annotations
@@ -23,59 +23,30 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.features.bitmap.bitmap_models import WelcomeConfig
 from app.features.bitmap.renderers.base import NATIVE_SIZE, SANS_STACK, Size, html_to_bmp
 
-# Shown until the user writes their own, and as the store/preview sample. The
-# blank-line groups become eyebrow / body / footer (see module docstring).
+# Shown until the user writes their own, and as the store/preview sample.
+_DEFAULT_EYEBROW = "Hello & good to see you"
 _DEFAULT_HEADING = "Welcome"
 _DEFAULT_BODY = (
-    "Hello & good to see you\n"
-    "\n"
     "Make yourself at home.\n"
     "The coffee is fresh, the wifi is fast,\n"
-    "and you're always welcome here.\n"
-    "\n"
-    "Enjoy your stay"
+    "and you're always welcome here."
 )
+_DEFAULT_FOOTER = "Enjoy your stay"
 
 
-def _split_roles(body: str) -> tuple[str | None, list[str], str | None]:
-    """Split the body into (eyebrow, lines, footer) by blank-line groups.
-
-    Blank lines separate groups. A single-line leading group becomes the eyebrow;
-    a single-line trailing group becomes the footer; everything in between is the
-    body. With no blank lines, all lines are body (eyebrow/footer are None).
-    """
-    groups: list[list[str]] = []
-    current: list[str] = []
-    for raw in body.splitlines():
-        line = raw.strip()
-        if line:
-            current.append(line)
-        elif current:
-            groups.append(current)
-            current = []
-    if current:
-        groups.append(current)
-
-    if not groups:
-        return None, [], None
-
-    eyebrow: str | None = None
-    footer: str | None = None
-    # A short single-line first/last group reads as a kicker/footer, not body.
-    if len(groups) > 1 and len(groups[0]) == 1:
-        eyebrow = groups.pop(0)[0]
-    if len(groups) > 1 and len(groups[-1]) == 1:
-        footer = groups.pop()[0]
-
-    lines = [ln for group in groups for ln in group]
-    return eyebrow, lines, footer
-
-
-def render_html(heading: str, body: str, *, size: Size = NATIVE_SIZE) -> str:
+def render_html(
+    heading: str,
+    body: str = "",
+    *,
+    eyebrow: str = "",
+    footer: str = "",
+    size: Size = NATIVE_SIZE,
+) -> str:
     """Lay the text out as a framed poster, scaled to the render size.
 
-    All sizes derive from the render dimensions so the composition stays balanced
-    at any geometry, portrait or landscape.
+    ``body`` is newline-separated lines. ``eyebrow`` and ``footer`` are optional
+    single lines; empty ones are omitted. All sizes derive from the render
+    dimensions so the composition stays balanced at any geometry.
     """
     width, height = size
     short_edge = min(width, height)
@@ -88,11 +59,12 @@ def render_html(heading: str, body: str, *, size: Size = NATIVE_SIZE) -> str:
     border_px = max(2, round(short_edge * 0.006))
     rule_w = round(short_edge * 0.16)
 
-    eyebrow, lines, footer = _split_roles(body)
+    lines = [ln.strip() for ln in body.splitlines() if ln.strip()]
     body_html = "".join(f"<p>{escape(ln)}</p>" for ln in lines)
 
-    eyebrow_html = f'<div class="eyebrow">{escape(eyebrow)}</div>' if eyebrow else ""
-    footer_html = f'<div class="footer">{escape(footer)}</div>' if footer else ""
+    eyebrow_html = f'<div class="eyebrow">{escape(eyebrow)}</div>' if eyebrow.strip() else ""
+    footer_html = f'<div class="footer">{escape(footer)}</div>' if footer.strip() else ""
+    footer = footer.strip()
 
     return f"""\
 <!doctype html><html lang="en"><head><meta charset="utf-8">
@@ -147,6 +119,20 @@ class WelcomeRenderer:
 
     async def render(self, size: Size = NATIVE_SIZE) -> bytes:
         cfg = await self.session.get(WelcomeConfig, self.user_id)
-        heading = cfg.heading if cfg else _DEFAULT_HEADING
-        body = cfg.body if cfg else _DEFAULT_BODY
-        return await html_to_bmp(render_html(heading, body, size=size), size=size)
+        if cfg is None:
+            html = render_html(
+                _DEFAULT_HEADING,
+                _DEFAULT_BODY,
+                eyebrow=_DEFAULT_EYEBROW,
+                footer=_DEFAULT_FOOTER,
+                size=size,
+            )
+        else:
+            html = render_html(
+                cfg.heading,
+                cfg.body,
+                eyebrow=cfg.eyebrow,
+                footer=cfg.footer,
+                size=size,
+            )
+        return await html_to_bmp(html, size=size)

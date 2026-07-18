@@ -28,5 +28,11 @@ async def get_welcome(auth: AuthDep, repo: RepoDep) -> WelcomeRead:
 
 @router.put("", response_model=WelcomeRead)
 async def set_welcome(body: WelcomeUpdate, auth: AuthDep, repo: RepoDep) -> WelcomeRead:
-    row = await repo.upsert(auth.user.id, body.heading.strip(), body.body.strip())
+    row = await repo.upsert(
+        auth.user.id,
+        eyebrow=body.eyebrow.strip(),
+        heading=body.heading.strip(),
+        body=body.body.strip(),
+        footer=body.footer.strip(),
+    )
     return WelcomeRead.model_validate(row)

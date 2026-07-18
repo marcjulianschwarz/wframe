@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { api, type DashboardType } from "@/lib/api";
+import { useT } from "@/lib/i18n";
 
 // The epaper's native portrait canvas; thumbnails preserve this 3:5 aspect.
 const NATIVE_W = 480;
@@ -10,11 +11,15 @@ interface Props {
   /** Set the rendered width via a Tailwind width class (e.g. "w-36"); height
    * follows the epaper aspect ratio. */
   className?: string;
+  /** Cap the thumbnail height (px), cropping the portrait preview from the top
+   * instead of showing the full 3:5 frame. Keeps store cards short. */
+  maxHeight?: number;
 }
 
 /** A small live preview of a store dashboard, rendered as a scaled-down iframe
  * of the real preview page. Non-interactive — meant to sit inside a link. */
-export function StoreThumb({ type, className = "" }: Props) {
+export function StoreThumb({ type, className = "", maxHeight }: Props) {
+  const t = useT();
   const [loading, setLoading] = useState(true);
   const frameRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0);
@@ -34,7 +39,7 @@ export function StoreThumb({ type, className = "" }: Props) {
     <div
       ref={frameRef}
       className={`relative overflow-hidden bg-black ${className}`}
-      style={{ aspectRatio: `${NATIVE_W} / ${NATIVE_H}` }}
+      style={maxHeight ? { height: maxHeight } : { aspectRatio: `${NATIVE_W} / ${NATIVE_H}` }}
     >
       {loading && (
         <div className="absolute inset-0 grid place-items-center bg-[var(--paper-2)]">
@@ -54,7 +59,7 @@ export function StoreThumb({ type, className = "" }: Props) {
         }}
       >
         <iframe
-          title={`${type} preview`}
+          title={t("store.previewOf", { type })}
           src={api.previewUrl(type)}
           width={NATIVE_W}
           height={NATIVE_H}

@@ -1,14 +1,16 @@
 import { type EpaperGeometry, type Rotation } from "@/lib/api";
+import { useT } from "@/lib/i18n";
+import type { TKey } from "@/lib/i18n";
 
 type NumericField = Exclude<keyof EpaperGeometry, "rotation">;
 
-const FIELDS: { key: NumericField; label: string; min: number }[] = [
-  { key: "screen_width", label: "Screen width", min: 1 },
-  { key: "screen_height", label: "Screen height", min: 1 },
-  { key: "image_width", label: "Image width", min: 1 },
-  { key: "image_height", label: "Image height", min: 1 },
-  { key: "image_x", label: "Image X", min: 0 },
-  { key: "image_y", label: "Image Y", min: 0 },
+const FIELDS: { key: NumericField; labelKey: TKey; min: number }[] = [
+  { key: "screen_width", labelKey: "geometry.screenWidth", min: 1 },
+  { key: "screen_height", labelKey: "geometry.screenHeight", min: 1 },
+  { key: "image_width", labelKey: "geometry.imageWidth", min: 1 },
+  { key: "image_height", labelKey: "geometry.imageHeight", min: 1 },
+  { key: "image_x", labelKey: "geometry.imageX", min: 0 },
+  { key: "image_y", labelKey: "geometry.imageY", min: 0 },
 ];
 
 const ROTATIONS: Rotation[] = [0, 90, 180, 270];
@@ -24,6 +26,7 @@ export function DisplayGeometryForm({
   onChange: (next: EpaperGeometry) => void;
   disabled?: boolean;
 }) {
+  const t = useT();
   const overflowX = value.image_x + value.image_width > value.screen_width;
   const overflowY = value.image_y + value.image_height > value.screen_height;
   const fits = !overflowX && !overflowY;
@@ -36,13 +39,12 @@ export function DisplayGeometryForm({
   return (
     <div className="flex flex-col gap-3">
       <p className="text-sm text-soft">
-        Screen size in pixels, and the size and position of the rendered
-        dashboard drawn on it.
+        {t("geometry.intro")}
       </p>
       <div className="grid grid-cols-2 gap-3">
         {FIELDS.map((f) => (
           <label key={f.key} className="flex flex-col gap-1">
-            <span className="field-label">{f.label}</span>
+            <span className="field-label">{t(f.labelKey)}</span>
             <input
               className="field"
               type="number"
@@ -56,7 +58,7 @@ export function DisplayGeometryForm({
         ))}
       </div>
       <label className="flex flex-col gap-1">
-        <span className="field-label">Rotation</span>
+        <span className="field-label">{t("geometry.rotation")}</span>
         <select
           className="field"
           value={String(value.rotation)}
@@ -74,8 +76,7 @@ export function DisplayGeometryForm({
       </label>
       {!fits && (
         <div className="text-sm" style={{ color: "var(--danger)" }}>
-          The image extends past the {overflowX ? "right" : "bottom"} edge of the
-          screen.
+          {overflowX ? t("geometry.overflowRight") : t("geometry.overflowBottom")}
         </div>
       )}
     </div>

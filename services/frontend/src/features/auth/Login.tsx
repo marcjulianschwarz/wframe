@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { authApi } from "@/lib/api";
 import { auth } from "@/lib/auth";
+import { useT } from "@/lib/i18n";
 
 type Mode = "login" | "register";
 
 export function Login({ onLogin }: { onLogin: () => void }) {
+  const t = useT();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,7 +37,7 @@ export function Login({ onLogin }: { onLogin: () => void }) {
       <form onSubmit={submit} className="sketch w-full max-w-sm p-6 flex flex-col gap-4">
         <span className="font-hand text-2xl font-bold">wframe</span>
         <h2 className="text-xl m-0">
-          {isRegister ? "Create your account" : "Sign in"}
+          {isRegister ? t("auth.createAccount") : t("auth.signIn")}
         </h2>
 
         {error && (
@@ -52,7 +54,7 @@ export function Login({ onLogin }: { onLogin: () => void }) {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
+          placeholder={t("auth.emailPlaceholder")}
           autoComplete="email"
           required
         />
@@ -61,11 +63,11 @@ export function Login({ onLogin }: { onLogin: () => void }) {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="password"
+          placeholder={t("auth.passwordPlaceholder")}
           autoComplete={isRegister ? "new-password" : "current-password"}
           required
         />
-        {isRegister && <p className="text-soft text-sm m-0">At least 8 characters.</p>}
+        {isRegister && <p className="text-soft text-sm m-0">{t("auth.minChars")}</p>}
 
         <div className="flex items-center justify-between gap-3">
           <button
@@ -76,10 +78,10 @@ export function Login({ onLogin }: { onLogin: () => void }) {
               setError(null);
             }}
           >
-            {isRegister ? "Have an account? Sign in" : "Create an account"}
+            {isRegister ? t("auth.haveAccount") : t("auth.createAccountLink")}
           </button>
           <button className="btn btn-accent" type="submit" disabled={busy}>
-            {busy ? "…" : isRegister ? "Register" : "Sign in"}
+            {busy ? "…" : isRegister ? t("auth.register") : t("auth.signIn")}
           </button>
         </div>
       </form>
