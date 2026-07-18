@@ -8,7 +8,6 @@ services:
     expose:
       - "8000"
     networks:
-      - autobahn-web
       - wframe-internal
       - secrets
     depends_on:
@@ -22,8 +21,6 @@ services:
     restart: always
     expose:
       - "80"
-    networks:
-      - autobahn-web
     depends_on:
       - backend
 
@@ -48,8 +45,6 @@ services:
       retries: 10
 
 networks:
-  autobahn-web:
-    external: true
   # Self-hosted Infisical lives here; created by the infisical compose project.
   secrets:
     external: true
