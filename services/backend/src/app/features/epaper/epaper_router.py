@@ -123,6 +123,52 @@ async def set_my_epaper_refresh(
     return await service.set_refresh(auth.user.id, epaper_id, body)
 
 
+@router.post("/epapers/{epaper_id}/refresh-now", response_model=EpaperRead)
+async def refresh_my_epaper_now(
+    epaper_id: uuid.UUID, auth: AuthDep, service: EpaperServiceDep
+) -> EpaperRead:
+    return await service.refresh_now(auth.user.id, epaper_id)
+
+
+@router.get("/epapers/{epaper_id}/preview.bmp")
+async def preview_my_epaper_bitmap(
+    epaper_id: uuid.UUID,
+    auth: AuthDep,
+    service: EpaperServiceDep,
+    bitmap_service: BitmapServiceDep,
+    dashboard_repo: Annotated[DashboardRepo, Depends(get_dashboard_repo_for_serve)],
+) -> Response:
+    """The exact 1-bit image the panel would show right now, for the in-app canvas
+    preview. Unlike ``/e/{slug}.bmp`` this ignores the serve window and pause
+    state (a preview should always reflect the current dashboard), and it renders
+    once if nothing is cached yet — so a first render always happens on demand."""
+    epaper = await service.owned(auth.user.id, epaper_id)
+    if epaper.dashboard_id is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No dashboard deployed")
+    dashboard = await dashboard_repo.get_any(epaper.dashboard_id)
+    if dashboard is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Dashboard not found")
+    geometry = Geometry(
+        screen_width=epaper.screen_width,
+        screen_height=epaper.screen_height,
+        image_width=epaper.image_width,
+        image_height=epaper.image_height,
+        image_x=epaper.image_x,
+        image_y=epaper.image_y,
+        rotation=epaper.rotation,
+    )
+    data = await bitmap_service.get_or_render(dashboard, geometry=geometry)
+    return Response(
+        content=data,
+        media_type="image/bmp",
+        headers={
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        },
+    )
+
+
 @router.get("/e/{slug}.bmp")
 async def serve_bitmap(
     slug: str,

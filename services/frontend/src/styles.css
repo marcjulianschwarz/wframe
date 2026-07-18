@@ -1,0 +1,358 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * wframe — playful "paper desk" theme.
+ * Hand-rolled brand styling for the e-paper canvas. No managed token contract:
+ * everything here is app-owned. Think warm paper, soft ink outlines, springy
+ * little cards you can drop dashboards onto.
+ */
+
+:root {
+  /* Palette */
+  --paper: #f6f1e7;
+  --paper-2: #efe8d8;
+  --ink: #23201b;
+  --ink-soft: #6b6459;
+  --ink-faint: #a39a89;
+  --line: #2a251e;
+  --accent: #e8703a;   /* warm playful orange */
+  --accent-soft: #fbe3d4;
+  --mint: #4bb890;     /* "live" dot */
+  --card: #fffdf8;
+  --danger: #d1493f;
+
+  --shadow-sketch: 3px 3px 0 rgba(42, 37, 30, 0.9);
+  --shadow-soft: 0 6px 18px rgba(42, 37, 30, 0.12);
+
+  --font-hand: "Comic Sans MS", "Chalkboard SE", "Comic Neue", "Segoe Print", system-ui, sans-serif;
+  --font-body: ui-rounded, "Nunito", "Segoe UI Rounded", system-ui, sans-serif;
+}
+
+/* App-wide zoom: scales the whole UI like browser zoom (layout, px, rem, images
+   all together), so fixed-px pieces such as the epaper frames grow uniformly.
+   Change --app-zoom to taste. */
+:root {
+  --app-zoom: 1.3;
+}
+html {
+  zoom: var(--app-zoom);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background-color: var(--paper);
+  /* Faint dotted "notebook" texture on the desk. */
+  background-image: radial-gradient(rgba(42, 37, 30, 0.06) 1.4px, transparent 1.4px);
+  background-size: 22px 22px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-hand);
+  letter-spacing: 0.01em;
+}
+
+/* ---- Sketchy panel: the rounded, ink-outlined container look ---- */
+.sketch {
+  background: var(--card);
+  border: 2.5px solid var(--line);
+  border-radius: 22px;
+  box-shadow: var(--shadow-sketch);
+}
+
+/* A slightly wobbly variant for cards that should feel loose/playful. */
+.sketch-wobble {
+  border-radius: 255px 18px 225px 20px / 20px 225px 18px 255px;
+}
+
+/* Clickable epaper screen: lifts on hover and shows an accent ring to signal
+   it opens settings. Only applied when the frame is actually clickable (not in
+   drag-assign mode, which has its own overlay). */
+.epaper-screen {
+  cursor: pointer;
+  transition: transform 100ms ease, box-shadow 100ms ease;
+}
+.epaper-screen:hover {
+  transform: translate(-1px, -2px);
+  box-shadow: 5px 6px 0 rgba(42, 37, 30, 0.9);
+}
+.epaper-screen:active {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 rgba(42, 37, 30, 0.9);
+}
+
+/* Hand-styled tooltip: a small sketch bubble that pops above its trigger on
+   hover/focus. The trigger wrapper is inline and positions the bubble; the
+   bubble itself matches the brand's thick line + hard offset shadow. */
+.tooltip-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.tooltip-bubble {
+  position: absolute;
+  bottom: calc(100% + 9px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  z-index: 40;
+  white-space: nowrap;
+  padding: 5px 10px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--paper);
+  border: 2px solid var(--line);
+  box-shadow: 2px 2px 0 rgba(42, 37, 30, 0.55);
+  font-family: var(--font-hand);
+  font-size: 12px;
+  line-height: 1.2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 110ms ease, transform 110ms ease;
+}
+/* Pointer nub under the bubble: two stacked triangles — a larger one in the
+   line colour behind, a fill-coloured one on top — so the nub keeps the same
+   border as the bubble. The border triangle sits 2px lower and is wider so its
+   edges read as the outline. --nub-fill is set per-variant to match the bg. */
+.tooltip-bubble {
+  --nub-fill: var(--ink);
+}
+.tooltip-bubble::before,
+.tooltip-bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+}
+/* border triangle */
+.tooltip-bubble::before {
+  top: calc(100% + 1px);
+  border: 7px solid transparent;
+  border-top-color: var(--line);
+}
+/* fill triangle, overlapping the bubble edge so no seam shows */
+.tooltip-bubble::after {
+  top: calc(100% - 1px);
+  border: 5px solid transparent;
+  border-top-color: var(--nub-fill);
+}
+.tooltip-wrap:hover .tooltip-bubble,
+.tooltip-wrap:focus-within .tooltip-bubble {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* A self-showing variant (not hover-driven): used for the "about to refresh"
+   heads-up. Accented so it reads as a live alert, with a gentle pulse. */
+.tooltip-bubble.tooltip-open {
+  --nub-fill: var(--accent);
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  background: var(--accent);
+  border-color: var(--line);
+  animation: tooltip-pulse 1s ease-in-out infinite;
+}
+@keyframes tooltip-pulse {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-2px); }
+}
+
+/* ---- Buttons ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.9rem;
+  border: 2.5px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 2px 2px 0 rgba(42, 37, 30, 0.85);
+  transition: transform 90ms ease, box-shadow 90ms ease, background 120ms ease;
+}
+.btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 rgba(42, 37, 30, 0.85);
+}
+.btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 rgba(42, 37, 30, 0.85);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 2px 2px 0 rgba(42, 37, 30, 0.4);
+}
+.btn-accent {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-ghost {
+  background: transparent;
+  box-shadow: none;
+  border-color: transparent;
+}
+.btn-ghost:hover {
+  background: var(--paper-2);
+  transform: none;
+  box-shadow: none;
+}
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* Small round icon button (the per-epaper toolbar buttons). */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 2.5px solid var(--line);
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 2px 2px 0 rgba(42, 37, 30, 0.85);
+  transition: transform 90ms ease, box-shadow 90ms ease, background 120ms ease;
+}
+.icon-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 rgba(42, 37, 30, 0.85);
+  background: var(--accent-soft);
+}
+.icon-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 rgba(42, 37, 30, 0.85);
+}
+.icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- Inputs ---- */
+.field {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  padding: 0.5rem 0.75rem;
+  border: 2.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--ink);
+  outline: none;
+}
+.field:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.field-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+/* ---- Chip / tab ---- */
+.chip {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.8rem;
+  border: 2.5px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+}
+.chip-active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ---- Live dot ---- */
+.live-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--mint);
+}
+.live-dot-off {
+  background: var(--paper-2);
+}
+
+/* ---- Drag / drop affordances ---- */
+.drop-target {
+  outline: 3px dashed var(--accent);
+  outline-offset: 4px;
+}
+.drop-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  background: rgba(232, 112, 58, 0.14);
+  color: var(--accent);
+  font-family: var(--font-hand);
+  font-weight: 800;
+  cursor: pointer;
+  border: 3px dashed var(--accent);
+}
+.drop-overlay:hover {
+  background: rgba(232, 112, 58, 0.26);
+}
+
+/* ---- Modal backdrop ---- */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(35, 32, 27, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+  animation: fade 120ms ease;
+}
+.modal {
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow: auto;
+  padding: 1.5rem;
+  animation: pop 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.text-soft { color: var(--ink-soft); }
+.text-faint { color: var(--ink-faint); }

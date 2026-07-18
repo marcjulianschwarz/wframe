@@ -20,7 +20,7 @@ from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.features.bitmap.bitmap_models import GithubProfile
-from app.features.bitmap.renderers.base import html_to_bmp
+from app.features.bitmap.renderers.base import NATIVE_SIZE, Size, html_to_bmp
 from app.settings import settings
 
 FONTS_DIR = Path(__file__).parent.parent / "fonts"
@@ -173,6 +173,8 @@ def _lang_bar(langs: dict[str, int]) -> str:
 
     items = sorted(langs.items(), key=lambda kv: kv[1], reverse=True)[:TOP_LANGS]
     total = sum(v for _, v in items) or 1
+    # viewBox coordinate space only; the SVG stretches to fill its CSS width
+    # (preserveAspectRatio="none"), so the bar widens with the panel geometry.
     w, bar_h = 380, 30
 
     # One <pattern> per used dither tile, referenced by both bar and legend swatch.
@@ -192,15 +194,15 @@ def _lang_bar(langs: dict[str, int]) -> str:
             seps.append(f'<rect x="{x:.1f}" y="0" width="1.5" height="{bar_h}" fill="#000"/>')
         x += seg_w
     bar = (
-        f'<svg width="{w}" height="{bar_h}" viewBox="0 0 {w} {bar_h}" '
+        f'<svg viewBox="0 0 {w} {bar_h}" preserveAspectRatio="none" '
         f'xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">'
         f"<defs>{defs}</defs>"
         f'<rect x="0" y="0" width="{w}" height="{bar_h}" fill="#000" '
-        f'stroke="#fff" stroke-width="1"/>'
+        f'stroke="#fff" stroke-width="1" vector-effect="non-scaling-stroke"/>'
         f"{''.join(segs)}{''.join(seps)}"
         # redraw the white frame on top so segment fills don't cover it
         f'<rect x="0" y="0" width="{w}" height="{bar_h}" fill="none" '
-        f'stroke="#fff" stroke-width="2"/></svg>'
+        f'stroke="#fff" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>'
     )
 
     # Legend swatches reuse the same dither tiles as tiny inline SVGs.
@@ -242,7 +244,9 @@ def render_html(profile: Profile, agg: Aggregate) -> str:
 <meta name="viewport" content="width=480, initial-scale=1.0">
 <style>{_font_face()}
   *{{box-sizing:border-box;margin:0;padding:0;}}
-  html,body{{width:480px;height:800px;background:#000;color:#fff;
+  /* Fill the actual render viewport instead of a fixed 480×800, so the whole
+     layout reflows when the device geometry changes. */
+  html,body{{width:100vw;height:100vh;background:#000;color:#fff;
     font-family:"Cozette",monospace;-webkit-font-smoothing:none;
     font-smooth:never;text-rendering:geometricPrecision;}}
   body{{padding:26px;}}
@@ -265,7 +269,10 @@ def render_html(profile: Profile, agg: Aggregate) -> str:
     padding:5px 0;border-bottom:1px solid #fff;}}
   .repo .rs{{font-weight:700;white-space:nowrap;padding-left:12px;}}
   .langs{{margin-top:16px;}}
-  .bar svg{{display:block;width:380px;height:26px;}}
+  /* The bar stretches to fill its width (preserveAspectRatio="none" +
+     non-scaling-stroke), so it widens with the panel while keeping crisp
+     1-bit frame lines. */
+  .bar svg{{display:block;width:100%;height:26px;}}
   .legend{{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;
     font-size:13px;}}
   .leg{{display:flex;align-items:center;}}
@@ -325,11 +332,11 @@ class GithubRenderer:
         self.session: AsyncSession = session
         self.user_id: uuid.UUID = user_id
 
-    async def render(self) -> bytes:
+    async def render(self, size: Size = NATIVE_SIZE) -> bytes:
         profile = await self.session.get(GithubProfile, self.user_id)
         if profile is None:
-            return await html_to_bmp(_no_username_html(), scale=1)
+            return await html_to_bmp(_no_username_html(), size=size, scale=1)
         data = await _fetch(profile.username)
         agg = aggregate(data.repos)
         html = render_html(data.profile, agg)
-        return await html_to_bmp(html, scale=1)
+        return await html_to_bmp(html, size=size, scale=1)

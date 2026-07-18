@@ -17,7 +17,7 @@ import numpy as np
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.features.bitmap.bitmap_models import LifeState
-from app.features.bitmap.renderers.base import HEIGHT, WIDTH, html_to_bmp
+from app.features.bitmap.renderers.base import HEIGHT, NATIVE_SIZE, WIDTH, Size, html_to_bmp
 
 LIFE_W, LIFE_H, LIFE_CELL = 60, 100, 8
 LIFE_STEPS_PER_TICK = 5
@@ -124,7 +124,7 @@ class LifeRenderer:
             await self.session.refresh(state)
         return state
 
-    async def render(self) -> bytes:
+    async def render(self, size: Size = NATIVE_SIZE) -> bytes:
         state = await self._load_state()
 
         # generation == -1 is the "restart pending" sentinel set on the previous
@@ -134,7 +134,7 @@ class LifeRenderer:
             state.generation = 0
             state.grid = grid_to_bytes(grid)
             await self.session.flush()
-            return await html_to_bmp(_grid_html(grid))
+            return await html_to_bmp(_grid_html(grid), size=size)
 
         grid = grid_from_bytes(state.grid)
         for _ in range(LIFE_STEPS_PER_TICK):
@@ -147,8 +147,8 @@ class LifeRenderer:
             state.generation = -1
             # grid is unused while restarting; keep the last grid bytes as-is.
             await self.session.flush()
-            return await html_to_bmp(_RESTART_HTML)
+            return await html_to_bmp(_RESTART_HTML, size=size)
 
         state.grid = grid_to_bytes(grid)
         await self.session.flush()
-        return await html_to_bmp(_grid_html(grid))
+        return await html_to_bmp(_grid_html(grid), size=size)

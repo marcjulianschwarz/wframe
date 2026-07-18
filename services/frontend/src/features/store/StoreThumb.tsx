@@ -37,9 +37,10 @@ export function StoreThumb({ type, className = "" }: Props) {
       style={{ aspectRatio: `${NATIVE_W} / ${NATIVE_H}` }}
     >
       {loading && (
-        <div className="absolute inset-0 grid place-items-center bg-ui-surface-sunken">
+        <div className="absolute inset-0 grid place-items-center bg-[var(--paper-2)]">
           <span
-            className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-ui-border border-t-ui-accent"
+            className="inline-block h-5 w-5 animate-spin rounded-full border-2"
+            style={{ borderColor: "var(--ink-faint)", borderTopColor: "var(--accent)" }}
             aria-hidden
           />
         </div>
@@ -57,7 +58,7 @@ export function StoreThumb({ type, className = "" }: Props) {
           src={api.previewUrl(type)}
           width={NATIVE_W}
           height={NATIVE_H}
-          className={`border-0 transition-opacity duration-ui-fast ${
+          className={`border-0 transition-opacity ${
             loading ? "opacity-0" : "opacity-100"
           }`}
           style={{ pointerEvents: "none" }}

@@ -38,6 +38,11 @@ class EpaperService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Epaper not found")
         return epaper
 
+    async def owned(self, user_id: uuid.UUID, epaper_id: uuid.UUID) -> Epaper:
+        """Public accessor for the owned ORM epaper (used by the preview endpoint,
+        which needs the geometry fields, not the read schema)."""
+        return await self._owned(user_id, epaper_id)
+
     async def list_for_user(self, user_id: uuid.UUID) -> list[EpaperRead]:
         """Every epaper the user owns. A user with none gets a first device
         auto-provisioned so the UI always has something to configure."""
@@ -116,6 +121,17 @@ class EpaperService:
             paused=refresh.paused,
             refresh_interval=refresh.refresh_interval,
         )
+        return await self._to_read(epaper)
+
+    async def refresh_now(self, user_id: uuid.UUID, epaper_id: uuid.UUID) -> EpaperRead:
+        """Force the device to redraw once on its next poll, ignoring the interval.
+
+        Opens a force-serve window (see :mod:`force_serve`); does not change the
+        stored refresh settings. If paused, ``should_serve_now`` still short-circuits
+        to 204, so a paused device stays frozen even after this call.
+        """
+        epaper = await self._owned(user_id, epaper_id)
+        force_serve.mark(epaper.id)
         return await self._to_read(epaper)
 
     async def get_by_slug(self, slug: str) -> Epaper | None:

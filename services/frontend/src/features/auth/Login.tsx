@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Button } from "@/ui/concepts/button/component";
-import { Input } from "@/components/Input";
 import { authApi } from "@/lib/api";
 import { auth } from "@/lib/auth";
 
@@ -33,27 +31,24 @@ export function Login({ onLogin }: { onLogin: () => void }) {
   const isRegister = mode === "register";
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-ui-l">
-      <form
-        onSubmit={submit}
-        className="w-full max-w-sm bg-ui-surface-raised border border-ui-border rounded-ui-n p-ui-l flex flex-col gap-ui-m shadow-ui-normal"
-      >
-        <div className="flex items-center gap-ui-s">
-          <div className="w-8 h-8 rounded-ui-s bg-ui-accent text-white flex items-center justify-center font-ui-mono text-ui-s font-ui-bold">
-            w
-          </div>
-          <span className="font-ui-mono text-ui-m font-ui-semibold">wframe</span>
-        </div>
-
-        <h2>{isRegister ? "Create your account" : "Sign in"}</h2>
+    <div className="min-h-screen w-full flex items-center justify-center p-6">
+      <form onSubmit={submit} className="sketch w-full max-w-sm p-6 flex flex-col gap-4">
+        <span className="font-hand text-2xl font-bold">wframe</span>
+        <h2 className="text-xl m-0">
+          {isRegister ? "Create your account" : "Sign in"}
+        </h2>
 
         {error && (
-          <div className="p-ui-n rounded-ui-s border border-ui-border bg-ui-danger-bg text-ui-danger text-ui-s">
+          <div
+            className="text-sm rounded-xl px-3 py-2"
+            style={{ color: "var(--danger)", background: "#f7dcd9" }}
+          >
             {error}
           </div>
         )}
 
-        <Input
+        <input
+          className="field"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -61,7 +56,8 @@ export function Login({ onLogin }: { onLogin: () => void }) {
           autoComplete="email"
           required
         />
-        <Input
+        <input
+          className="field"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -69,14 +65,12 @@ export function Login({ onLogin }: { onLogin: () => void }) {
           autoComplete={isRegister ? "new-password" : "current-password"}
           required
         />
-        {isRegister && (
-          <p className="text-ui-secondary text-ui-s">At least 8 characters.</p>
-        )}
+        {isRegister && <p className="text-soft text-sm m-0">At least 8 characters.</p>}
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <button
             type="button"
-            className="text-ui-s text-ui-secondary hover:text-ui-primary underline"
+            className="text-sm text-soft underline"
             onClick={() => {
               setMode(isRegister ? "login" : "register");
               setError(null);
@@ -84,9 +78,9 @@ export function Login({ onLogin }: { onLogin: () => void }) {
           >
             {isRegister ? "Have an account? Sign in" : "Create an account"}
           </button>
-          <Button variant="primary" type="submit" disabled={busy}>
+          <button className="btn btn-accent" type="submit" disabled={busy}>
             {busy ? "…" : isRegister ? "Register" : "Sign in"}
-          </Button>
+          </button>
         </div>
       </form>
     </div>

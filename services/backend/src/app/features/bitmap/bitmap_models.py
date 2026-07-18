@@ -1,11 +1,15 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Float, ForeignKey, LargeBinary, String, func
+from sqlalchemy import DateTime, Float, ForeignKey, Index, LargeBinary, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.session import Base, TimestampMixin
+
+# Native panel size; the default render dimensions when no geometry narrows it.
+WIDTH = 480
+HEIGHT = 800
 
 
 class WeatherLocation(Base, TimestampMixin):
@@ -117,14 +121,18 @@ class LifeState(Base, TimestampMixin):
 
 
 class Bitmap(Base, TimestampMixin):
-    """Last rendered native BMP for a collection dashboard.
+    """Last rendered BMP for a collection dashboard, at a given render size.
 
-    Cached per ``dashboard_id`` so the serve path can fall back to the most
-    recent good image when a fresh render fails, and so two custom-URL
-    dashboards never share a cache entry.
+    Cached per ``(dashboard_id, width, height)``: dashboards render their HTML at
+    the image size so the layout reflows, meaning a render is only valid for the
+    size it was produced at. Keying by size lets the serve path fall back to the
+    most recent good image *for that size* when a fresh render fails, and keeps
+    two custom-URL dashboards (or two different display sizes) from sharing an
+    entry.
     """
 
     __tablename__: str = "bitmaps"
+    __table_args__ = (Index("ix_bitmaps_dashboard_size", "dashboard_id", "width", "height"),)
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     dashboard_id: Mapped[uuid.UUID] = mapped_column(
@@ -133,5 +141,8 @@ class Bitmap(Base, TimestampMixin):
         nullable=False,
         index=True,
     )
+    # The render dimensions this bitmap was produced at (the epaper's image size).
+    width: Mapped[int] = mapped_column(nullable=False, default=WIDTH)
+    height: Mapped[int] = mapped_column(nullable=False, default=HEIGHT)
     data: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     rendered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

@@ -15,7 +15,7 @@ from typing import ClassVar, cast
 from openai import OpenAI
 from pydantic import BaseModel, ConfigDict
 
-from app.features.bitmap.renderers.base import html_to_bmp
+from app.features.bitmap.renderers.base import NATIVE_SIZE, Size, html_to_bmp
 from app.settings import settings
 
 CACHE = Path(__file__).parent.parent / ".hn_cache.json"
@@ -176,16 +176,22 @@ def render_html(items: list[Item]) -> str:
         _font_face(),
         """
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* Fill the actual render viewport instead of a fixed 480×800, so the layout
+     reflows when the device geometry changes. min-height keeps it growing if the
+     stories overflow a short panel. */
   html, body {
-    width: 480px; min-height: 800px;
+    width: 100vw; min-height: 100vh;
     background: #000; color: #fff;
     font-family: "Cozette", monospace;
     /* Pixel font at native size: no smoothing, no fractional positioning. */
     -webkit-font-smoothing: none; font-smooth: never;
     text-rendering: geometricPrecision;
   }
-  body { padding: 26px; }
-  .frame { border: 2px solid #fff; padding: 24px 22px; }
+  /* Flex column so the frame stretches to the full viewport height and its
+     border reaches the bottom edge on any panel size. */
+  body { padding: 26px; min-height: 100vh; display: flex; }
+  .frame { border: 2px solid #fff; padding: 24px 22px; flex: 1;
+    display: flex; flex-direction: column; }
   .masthead {
     text-align: center;
     border-bottom: 2px solid #fff;
@@ -206,6 +212,7 @@ def render_html(items: list[Item]) -> str:
     text-transform: uppercase;
   }
   .stories {
+    flex: 1;
     display: flex;
     flex-direction: column;
     row-gap: 13px;
@@ -308,9 +315,9 @@ def _build_items() -> list[Item]:
 
 
 class HnZeitungRenderer:
-    async def render(self) -> bytes:
+    async def render(self, size: Size = NATIVE_SIZE) -> bytes:
         items = await asyncio.to_thread(_build_items)
         html = render_html(items)
         # scale=1: Cozette is a pixel font sized to its native 13px grid, so we
         # render at device resolution and skip supersampling.
-        return await html_to_bmp(html, scale=1)
+        return await html_to_bmp(html, size=size, scale=1)

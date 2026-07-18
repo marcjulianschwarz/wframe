@@ -240,6 +240,20 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(refresh),
     }),
+  /** Force the device to redraw once on its next poll (ignores the interval). */
+  refreshNow: (token: string, id: string) =>
+    req<Epaper>(`/epapers/${id}/refresh-now`, token, { method: "POST" }),
+
+  /** The exact 1-bit BMP the panel would show right now, as an object URL for an
+   * <img>. Authenticated, so we fetch the bytes and wrap them in a blob URL; the
+   * caller is responsible for revoking the returned URL when it's replaced. */
+  previewBitmap: async (token: string, id: string): Promise<string> => {
+    const res = await fetch(`${BASE}/epapers/${id}/preview.bmp`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error(await errorMessage(res));
+    return URL.createObjectURL(await res.blob());
+  },
 
   /** Live example HTML preview for a built-in dashboard type, for the in-app
    * iframe. Serves canned data and does not change what the epaper serves. */

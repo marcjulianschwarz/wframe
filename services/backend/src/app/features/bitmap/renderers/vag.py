@@ -21,7 +21,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.features.bitmap.bitmap_models import VagStop
-from app.features.bitmap.renderers.base import html_to_bmp
+from app.features.bitmap.renderers.base import NATIVE_SIZE, Size, html_to_bmp
 
 FONTS_DIR = Path(__file__).parent.parent / "fonts"
 
@@ -78,7 +78,7 @@ def _font_face() -> str:
 def _no_stop_html() -> str:
     return f"""\
 <!doctype html><html><head><meta charset="utf-8"><style>{_font_face()}
-  html,body{{margin:0;width:480px;height:800px;background:#000;color:#fff;
+  html,body{{margin:0;width:100vw;height:100vh;background:#000;color:#fff;
     font-family:"Cozette",monospace;-webkit-font-smoothing:none;}}
   body{{display:flex;flex-direction:column;align-items:center;
     justify-content:center;text-align:center;padding:40px;}}
@@ -144,7 +144,9 @@ def render_html(stop_name: str, data: Departures, now: datetime) -> str:
 <meta name="viewport" content="width=480, initial-scale=1.0">
 <style>{_font_face()}
   *{{box-sizing:border-box;margin:0;padding:0;}}
-  html,body{{width:480px;height:800px;background:#000;color:#fff;
+  /* Fill the actual render viewport instead of a fixed 480×800, so the whole
+     layout reflows when the device geometry changes. */
+  html,body{{width:100vw;height:100vh;background:#000;color:#fff;
     font-family:"Cozette",monospace;-webkit-font-smoothing:none;
     font-smooth:never;text-rendering:geometricPrecision;}}
   body{{padding:26px;}}
@@ -195,13 +197,13 @@ class VagRenderer:
         self.session: AsyncSession = session
         self.user_id: uuid.UUID = user_id
 
-    async def render(self) -> bytes:
+    async def render(self, size: Size = NATIVE_SIZE) -> bytes:
         stop = await self.session.get(VagStop, self.user_id)
         if stop is None:
-            return await html_to_bmp(_no_stop_html(), scale=1)
+            return await html_to_bmp(_no_stop_html(), size=size, scale=1)
         data = await _fetch(stop.vgn_number)
         # The API timestamp is the stop's local time; using it (not the server
         # clock) keeps countdowns right regardless of the server's timezone.
         now = datetime.fromisoformat(data.Metadata.Timestamp)
         html = render_html(data.Haltestellenname or stop.name, data, now)
-        return await html_to_bmp(html, scale=1)
+        return await html_to_bmp(html, size=size, scale=1)

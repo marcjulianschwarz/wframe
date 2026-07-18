@@ -5,9 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.features.bitmap.renderers.base import (
     HEIGHT,
+    NATIVE_SIZE,
     WIDTH,
     DashboardRenderer,
     Geometry,
+    Size,
     composite_onto_screen,
     html_to_bmp,
 )
@@ -25,6 +27,8 @@ from app.features.dashboard.dashboard_models import DashboardType
 __all__ = [
     "DashboardRenderer",
     "Geometry",
+    "Size",
+    "NATIVE_SIZE",
     "composite_onto_screen",
     "html_to_bmp",
     "WIDTH",

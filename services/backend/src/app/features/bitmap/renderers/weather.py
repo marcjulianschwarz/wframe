@@ -19,7 +19,7 @@ from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.features.bitmap.bitmap_models import WeatherLocation
-from app.features.bitmap.renderers.base import html_to_bmp
+from app.features.bitmap.renderers.base import NATIVE_SIZE, Size, html_to_bmp
 
 FONTS_DIR = Path(__file__).parent.parent / "fonts"
 
@@ -164,7 +164,7 @@ def svg_line_chart(times: list[str], temps: list[float], now_idx: int) -> str:
         anchor = "start" if i == 0 else "end" if i >= n - 1 else "middle"
         ticks.append(
             f'<line x1="{x(i):.1f}" y1="{pad_t + ih}" x2="{x(i):.1f}" '
-            + f'y2="{pad_t + ih + 4}" stroke="#fff" stroke-width="1"/>'
+            + f'y2="{pad_t + ih + 4}" stroke="#fff" stroke-width="1" vector-effect="non-scaling-stroke"/>'
             + f'<text x="{x(i):.1f}" y="{h - 6}" fill="#fff" font-size="11" '
             + f'font-family="Cozette,monospace" text-anchor="{anchor}">{hh}</text>'
         )
@@ -172,11 +172,15 @@ def svg_line_chart(times: list[str], temps: list[float], now_idx: int) -> str:
     nx, ny = x(now_idx), y(temps[now_idx])
     now_marker = (
         f'<line x1="{nx:.1f}" y1="{pad_t}" x2="{nx:.1f}" y2="{pad_t + ih}" '
-        f'stroke="#fff" stroke-width="1" stroke-dasharray="2 3"/>'
+        f'stroke="#fff" stroke-width="1" stroke-dasharray="2 3" vector-effect="non-scaling-stroke"/>'
         f'<circle cx="{nx:.1f}" cy="{ny:.1f}" r="4" fill="#fff"/>'
     )
 
-    return f'''<svg width="{w}" height="{h}" viewBox="0 0 {w} {h}"
+    # No fixed width/height: the SVG stretches to fill its CSS box in both axes
+    # (preserveAspectRatio="none"), so the chart reflows for the panel's geometry.
+    # non-scaling-stroke keeps every line a constant 1-bit pixel width regardless
+    # of how far the viewBox is stretched, so the strokes never smear.
+    return f'''<svg viewBox="0 0 {w} {h}" preserveAspectRatio="none"
   xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
   <rect x="0" y="0" width="{w}" height="{h}" fill="#000"/>
   <text x="{pad_l}" y="11" fill="#fff" font-size="11"
@@ -184,10 +188,11 @@ def svg_line_chart(times: list[str], temps: list[float], now_idx: int) -> str:
   <text x="{pad_l}" y="{pad_t + ih}" fill="#fff" font-size="11"
     font-family="Cozette,monospace">{lo:.0f}&deg;</text>
   <line x1="{pad_l}" y1="{pad_t + ih}" x2="{pad_l + iw}" y2="{pad_t + ih}"
-    stroke="#fff" stroke-width="1"/>
+    stroke="#fff" stroke-width="1" vector-effect="non-scaling-stroke"/>
   {now_marker}
   <polyline points="{pts}" fill="none" stroke="#fff" stroke-width="2"
-    stroke-linejoin="round" stroke-linecap="round"/>
+    stroke-linejoin="round" stroke-linecap="round"
+    vector-effect="non-scaling-stroke"/>
   {"".join(ticks)}
 </svg>'''
 
@@ -232,7 +237,9 @@ def render_html(data: Forecast, place: str | None) -> str:
 <meta name="viewport" content="width=480, initial-scale=1.0">
 <style>{_font_face()}
   *{{box-sizing:border-box;margin:0;padding:0;}}
-  html,body{{width:480px;height:800px;background:#000;color:#fff;
+  /* Fill the actual render viewport instead of a fixed 480×800, so the whole
+     layout reflows when the device geometry changes. */
+  html,body{{width:100vw;height:100vh;background:#000;color:#fff;
     font-family:"Cozette",monospace;-webkit-font-smoothing:none;
     font-smooth:never;text-rendering:geometricPrecision;}}
   body{{padding:26px;}}
@@ -247,12 +254,13 @@ def render_html(data: Forecast, place: str | None) -> str:
   .head .cond{{font-size:18px;font-weight:700;text-transform:uppercase;}}
   .head .stamp{{font-size:13px;margin-top:8px;text-transform:uppercase;}}
   .chart{{flex:1;display:flex;flex-direction:column;justify-content:center;
-    margin:8px 0;}}
+    margin:8px 0;min-height:0;}}
   .chart .cap{{font-size:13px;font-weight:700;text-transform:uppercase;
     margin-bottom:8px;}}
-  /* Render the SVG at its native 380×200 — never scaled — so the browser
-     doesn't sub-pixel-stretch the 2px stroke into spiky edges. */
-  .chart svg{{display:block;width:380px;height:200px;}}
+  /* The SVG stretches to fill the chart box (preserveAspectRatio="none" +
+     non-scaling-stroke), so it widens/heightens with the panel geometry while
+     keeping crisp 1-bit lines. */
+  .chart svg{{display:block;width:100%;flex:1;min-height:0;}}
   .stats{{display:grid;grid-template-columns:1fr 1fr;gap:13px;
     border-top:2px solid #fff;padding-top:16px;}}
   .stat .k{{font-size:13px;text-transform:uppercase;}}
@@ -294,10 +302,10 @@ class WeatherRenderer:
         self.session: AsyncSession = session
         self.user_id: uuid.UUID = user_id
 
-    async def render(self) -> bytes:
+    async def render(self, size: Size = NATIVE_SIZE) -> bytes:
         loc = await self.session.get(WeatherLocation, self.user_id)
         if loc is None:
-            return await html_to_bmp(_no_location_html(), scale=1)
+            return await html_to_bmp(_no_location_html(), size=size, scale=1)
         data = await _fetch(loc.latitude, loc.longitude)
         html = render_html(data, loc.place)
-        return await html_to_bmp(html, scale=1)
+        return await html_to_bmp(html, size=size, scale=1)

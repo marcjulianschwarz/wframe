@@ -1,4 +1,3 @@
-import { Input } from "@/components/Input";
 import { type EpaperGeometry, type Rotation } from "@/lib/api";
 
 type NumericField = Exclude<keyof EpaperGeometry, "rotation">;
@@ -35,16 +34,17 @@ export function DisplayGeometryForm({
   }
 
   return (
-    <div className="flex flex-col gap-ui-s">
-      <p className="text-ui-s text-ui-secondary">
+    <div className="flex flex-col gap-3">
+      <p className="text-sm text-soft">
         Screen size in pixels, and the size and position of the rendered
         dashboard drawn on it.
       </p>
-      <div className="grid grid-cols-2 gap-ui-s mt-ui-xs">
+      <div className="grid grid-cols-2 gap-3">
         {FIELDS.map((f) => (
-          <label key={f.key} className="flex flex-col gap-ui-xs">
-            <span className="text-ui-s text-ui-secondary">{f.label}</span>
-            <Input
+          <label key={f.key} className="flex flex-col gap-1">
+            <span className="field-label">{f.label}</span>
+            <input
+              className="field"
               type="number"
               inputMode="numeric"
               min={f.min}
@@ -55,15 +55,15 @@ export function DisplayGeometryForm({
           </label>
         ))}
       </div>
-      <label className="flex flex-col gap-ui-xs">
-        <span className="text-ui-s text-ui-secondary">Rotation</span>
+      <label className="flex flex-col gap-1">
+        <span className="field-label">Rotation</span>
         <select
+          className="field"
           value={String(value.rotation)}
           onChange={(e) =>
             onChange({ ...value, rotation: Number.parseInt(e.target.value, 10) as Rotation })
           }
           disabled={disabled}
-          className="w-full px-ui-m py-ui-n rounded-ui-s border border-ui-border bg-ui-surface-raised text-ui-primary text-ui-m hover:border-ui-border-strong focus:border-ui-accent focus:shadow-ui-focus outline-none transition-colors duration-ui-fast ease-ui-out"
         >
           {ROTATIONS.map((r) => (
             <option key={r} value={r}>
@@ -73,7 +73,7 @@ export function DisplayGeometryForm({
         </select>
       </label>
       {!fits && (
-        <div className="text-ui-s text-ui-danger">
+        <div className="text-sm" style={{ color: "var(--danger)" }}>
           The image extends past the {overflowX ? "right" : "bottom"} edge of the
           screen.
         </div>

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.features.bitmap.renderers.base import url_to_bmp
+from app.features.bitmap.renderers.base import NATIVE_SIZE, Size, url_to_bmp
 
 _FALLBACK_HTML = """\
 <!doctype html><html><head><meta charset="utf-8"><style>
@@ -18,9 +18,9 @@ class CustomUrlRenderer:
     def __init__(self, url: str | None) -> None:
         self.url: str | None = url
 
-    async def render(self) -> bytes:
+    async def render(self, size: Size = NATIVE_SIZE) -> bytes:
         if not self.url:
             from app.features.bitmap.renderers.base import html_to_bmp
 
-            return await html_to_bmp(_FALLBACK_HTML)
-        return await url_to_bmp(self.url)
+            return await html_to_bmp(_FALLBACK_HTML, size=size)
+        return await url_to_bmp(self.url, size=size)

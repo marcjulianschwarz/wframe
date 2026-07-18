@@ -20,9 +20,15 @@ SCALE = 3
 
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
 
+# A (width, height) render target in device pixels. Dashboards render their HTML
+# *at* this size so the layout reflows for it, rather than being drawn at native
+# size and then stretched. Defaults to the native panel size.
+Size = tuple[int, int]
+NATIVE_SIZE: Size = (WIDTH, HEIGHT)
+
 
 class DashboardRenderer(Protocol):
-    async def render(self) -> bytes: ...
+    async def render(self, size: Size = NATIVE_SIZE) -> bytes: ...
 
 
 @dataclass(frozen=True)
@@ -53,12 +59,14 @@ class Geometry:
 
 
 def _composite(bmp_bytes: bytes, geom: Geometry) -> bytes:
-    """Scale a 1-bit BMP to the image size and paste it onto a screen canvas.
+    """Paste a 1-bit BMP (already rendered at the image size) onto a screen canvas.
 
-    The margin outside the drawn image is filled black (0); on this epaper an
-    unlit/0 pixel reads as black, so a black margin keeps the surround dark.
-    The whole screen is then rotated clockwise by ``geom.rotation`` degrees;
-    90/270 swap the output's width and height.
+    The dashboard is rendered directly at ``image_width``×``image_height`` (its
+    HTML reflows for that size), so no scaling happens here — a mismatch is only
+    a defensive resize. The margin outside the drawn image is filled black (0);
+    on this epaper an unlit/0 pixel reads as black, so a black margin keeps the
+    surround dark. The whole screen is then rotated clockwise by
+    ``geom.rotation`` degrees; 90/270 swap the output's width and height.
     """
     img = Image.open(BytesIO(bmp_bytes)).convert("1")
     if img.size != (geom.image_width, geom.image_height):
@@ -84,19 +92,24 @@ async def composite_onto_screen(bmp_bytes: bytes, geom: Geometry) -> bytes:
     return await asyncio.to_thread(_composite, bmp_bytes, geom)
 
 
-def _to_bmp(png_bytes: bytes, threshold: int) -> bytes:
-    """Downscale a supersampled PNG to WIDTH×HEIGHT and threshold to 1-bit."""
+def _to_bmp(png_bytes: bytes, threshold: int, size: Size) -> bytes:
+    """Downscale a supersampled PNG to ``size`` and threshold to 1-bit."""
     img = Image.open(BytesIO(png_bytes)).convert("L")
-    if img.size != (WIDTH, HEIGHT):
-        img = img.resize((WIDTH, HEIGHT), Image.Resampling.LANCZOS)
+    if img.size != size:
+        img = img.resize(size, Image.Resampling.LANCZOS)
     bw = img.point(lambda v: 255 if v >= threshold else 0, mode="1")  # pyright: ignore[reportOperatorIssue]
     out = BytesIO()
     bw.save(out, "BMP")
     return out.getvalue()
 
 
-async def html_to_bmp(html: str, *, threshold: int = THRESHOLD, scale: int = SCALE) -> bytes:
-    """Render HTML to a 1-bit BMP via Playwright.
+async def html_to_bmp(
+    html: str, *, size: Size = NATIVE_SIZE, threshold: int = THRESHOLD, scale: int = SCALE
+) -> bytes:
+    """Render HTML to a 1-bit BMP via Playwright, laid out at ``size``.
+
+    The browser viewport is set to ``size`` so the HTML reflows for the actual
+    render dimensions instead of being drawn at native size and stretched later.
 
     ``scale`` supersamples outline fonts so antialiased edges survive the
     1-bit threshold. Pass ``scale=1`` when the page uses a pixel/bitmap font
@@ -104,27 +117,29 @@ async def html_to_bmp(html: str, *, threshold: int = THRESHOLD, scale: int = SCA
     """
     from playwright.async_api import async_playwright
 
+    width, height = size
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page(
-            viewport={"width": WIDTH, "height": HEIGHT},
+            viewport={"width": width, "height": height},
             device_scale_factor=scale,
         )
         await page.set_content(html, wait_until="networkidle")
         png = await page.screenshot(type="png")
         await browser.close()
 
-    return await asyncio.to_thread(_to_bmp, png, threshold)
+    return await asyncio.to_thread(_to_bmp, png, threshold, size)
 
 
-async def url_to_bmp(url: str, *, threshold: int = THRESHOLD) -> bytes:
-    """Navigate to a live URL and rasterize the rendered page to a 1-bit BMP."""
+async def url_to_bmp(url: str, *, size: Size = NATIVE_SIZE, threshold: int = THRESHOLD) -> bytes:
+    """Navigate to a live URL and rasterize the rendered page to a 1-bit BMP at ``size``."""
     from playwright.async_api import async_playwright
 
+    width, height = size
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page(
-            viewport={"width": WIDTH, "height": HEIGHT},
+            viewport={"width": width, "height": height},
             device_scale_factor=SCALE,
         )
         try:
@@ -135,7 +150,7 @@ async def url_to_bmp(url: str, *, threshold: int = THRESHOLD) -> bytes:
         png = await page.screenshot(type="png")
         await browser.close()
 
-    return await asyncio.to_thread(_to_bmp, png, threshold)
+    return await asyncio.to_thread(_to_bmp, png, threshold, size)
 
 
 async def image_to_bmp(img: Image.Image) -> bytes:

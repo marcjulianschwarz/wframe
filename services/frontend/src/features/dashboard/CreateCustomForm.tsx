@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Button } from "@/ui/concepts/button/component";
-import { Input } from "@/components/Input";
 import { api, type Dashboard } from "@/lib/api";
 import { useSession } from "@/lib/session";
 
@@ -57,38 +55,41 @@ export function CreateCustomForm({ onCreated }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-ui-s">
-      <label className="text-ui-s text-ui-secondary flex flex-col gap-ui-xs">
-        Name
-        <Input
+    <div className="flex flex-col gap-3">
+      <label className="flex flex-col gap-1">
+        <span className="field-label">Name</span>
+        <input
+          className="field"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="My dashboard"
           disabled={busy}
         />
       </label>
-      <label className="text-ui-s text-ui-secondary flex flex-col gap-ui-xs">
-        Description <span className="opacity-60">(optional)</span>
-        <Input
+      <label className="flex flex-col gap-1">
+        <span className="field-label">Description (optional)</span>
+        <input
+          className="field"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="What this shows"
           disabled={busy}
         />
       </label>
-      <label className="text-ui-s text-ui-secondary flex flex-col gap-ui-xs">
-        Slug
-        <Input
+      <label className="flex flex-col gap-1">
+        <span className="field-label">Slug</span>
+        <input
+          className="field"
           value={slug}
           onChange={(e) => setSlugEdited(slugify(e.target.value))}
           placeholder="my-dashboard"
           disabled={busy}
-          className="font-ui-mono"
         />
       </label>
-      <label className="text-ui-s text-ui-secondary flex flex-col gap-ui-xs">
-        URL
-        <Input
+      <label className="flex flex-col gap-1">
+        <span className="field-label">URL</span>
+        <input
+          className="field"
           type="url"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
@@ -97,14 +98,18 @@ export function CreateCustomForm({ onCreated }: Props) {
         />
       </label>
       {url.length > 0 && !urlValid && (
-        <div className="text-ui-s text-ui-danger">
+        <div className="text-sm" style={{ color: "var(--danger)" }}>
           Enter a full URL starting with http:// or https://
         </div>
       )}
-      {error && <div className="text-ui-s text-ui-danger">{error}</div>}
-      <Button variant="primary" className="self-start" onClick={submit} disabled={!canSubmit}>
+      {error && (
+        <div className="text-sm" style={{ color: "var(--danger)" }}>
+          {error}
+        </div>
+      )}
+      <button className="btn btn-accent self-start" onClick={submit} disabled={!canSubmit}>
         {busy ? "Creating…" : "Create dashboard"}
-      </Button>
+      </button>
     </div>
   );
 }

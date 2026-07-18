@@ -1,5 +1,3 @@
-import { Button } from "@/ui/concepts/button/component";
-import { Input } from "@/components/Input";
 import { type EpaperRefresh } from "@/lib/api";
 
 /** Controlled form for stop/resume and the redraw interval. The parent owns the
@@ -15,24 +13,25 @@ export function RefreshControl({
   disabled?: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-ui-s">
-      <div className="flex items-center gap-ui-s">
-        <span className="text-ui-s text-ui-secondary flex-1">
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-soft flex-1">
           {value.paused
             ? "Stopped — the display is frozen on its last image."
             : "Running — the display redraws on the interval below."}
         </span>
-        <Button
-          variant={value.paused ? "primary" : "ghost"}
+        <button
+          className={value.paused ? "btn btn-accent" : "btn"}
           disabled={disabled}
           onClick={() => onChange({ ...value, paused: !value.paused })}
         >
           {value.paused ? "Resume" : "Stop"}
-        </Button>
+        </button>
       </div>
-      <label className="flex flex-col gap-ui-xs">
-        <span className="text-ui-s text-ui-secondary">Refresh interval (seconds)</span>
-        <Input
+      <label className="flex flex-col gap-1">
+        <span className="field-label">Refresh interval (seconds)</span>
+        <input
+          className="field"
           type="number"
           inputMode="numeric"
           min={0}
@@ -44,7 +43,7 @@ export function RefreshControl({
           disabled={disabled}
         />
       </label>
-      <span className="text-ui-s text-ui-secondary">
+      <span className="text-xs text-soft">
         0 redraws on every device poll (~5s). Higher values save panel wear.
       </span>
     </div>

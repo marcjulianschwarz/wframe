@@ -4,7 +4,7 @@ import random
 import re
 from datetime import datetime
 
-from app.features.bitmap.renderers.base import TEMPLATES_DIR, html_to_bmp
+from app.features.bitmap.renderers.base import NATIVE_SIZE, TEMPLATES_DIR, Size, html_to_bmp
 
 CONDS = ["Partly Cloudy", "Clear", "Light Rain", "Overcast", "Sunny", "Foggy", "Windy"]
 ICONS = ["&#9728;", "&#9729;", "&#9730;", "&#9925;", "&#9928;"]
@@ -35,7 +35,7 @@ def dash_mutate(s: str) -> str:
 
 
 class DashboardRendererImpl:
-    async def render(self) -> bytes:
+    async def render(self, size: Size = NATIVE_SIZE) -> bytes:
         html = (TEMPLATES_DIR / "dashboard.html").read_text()
         html = dash_mutate(html)
-        return await html_to_bmp(html)
+        return await html_to_bmp(html, size=size)
