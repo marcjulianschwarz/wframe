@@ -70,10 +70,10 @@ def render_html(
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <style>
   *{{box-sizing:border-box;margin:0;padding:0;}}
-  html,body{{width:100vw;height:100vh;background:#000;color:#fff;
+  html,body{{width:100vw;height:100vh;background:#fff;color:#000;
     font-family:{SANS_STACK};-webkit-font-smoothing:antialiased;}}
   body{{padding:{round(pad_px * 0.45)}px;}}
-  .frame{{width:100%;height:100%;border:{border_px}px solid #fff;
+  .frame{{width:100%;height:100%;border:{border_px}px solid #000;
     border-radius:{round(short_edge * 0.03)}px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     text-align:center;padding:{pad_px}px;position:relative;}}
@@ -83,7 +83,7 @@ def render_html(
   /* Small corner ticks for a bit of decoration. */
   .frame::before,.frame::after{{content:"";position:absolute;
     width:{round(short_edge * 0.06)}px;height:{round(short_edge * 0.06)}px;
-    border-color:#fff;border-style:solid;border-width:0;}}
+    border-color:#000;border-style:solid;border-width:0;}}
   .frame::before{{top:{round(pad_px * 0.5)}px;left:{round(pad_px * 0.5)}px;
     border-top-width:{border_px}px;border-left-width:{border_px}px;}}
   .frame::after{{bottom:{round(pad_px * 0.5)}px;right:{round(pad_px * 0.5)}px;
@@ -93,7 +93,7 @@ def render_html(
     margin-bottom:{round(heading_px * 0.35)}px;}}
   h1{{font-size:{heading_px}px;font-weight:800;line-height:1.05;
     letter-spacing:-1px;}}
-  .rule{{width:{rule_w}px;height:{border_px}px;background:#fff;
+  .rule{{width:{rule_w}px;height:{border_px}px;background:#000;
     margin:{round(heading_px * 0.5)}px 0;opacity:0.9;}}
   .body{{display:flex;flex-direction:column;gap:{round(body_px * 0.5)}px;
     max-width:100%;}}

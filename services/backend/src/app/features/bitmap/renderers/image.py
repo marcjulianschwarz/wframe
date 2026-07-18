@@ -20,7 +20,7 @@ from app.features.bitmap.renderers.dither import ImageAlgorithm, ImageFit, contr
 
 _NO_IMAGE_HTML = """\
 <!doctype html><html><head><meta charset="utf-8"><style>
-  html,body{margin:0;width:100vw;height:100vh;background:#000;color:#fff;}
+  html,body{margin:0;width:100vw;height:100vh;background:#fff;color:#000;}
   body{display:flex;flex-direction:column;align-items:center;justify-content:center;
        font-family:-apple-system,Helvetica,Arial,sans-serif;text-align:center;padding:40px;}
   h1{font-size:40px;font-weight:700;margin-bottom:20px;}
@@ -42,11 +42,9 @@ def render_bmp(
     fitted = fit(src, size, fit_mode)
     adjusted = contrast(fitted, contrast_factor)
     bw = dither(adjusted, algorithm)
-    # On this epaper an unlit/0 pixel reads as black, so the saved 1-bit bitmap
-    # must be inverted relative to a normal screen: a bright photo pixel needs to
-    # map to 0 (black-on-the-panel) to look right. point() over mode "1" flips
-    # each pixel without re-thresholding, so the dither pattern is preserved.
-    bw = bw.point(lambda v: 0 if v else 1, mode="1")
+    # The BMP is saved in normal polarity — a bright photo pixel stays 1 (white).
+    # The firmware inverts once for the panel (see streaming_bmp.cpp), so no
+    # per-renderer flip is needed here.
     out = BytesIO()
     bw.save(out, "BMP")
     return out.getvalue()

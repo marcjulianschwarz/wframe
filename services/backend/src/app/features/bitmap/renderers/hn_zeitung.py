@@ -155,17 +155,17 @@ def render_html(items: list[Item]) -> str:
      stories overflow a short panel. */
   html, body {
     width: 100vw; min-height: 100vh;
-    background: #000; color: #fff;
+    background: #fff; color: #000;
     font-family: sans-serif;
   }
   /* Flex column so the frame stretches to the full viewport height and its
      border reaches the bottom edge on any panel size. */
   body { padding: 26px; min-height: 100vh; display: flex; }
-  .frame { border: 2px solid #fff; padding: 24px 22px; flex: 1;
+  .frame { border: 2px solid #000; padding: 24px 22px; flex: 1;
     display: flex; flex-direction: column; }
   .masthead {
     text-align: center;
-    border-bottom: 2px solid #fff;
+    border-bottom: 2px solid #000;
     padding-bottom: 13px;
     margin-bottom: 18px;
   }
@@ -192,7 +192,7 @@ def render_html(items: list[Item]) -> str:
     padding: 0 0 13px;
     display: flex;
     flex-direction: column;
-    border-bottom: 2px solid #fff;
+    border-bottom: 2px solid #000;
   }
   article:last-child { border-bottom: none; padding-bottom: 0; }
   article .num {
@@ -216,7 +216,7 @@ def render_html(items: list[Item]) -> str:
   }
   .footer {
     margin-top: 18px; padding-top: 13px;
-    border-top: 2px solid #fff;
+    border-top: 2px solid #000;
     display: flex; justify-content: space-between;
     font-size: 13px; font-weight: 700;
     text-transform: uppercase;

@@ -16,6 +16,7 @@ from app.features.dashboard.dashboard_router import get_dashboard_service
 from app.features.dashboard.dashboard_service import DashboardService
 from app.features.epaper import force_serve
 from app.features.epaper.epaper_models import Epaper
+from app.features.epaper.firmware_config import build_firmware_config
 from app.features.epaper.epaper_repository import EpaperRepo
 from app.features.epaper.epaper_schemas import (
     EpaperCreate,
@@ -26,6 +27,7 @@ from app.features.epaper.epaper_schemas import (
     EpaperUpdate,
 )
 from app.features.epaper.epaper_service import EpaperService
+from app.settings import settings
 
 router = APIRouter(tags=["epaper"])
 
@@ -87,6 +89,21 @@ async def create_my_epaper(body: EpaperCreate, auth: AuthDep, service: EpaperSer
 @router.get("/epapers/{epaper_id}", response_model=EpaperRead)
 async def get_my_epaper(epaper_id: uuid.UUID, auth: AuthDep, service: EpaperServiceDep) -> EpaperRead:
     return await service.get(auth.user.id, epaper_id)
+
+
+@router.get("/epapers/{epaper_id}/config.yaml")
+async def download_my_epaper_config(
+    epaper_id: uuid.UUID, auth: AuthDep, service: EpaperServiceDep
+) -> Response:
+    """The ready-to-flash ESPHome ``wframe.yaml`` for this device, with its image
+    URL baked in. WiFi stays as ``!secret`` refs — no credentials are embedded."""
+    epaper = await service.owned(auth.user.id, epaper_id)
+    bitmap_url = f"{settings.BACKEND_URL}/e/{epaper.slug}.bmp"
+    return Response(
+        content=build_firmware_config(bitmap_url),
+        media_type="application/x-yaml",
+        headers={"Content-Disposition": 'attachment; filename="wframe.yaml"'},
+    )
 
 
 @router.patch("/epapers/{epaper_id}", response_model=EpaperRead)

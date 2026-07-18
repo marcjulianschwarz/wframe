@@ -127,26 +127,26 @@ def _fmt(n: int) -> str:
 # Dither tiles, lightest→darkest. Each is an 8×8 pure black/white pattern, so it
 # survives the 1-bit threshold as a real *texture* (not a grey that snaps to one
 # tone) — that's what lets adjacent language segments read apart on epaper.
-# Listed densest-distinct so neighbours never look alike: solid white, dense
+# Listed densest-distinct so neighbours never look alike: solid black, dense
 # dots, diagonal hatch, sparse dots, fine checker.
 _DITHERS = [
-    # solid white
-    '<rect width="8" height="8" fill="#fff"/>',
-    # dense dots (white on black)
-    '<rect width="8" height="8" fill="#000"/>'
-    + '<rect x="1" y="1" width="2" height="2" fill="#fff"/>'
-    + '<rect x="5" y="1" width="2" height="2" fill="#fff"/>'
-    + '<rect x="1" y="5" width="2" height="2" fill="#fff"/>'
-    + '<rect x="5" y="5" width="2" height="2" fill="#fff"/>',
+    # solid black
+    '<rect width="8" height="8" fill="#000"/>',
+    # dense dots (black on white)
+    '<rect width="8" height="8" fill="#fff"/>'
+    + '<rect x="1" y="1" width="2" height="2" fill="#000"/>'
+    + '<rect x="5" y="1" width="2" height="2" fill="#000"/>'
+    + '<rect x="1" y="5" width="2" height="2" fill="#000"/>'
+    + '<rect x="5" y="5" width="2" height="2" fill="#000"/>',
     # diagonal hatch
-    '<rect width="8" height="8" fill="#000"/>'
-    + '<path d="M0 8 L8 0 M-2 2 L2 -2 M6 10 L10 6" stroke="#fff" stroke-width="2"/>',
+    '<rect width="8" height="8" fill="#fff"/>'
+    + '<path d="M0 8 L8 0 M-2 2 L2 -2 M6 10 L10 6" stroke="#000" stroke-width="2"/>',
     # sparse dots
-    '<rect width="8" height="8" fill="#000"/><rect x="3" y="3" width="2" height="2" fill="#fff"/>',
+    '<rect width="8" height="8" fill="#fff"/><rect x="3" y="3" width="2" height="2" fill="#000"/>',
     # fine checker
-    '<rect width="8" height="8" fill="#000"/>'
-    + '<rect x="0" y="0" width="4" height="4" fill="#fff"/>'
-    + '<rect x="4" y="4" width="4" height="4" fill="#fff"/>',
+    '<rect width="8" height="8" fill="#fff"/>'
+    + '<rect x="0" y="0" width="4" height="4" fill="#000"/>'
+    + '<rect x="4" y="4" width="4" height="4" fill="#000"/>',
 ]
 
 
@@ -172,24 +172,24 @@ def _lang_bar(langs: dict[str, int]) -> str:
     )
 
     segs: list[str] = []
-    seps: list[str] = []  # 1px black gaps so neighbouring textures don't merge
+    seps: list[str] = []  # 1px white gaps so neighbouring textures don't merge
     x = 0.0
     for i, (_, v) in enumerate(items):
         seg_w = w * v / total
         segs.append(f'<rect x="{x:.1f}" y="0" width="{seg_w:.1f}" height="{bar_h}" fill="url(#dz{i})"/>')
         if i > 0:
-            seps.append(f'<rect x="{x:.1f}" y="0" width="1.5" height="{bar_h}" fill="#000"/>')
+            seps.append(f'<rect x="{x:.1f}" y="0" width="1.5" height="{bar_h}" fill="#fff"/>')
         x += seg_w
     bar = (
         f'<svg viewBox="0 0 {w} {bar_h}" preserveAspectRatio="none" '
         f'xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">'
         f"<defs>{defs}</defs>"
-        f'<rect x="0" y="0" width="{w}" height="{bar_h}" fill="#000" '
-        f'stroke="#fff" stroke-width="1" vector-effect="non-scaling-stroke"/>'
+        f'<rect x="0" y="0" width="{w}" height="{bar_h}" fill="#fff" '
+        f'stroke="#000" stroke-width="1" vector-effect="non-scaling-stroke"/>'
         f"{''.join(segs)}{''.join(seps)}"
-        # redraw the white frame on top so segment fills don't cover it
+        # redraw the black frame on top so segment fills don't cover it
         f'<rect x="0" y="0" width="{w}" height="{bar_h}" fill="none" '
-        f'stroke="#fff" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>'
+        f'stroke="#000" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>'
     )
 
     # Legend swatches reuse the same dither tiles as tiny inline SVGs.
@@ -200,7 +200,7 @@ def _lang_bar(langs: dict[str, int]) -> str:
             f'<svg class="sw" width="16" height="16" viewBox="0 0 8 8" '
             f'shape-rendering="crispEdges">{_DITHERS[i]}'
             f'<rect x="0" y="0" width="8" height="8" fill="none" '
-            f'stroke="#fff" stroke-width="0.5"/></svg>'
+            f'stroke="#000" stroke-width="0.5"/></svg>'
         )
         legend.append(f'<div class="leg">{sw}{escape(name)} {pct}%</div>')
     return f'<div class="bar">{bar}</div><div class="legend">{"".join(legend)}</div>'
@@ -233,18 +233,18 @@ def render_html(profile: Profile, agg: Aggregate) -> str:
   *{{box-sizing:border-box;margin:0;padding:0;}}
   /* Fill the actual render viewport instead of a fixed 480×800, so the whole
      layout reflows when the device geometry changes. */
-  html,body{{width:100vw;height:100vh;background:#000;color:#fff;
+  html,body{{width:100vw;height:100vh;background:#fff;color:#000;
     font-family:{SANS_STACK};}}
   body{{padding:26px;}}
-  .frame{{border:2px solid #fff;padding:24px 22px;height:100%;
+  .frame{{border:2px solid #000;padding:24px 22px;height:100%;
     display:flex;flex-direction:column;}}
-  .head{{text-align:center;border-bottom:2px solid #fff;
+  .head{{text-align:center;border-bottom:2px solid #000;
     padding-bottom:14px;margin-bottom:16px;}}
   .head .name{{font-size:34px;font-weight:700;line-height:1.05;}}
   .head .login{{font-size:15px;margin-top:4px;}}
   .head .bio{{font-size:13px;line-height:1.5;margin-top:10px;}}
   .stats{{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;
-    text-align:center;border-bottom:2px solid #fff;padding-bottom:16px;
+    text-align:center;border-bottom:2px solid #000;padding-bottom:16px;
     margin-bottom:16px;}}
   .stat .v{{font-size:26px;font-weight:700;}}
   .stat .k{{font-size:12px;text-transform:uppercase;margin-top:2px;}}
@@ -252,7 +252,7 @@ def render_html(profile: Profile, agg: Aggregate) -> str:
     margin-bottom:10px;}}
   .repos{{flex:1;}}
   .repo{{display:flex;justify-content:space-between;font-size:15px;
-    padding:5px 0;border-bottom:1px solid #fff;}}
+    padding:5px 0;border-bottom:1px solid #000;}}
   .repo .rs{{font-weight:700;white-space:nowrap;padding-left:12px;}}
   .langs{{margin-top:16px;}}
   /* The bar stretches to fill its width (preserveAspectRatio="none" +
@@ -263,8 +263,8 @@ def render_html(profile: Profile, agg: Aggregate) -> str:
     font-size:13px;}}
   .leg{{display:flex;align-items:center;}}
   .sw{{display:inline-block;width:11px;height:11px;margin-right:5px;
-    border:1px solid #fff;}}
-  .footer{{margin-top:16px;padding-top:13px;border-top:2px solid #fff;
+    border:1px solid #000;}}
+  .footer{{margin-top:16px;padding-top:13px;border-top:2px solid #000;
     display:flex;justify-content:space-between;font-size:13px;font-weight:700;
     text-transform:uppercase;}}
 </style></head><body>
@@ -300,7 +300,7 @@ def render_html(profile: Profile, agg: Aggregate) -> str:
 def _no_username_html() -> str:
     return f"""\
 <!doctype html><html><head><meta charset="utf-8"><style>
-  html,body{{margin:0;width:480px;height:800px;background:#000;color:#fff;
+  html,body{{margin:0;width:480px;height:800px;background:#fff;color:#000;
     font-family:{SANS_STACK};}}
   body{{display:flex;flex-direction:column;align-items:center;
     justify-content:center;text-align:center;padding:40px;}}

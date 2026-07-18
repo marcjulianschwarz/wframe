@@ -197,10 +197,16 @@ void StreamingBmp::update() {
   // BEFORE drawing any pixel, so a 204/non-200/non-BMP response returns SKIP or
   // ERROR with the display buffer untouched. On 200+valid it streams pixels
   // straight into the display buffer, feeding the watchdog as it goes.
+  // The 7.50inV2p Waveshare driver inverts on the physical push: a "white"
+  // (COLOR_ON) pixel in the display buffer comes out as black ink on the panel.
+  // The BMPs we serve are authored in normal polarity (a set bit = white/paper),
+  // so we invert here to cancel the driver's inversion: a set bit is drawn as
+  // black into the buffer, which the panel then flips back to white. This lets
+  // the dashboards be authored as ordinary black-on-white pages.
   FetchResult result = stream_pixels(
       url_, x_off_, y_off_, [this](int x, int y, bool white) {
         display_->draw_pixel_at(x, y,
-                                white ? Color(0xFFFFFFu) : Color(0x000000u));
+                                white ? Color(0x000000u) : Color(0xFFFFFFu));
       });
 
   if (result != FetchResult::OK) {

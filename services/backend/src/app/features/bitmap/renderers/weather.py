@@ -89,7 +89,7 @@ WMO = {
 def _no_location_html() -> str:
     return f"""\
 <!doctype html><html><head><meta charset="utf-8"><style>
-  html,body{{margin:0;width:480px;height:800px;background:#000;color:#fff;
+  html,body{{margin:0;width:480px;height:800px;background:#fff;color:#000;
     font-family:{SANS_STACK};}}
   body{{display:flex;flex-direction:column;align-items:center;
     justify-content:center;text-align:center;padding:40px;}}
@@ -119,7 +119,7 @@ async def _fetch(lat: float, lon: float) -> Forecast:
 
 
 def svg_line_chart(times: list[str], temps: list[float], now_idx: int) -> str:
-    """A 24h line chart as inline SVG, 1px white on black, with a dot + vertical
+    """A 24h line chart as inline SVG, 1px black on white, with a dot + vertical
     guide on ``now_idx``. Shared with the Home Assistant renderer; both feed it a
     timestamp list and a value list, so it's deliberately series-agnostic."""
     # Width matches the frame's inner content box: 480 − 2×26 body padding
@@ -151,16 +151,16 @@ def svg_line_chart(times: list[str], temps: list[float], now_idx: int) -> str:
         anchor = "start" if i == 0 else "end" if i >= n - 1 else "middle"
         ticks.append(
             f'<line x1="{x(i):.1f}" y1="{pad_t + ih}" x2="{x(i):.1f}" '
-            + f'y2="{pad_t + ih + 4}" stroke="#fff" stroke-width="1" vector-effect="non-scaling-stroke"/>'
-            + f'<text x="{x(i):.1f}" y="{h - 6}" fill="#fff" font-size="11" '
+            + f'y2="{pad_t + ih + 4}" stroke="#000" stroke-width="1" vector-effect="non-scaling-stroke"/>'
+            + f'<text x="{x(i):.1f}" y="{h - 6}" fill="#000" font-size="11" '
             + f'font-family="sans-serif" text-anchor="{anchor}">{hh}</text>'
         )
 
     nx, ny = x(now_idx), y(temps[now_idx])
     now_marker = (
         f'<line x1="{nx:.1f}" y1="{pad_t}" x2="{nx:.1f}" y2="{pad_t + ih}" '
-        f'stroke="#fff" stroke-width="1" stroke-dasharray="2 3" vector-effect="non-scaling-stroke"/>'
-        f'<circle cx="{nx:.1f}" cy="{ny:.1f}" r="4" fill="#fff"/>'
+        f'stroke="#000" stroke-width="1" stroke-dasharray="2 3" vector-effect="non-scaling-stroke"/>'
+        f'<circle cx="{nx:.1f}" cy="{ny:.1f}" r="4" fill="#000"/>'
     )
 
     # No fixed width/height: the SVG stretches to fill its CSS box in both axes
@@ -169,15 +169,15 @@ def svg_line_chart(times: list[str], temps: list[float], now_idx: int) -> str:
     # of how far the viewBox is stretched, so the strokes never smear.
     return f'''<svg viewBox="0 0 {w} {h}" preserveAspectRatio="none"
   xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-  <rect x="0" y="0" width="{w}" height="{h}" fill="#000"/>
-  <text x="{pad_l}" y="11" fill="#fff" font-size="11"
+  <rect x="0" y="0" width="{w}" height="{h}" fill="#fff"/>
+  <text x="{pad_l}" y="11" fill="#000" font-size="11"
     font-family="sans-serif">{hi:.0f}&deg;</text>
-  <text x="{pad_l}" y="{pad_t + ih}" fill="#fff" font-size="11"
+  <text x="{pad_l}" y="{pad_t + ih}" fill="#000" font-size="11"
     font-family="sans-serif">{lo:.0f}&deg;</text>
   <line x1="{pad_l}" y1="{pad_t + ih}" x2="{pad_l + iw}" y2="{pad_t + ih}"
-    stroke="#fff" stroke-width="1" vector-effect="non-scaling-stroke"/>
+    stroke="#000" stroke-width="1" vector-effect="non-scaling-stroke"/>
   {now_marker}
-  <polyline points="{pts}" fill="none" stroke="#fff" stroke-width="2"
+  <polyline points="{pts}" fill="none" stroke="#000" stroke-width="2"
     stroke-linejoin="round" stroke-linecap="round"
     vector-effect="non-scaling-stroke"/>
   {"".join(ticks)}
@@ -226,14 +226,14 @@ def render_html(data: Forecast, place: str | None) -> str:
   *{{box-sizing:border-box;margin:0;padding:0;}}
   /* Fill the actual render viewport instead of a fixed 480×800, so the whole
      layout reflows when the device geometry changes. */
-  html,body{{width:100vw;height:100vh;background:#000;color:#fff;
+  html,body{{width:100vw;height:100vh;background:#fff;color:#000;
     font-family:{SANS_STACK};}}
   body{{padding:26px;}}
   /* Fill the full height so the border reaches the bottom; the chart row grows
      to take the slack between the fixed-height header and stats. */
-  .frame{{border:2px solid #fff;padding:24px 22px;height:100%;
+  .frame{{border:2px solid #000;padding:24px 22px;height:100%;
     display:flex;flex-direction:column;}}
-  .head{{text-align:center;border-bottom:2px solid #fff;
+  .head{{text-align:center;border-bottom:2px solid #000;
     padding-bottom:13px;margin-bottom:18px;}}
   .head .place{{font-size:13px;font-weight:700;text-transform:uppercase;}}
   .head .now{{font-size:78px;font-weight:700;line-height:1;margin:8px 0 4px;}}
@@ -248,10 +248,10 @@ def render_html(data: Forecast, place: str | None) -> str:
      keeping crisp 1-bit lines. */
   .chart svg{{display:block;width:100%;flex:1;min-height:0;}}
   .stats{{display:grid;grid-template-columns:1fr 1fr;gap:13px;
-    border-top:2px solid #fff;padding-top:16px;}}
+    border-top:2px solid #000;padding-top:16px;}}
   .stat .k{{font-size:13px;text-transform:uppercase;}}
   .stat .v{{font-size:26px;font-weight:700;}}
-  .footer{{margin-top:18px;padding-top:13px;border-top:2px solid #fff;
+  .footer{{margin-top:18px;padding-top:13px;border-top:2px solid #000;
     display:flex;justify-content:flex-end;font-size:13px;font-weight:700;
     text-transform:uppercase;}}
 </style></head><body>

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Check, Pause, Play, RefreshCw, Ruler, Settings, Timer } from "lucide-react";
+import { ArrowLeft, Check, Download, Pause, Play, RefreshCw, Ruler, Settings, Timer } from "lucide-react";
 import { Modal } from "@/components/Modal";
 import { DisplayGeometryForm } from "@/features/epaper/DisplayGeometryForm";
 import { RefreshControl } from "@/features/epaper/RefreshControl";
 import { EpaperEditModal } from "@/features/epaper/EpaperEditModal";
 import {
+  api,
   type Dashboard,
   type Epaper,
   type EpaperGeometry,
@@ -37,7 +38,7 @@ type SettingsModal = "settings" | "geometry" | "refresh" | null;
 export function DevicePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { notify } = useSession();
+  const { token, notify } = useSession();
   const t = useT();
   const dash = useDashboards();
   const epapers = useEpapers();
@@ -103,6 +104,15 @@ export function DevicePage() {
       },
       onError: fail,
     });
+  }
+
+  async function downloadConfig() {
+    try {
+      await api.downloadEpaperConfig(token, epaper!.id);
+      notify("success", t("device.downloadedConfig"));
+    } catch (e) {
+      fail(e);
+    }
   }
 
   function openGeometry() {
@@ -198,6 +208,9 @@ export function DevicePage() {
             </button>
             <button className="icon-btn" title={t("device.geometry")} onClick={openGeometry}>
               <Ruler size={16} />
+            </button>
+            <button className="icon-btn" title={t("device.downloadConfig")} onClick={() => void downloadConfig()}>
+              <Download size={16} />
             </button>
           </div>
         </div>

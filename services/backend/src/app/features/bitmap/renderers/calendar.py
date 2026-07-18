@@ -29,8 +29,10 @@ from app.features.bitmap.bitmap_models import CalendarConfig
 from app.features.bitmap.renderers.base import NATIVE_SIZE, SANS_STACK, SCALE, Size, html_to_bmp
 
 # How many events fit the 800px agenda, and how far back "upcoming" starts
-# (midnight today, so all-day events happening today still show).
-MAX_EVENTS = 9
+# (midnight today, so all-day events happening today still show). Titles are
+# clamped to a single line so every row is the same height and this many rows
+# always fit the frame without overflowing past the border.
+MAX_EVENTS = 8
 
 
 @dataclass
@@ -149,7 +151,7 @@ async def _fetch(url: str) -> str:
 def _no_feed_html() -> str:
     return f"""\
 <!doctype html><html><head><meta charset="utf-8"><style>
-  html,body{{margin:0;width:100vw;height:100vh;background:#000;color:#fff;
+  html,body{{margin:0;width:100vw;height:100vh;background:#fff;color:#000;
     font-family:{SANS_STACK};}}
   body{{display:flex;flex-direction:column;align-items:center;
     justify-content:center;text-align:center;padding:40px;}}
@@ -165,7 +167,7 @@ def _no_feed_html() -> str:
 def _error_html(message: str) -> str:
     return f"""\
 <!doctype html><html><head><meta charset="utf-8"><style>
-  html,body{{margin:0;width:100vw;height:100vh;background:#000;color:#fff;
+  html,body{{margin:0;width:100vw;height:100vh;background:#fff;color:#000;
     font-family:{SANS_STACK};}}
   body{{display:flex;flex-direction:column;align-items:center;
     justify-content:center;text-align:center;padding:40px;}}
@@ -212,36 +214,36 @@ def render_html(events: list[Event], now: datetime) -> str:
 <meta name="viewport" content="width=480, initial-scale=1.0">
 <style>
   *{{box-sizing:border-box;margin:0;padding:0;}}
-  html,body{{width:100vw;height:100vh;background:#000;color:#fff;
+  html,body{{width:100vw;height:100vh;background:#fff;color:#000;
     font-family:{SANS_STACK};}}
   body{{padding:26px;}}
-  .frame{{border:2px solid #fff;padding:24px 22px;height:100%;
+  .frame{{border:2px solid #000;padding:24px 22px;height:100%;
     display:flex;flex-direction:column;}}
-  .head{{text-align:center;border-bottom:2px solid #fff;
+  .head{{text-align:center;border-bottom:2px solid #000;
     padding-bottom:13px;margin-bottom:8px;}}
   .head .kicker{{font-size:13px;font-weight:700;text-transform:uppercase;
     letter-spacing:2px;}}
   .head .stamp{{font-size:20px;font-weight:700;line-height:1.2;margin:6px 0 0;}}
-  .rows{{flex:1;display:flex;flex-direction:column;}}
+  .rows{{flex:1;display:flex;flex-direction:column;overflow:hidden;}}
   .row{{display:flex;align-items:stretch;gap:14px;
-    border-bottom:1px solid #fff;padding:11px 0;}}
+    border-bottom:1px solid #000;padding:11px 0;}}
   .rail{{width:58px;flex:none;text-align:center;
     display:flex;flex-direction:column;justify-content:center;
-    border-right:2px solid #fff;padding-right:10px;}}
+    border-right:2px solid #000;padding-right:10px;}}
   .rail .wd{{font-size:11px;font-weight:700;letter-spacing:1px;}}
   .rail .day{{font-size:28px;font-weight:800;line-height:1;}}
   .rail .mon{{font-size:11px;font-weight:700;letter-spacing:1px;}}
   .body{{flex:1;min-width:0;display:flex;flex-direction:column;
     justify-content:center;}}
   .title{{font-size:19px;font-weight:700;line-height:1.2;
-    overflow:hidden;text-overflow:ellipsis;}}
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}}
   .sub{{font-size:13px;margin-top:3px;text-transform:uppercase;
     letter-spacing:1px;}}
   .loc{{font-size:13px;margin-top:2px;white-space:nowrap;overflow:hidden;
     text-overflow:ellipsis;opacity:0.85;}}
   .empty{{flex:1;display:flex;align-items:center;justify-content:center;
     font-size:13px;text-transform:uppercase;}}
-  .footer{{margin-top:14px;padding-top:13px;border-top:2px solid #fff;
+  .footer{{margin-top:14px;padding-top:13px;border-top:2px solid #000;
     display:flex;justify-content:flex-end;font-size:13px;font-weight:700;
     text-transform:uppercase;}}
 </style></head><body>

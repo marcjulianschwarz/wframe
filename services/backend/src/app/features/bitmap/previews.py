@@ -248,7 +248,7 @@ def _homeassistant_preview() -> str:
 def _image_preview() -> str:
     return """\
 <!doctype html><html><head><meta charset="utf-8"><style>
-  html,body{margin:0;width:480px;height:800px;background:#000;color:#fff;
+  html,body{margin:0;width:480px;height:800px;background:#fff;color:#000;
     font-family:-apple-system,Helvetica,Arial,sans-serif;}
   body{display:flex;flex-direction:column;align-items:center;
     justify-content:center;text-align:center;padding:40px;}

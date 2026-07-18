@@ -1,0 +1,96 @@
+# wframe — ESPHome config for the 7.5" Waveshare e-paper frame.
+#
+# This is the firmware that turns an ESP32 + Waveshare 7.5" V2 (HD) panel into a
+# wframe display: on boot it connects to WiFi and repeatedly fetches a 1-bit BMP
+# from your wframe device URL, streaming it straight onto the panel.
+#
+# Before flashing, fill in the placeholders below (WiFi + your device's image
+# URL). In ESPHome these usually live in a `secrets.yaml` next to this file:
+#
+#   wifi_ssid: "Your WiFi"
+#   wifi_password: "your-wifi-password"
+#
+# ...and are referenced here with `!secret`. The image URL is unique per epaper
+# and is shown in the wframe web app (Device → download config); paste it into
+# `streaming_bmp.url` below.
+
+esphome:
+  name: wframe
+  friendly_name: Welcome Frame
+  min_version: 2024.11.0
+
+external_components:
+  - source:
+      type: local
+      path: components
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+logger:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "Wframe Fallback"
+    password: "test12345"
+  on_connect:
+    - logger.log: "WiFi connected"
+    - delay: 2s
+    - logger.log: "Triggering image fetch"
+    # Trigger the streamer (not the display): it fetches and only refreshes the
+    # panel if a full image arrived.
+    - component.update: stream_full
+
+http_request:
+  verify_ssl: false
+
+streaming_bmp:
+  id: stream_full
+  # Paste your device's image URL here (wframe web app → Device → config).
+  url: "https://wframe.de/e/YOUR_DEVICE_ID.bmp"
+  display_id: my_display
+  x: 0
+  y: 0
+  # Poll every 10s. A fetch+push takes ~7.5s on the loop task; at 5s the next
+  # poll piled on before the previous finished and tripped the 5s task watchdog.
+  # 10s leaves a gap after each cycle so the loop returns and feeds the watchdog.
+  # The backend still gates actual redraws (8s serve windows / 204 between), so a
+  # push only happens when an image is returned.
+  update_interval: 10s
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO0
+      mode: INPUT_PULLUP
+    name: "Boot Button"
+    internal: true
+
+spi:
+  clk_pin: GPIO13
+  mosi_pin: GPIO14
+
+display:
+  - platform: waveshare_epaper
+    cs_pin:
+      number: GPIO15 #D2
+      ignore_strapping_warning: true
+    dc_pin: GPIO27 #D3
+    busy_pin:
+      number: GPIO25 #D4
+      inverted: true
+    reset_pin: GPIO26 #D5
+    model: 7.50inV2p # 7.50inV2p (HD) vs 7.50inv2
+    reset_duration: 200ms
+    # The display never refreshes on its own and has no lambda. streaming_bmp
+    # fetches on its own interval, draws straight into this display's buffer, and
+    # pushes to the panel (display()) only when a full image arrived — so the
+    # epaper is never re-flashed on a 204/skip (avoids wear).
+    update_interval: never
+    full_update_every: 30
+    rotation: 90
+    id: my_display

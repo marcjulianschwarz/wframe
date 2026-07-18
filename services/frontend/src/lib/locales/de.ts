@@ -40,6 +40,8 @@ export const de: Record<keyof typeof en, string> = {
   "device.stopClear": "Stoppen — die Ansicht von diesem Gerät entfernen",
   "device.refreshRate": "Aktualisierungsrate",
   "device.geometry": "Geometrie",
+  "device.downloadConfig": "Firmware-Konfiguration",
+  "device.downloadedConfig": "wframe.yaml heruntergeladen",
   "device.notExist": "Dieses Gerät existiert nicht.",
   "device.backToDevices": "Zurück zu den Geräten",
   "device.live": "Live",

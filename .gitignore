@@ -12,3 +12,7 @@ dist/
 *.log
 *.sh
 *.conf
+
+# ESPHome build artifacts + real secrets (keep secrets.yaml.example)
+esphome/secrets.yaml
+esphome/.esphome/

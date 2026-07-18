@@ -43,6 +43,8 @@ export const en = {
   "device.stopClear": "Stop — clear the view from this device",
   "device.refreshRate": "Refresh rate",
   "device.geometry": "Geometry",
+  "device.downloadConfig": "Firmware config",
+  "device.downloadedConfig": "Downloaded wframe.yaml",
   "device.notExist": "This device doesn’t exist.",
   "device.backToDevices": "Back to devices",
   "device.live": "Live",

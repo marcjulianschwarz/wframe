@@ -273,6 +273,24 @@ export const api = {
     return URL.createObjectURL(await res.blob());
   },
 
+  /** Download this device's ready-to-flash ESPHome `wframe.yaml` (image URL baked
+   * in; WiFi left as `!secret`). Authenticated, so we fetch the bytes and trigger
+   * a browser download from a temporary object URL. */
+  downloadEpaperConfig: async (token: string, id: string): Promise<void> => {
+    const res = await fetch(`${BASE}/epapers/${id}/config.yaml`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error(await errorMessage(res));
+    const url = URL.createObjectURL(await res.blob());
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "wframe.yaml";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  },
+
   /** Live example HTML preview for a built-in dashboard type, for the in-app
    * iframe. Serves canned data and does not change what the epaper serves. */
   previewUrl: (dashboard_type: DashboardType): string =>

@@ -26,7 +26,7 @@ logger = create_logger(__name__)
 def _waiting_html() -> str:
     return f"""\
 <!doctype html><html><head><meta charset="utf-8"><style>
-  html,body{{margin:0;width:100vw;height:100vh;background:#000;color:#fff;
+  html,body{{margin:0;width:100vw;height:100vh;background:#fff;color:#000;
     font-family:{SANS_STACK};}}
   body{{display:flex;flex-direction:column;align-items:center;
     justify-content:center;text-align:center;padding:40px;}}
@@ -42,7 +42,7 @@ def _waiting_html() -> str:
 def _temp_waiting_html() -> str:
     return f"""\
 <!doctype html><html><head><meta charset="utf-8"><style>
-  html,body{{margin:0;width:100vw;height:100vh;background:#000;color:#fff;
+  html,body{{margin:0;width:100vw;height:100vh;background:#fff;color:#000;
     font-family:{SANS_STACK};}}
   body{{display:flex;flex-direction:column;align-items:center;
     justify-content:center;text-align:center;padding:40px;}}
@@ -93,12 +93,12 @@ def render_html(lights: list[ha_cache.Light]) -> str:
   *{{box-sizing:border-box;margin:0;padding:0;}}
   /* Fill the actual render viewport instead of a fixed 480×800, so the whole
      layout reflows when the device geometry changes. */
-  html,body{{width:100vw;height:100vh;background:#000;color:#fff;
+  html,body{{width:100vw;height:100vh;background:#fff;color:#000;
     font-family:{SANS_STACK};}}
   body{{padding:26px;}}
-  .frame{{border:2px solid #fff;padding:24px 22px;height:100%;
+  .frame{{border:2px solid #000;padding:24px 22px;height:100%;
     display:flex;flex-direction:column;}}
-  .head{{text-align:center;border-bottom:2px solid #fff;
+  .head{{text-align:center;border-bottom:2px solid #000;
     padding-bottom:13px;margin-bottom:18px;}}
   .head .title{{font-size:39px;font-weight:700;text-transform:uppercase;
     line-height:1;}}
@@ -110,10 +110,10 @@ def render_html(lights: list[ha_cache.Light]) -> str:
   .row .dot{{font-size:14px;margin-right:8px;}}
   .row .name{{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}}
   .row .val{{margin-left:12px;}}
-  /* 1-bit brightness bar: white border, white fill. */
-  .bar{{margin-top:7px;height:13px;border:2px solid #fff;}}
-  .bar .fill{{height:100%;background:#fff;}}
-  .footer{{margin-top:18px;padding-top:13px;border-top:2px solid #fff;
+  /* 1-bit brightness bar: black border, black fill. */
+  .bar{{margin-top:7px;height:13px;border:2px solid #000;}}
+  .bar .fill{{height:100%;background:#000;}}
+  .footer{{margin-top:18px;padding-top:13px;border-top:2px solid #000;
     display:flex;justify-content:space-between;font-size:13px;font-weight:700;
     text-transform:uppercase;}}
 </style></head><body>
@@ -150,12 +150,12 @@ def render_sensor_html(series: ha_cache.SensorSeries) -> str:
   *{{box-sizing:border-box;margin:0;padding:0;}}
   /* Fill the actual render viewport instead of a fixed 480×800, so the whole
      layout reflows when the device geometry changes. */
-  html,body{{width:100vw;height:100vh;background:#000;color:#fff;
+  html,body{{width:100vw;height:100vh;background:#fff;color:#000;
     font-family:{SANS_STACK};}}
   body{{padding:26px;}}
-  .frame{{border:2px solid #fff;padding:24px 22px;height:100%;
+  .frame{{border:2px solid #000;padding:24px 22px;height:100%;
     display:flex;flex-direction:column;}}
-  .head{{text-align:center;border-bottom:2px solid #fff;
+  .head{{text-align:center;border-bottom:2px solid #000;
     padding-bottom:13px;margin-bottom:18px;}}
   .head .place{{font-size:13px;font-weight:700;text-transform:uppercase;}}
   .head .now{{font-size:78px;font-weight:700;line-height:1;margin:8px 0 4px;}}
@@ -168,10 +168,10 @@ def render_sensor_html(series: ha_cache.SensorSeries) -> str:
      non-scaling-stroke), so it reflows with the panel geometry. */
   .chart svg{{display:block;width:100%;flex:1;min-height:0;}}
   .stats{{display:grid;grid-template-columns:1fr 1fr;gap:13px;
-    border-top:2px solid #fff;padding-top:16px;}}
+    border-top:2px solid #000;padding-top:16px;}}
   .stat .k{{font-size:13px;text-transform:uppercase;}}
   .stat .v{{font-size:26px;font-weight:700;}}
-  .footer{{margin-top:18px;padding-top:13px;border-top:2px solid #fff;
+  .footer{{margin-top:18px;padding-top:13px;border-top:2px solid #000;
     display:flex;justify-content:space-between;font-size:13px;font-weight:700;
     text-transform:uppercase;}}
 </style></head><body>

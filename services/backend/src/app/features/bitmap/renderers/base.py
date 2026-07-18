@@ -70,15 +70,16 @@ def _composite(bmp_bytes: bytes, geom: Geometry) -> bytes:
 
     The dashboard is rendered directly at ``image_width``×``image_height`` (its
     HTML reflows for that size), so no scaling happens here — a mismatch is only
-    a defensive resize. The margin outside the drawn image is filled black (0);
-    on this epaper an unlit/0 pixel reads as black, so a black margin keeps the
-    surround dark. The whole screen is then rotated clockwise by
+    a defensive resize. The margin outside the drawn image is filled white (1):
+    dashboards are authored as black-on-white paper, so a white margin blends
+    into the surround. (The firmware inverts once for the panel; see
+    ``streaming_bmp.cpp``.) The whole screen is then rotated clockwise by
     ``geom.rotation`` degrees; 90/270 swap the output's width and height.
     """
     img = Image.open(BytesIO(bmp_bytes)).convert("1")
     if img.size != (geom.image_width, geom.image_height):
         img = img.resize((geom.image_width, geom.image_height), Image.Resampling.LANCZOS).convert("1")
-    canvas = Image.new("1", (geom.screen_width, geom.screen_height), 0)
+    canvas = Image.new("1", (geom.screen_width, geom.screen_height), 1)
     canvas.paste(img, (geom.image_x, geom.image_y))
     if geom.rotation:
         # PIL rotates counter-clockwise; negate for clockwise. expand=True keeps

@@ -65,7 +65,7 @@ class Departures(BaseModel):
 def _no_stop_html() -> str:
     return f"""\
 <!doctype html><html><head><meta charset="utf-8"><style>
-  html,body{{margin:0;width:100vw;height:100vh;background:#000;color:#fff;
+  html,body{{margin:0;width:100vw;height:100vh;background:#fff;color:#000;
     font-family:{SANS_STACK};}}
   body{{display:flex;flex-direction:column;align-items:center;
     justify-content:center;text-align:center;padding:40px;}}
@@ -133,20 +133,20 @@ def render_html(stop_name: str, data: Departures, now: datetime) -> str:
   *{{box-sizing:border-box;margin:0;padding:0;}}
   /* Fill the actual render viewport instead of a fixed 480×800, so the whole
      layout reflows when the device geometry changes. */
-  html,body{{width:100vw;height:100vh;background:#000;color:#fff;
+  html,body{{width:100vw;height:100vh;background:#fff;color:#000;
     font-family:{SANS_STACK};}}
   body{{padding:26px;}}
-  .frame{{border:2px solid #fff;padding:24px 22px;height:100%;
+  .frame{{border:2px solid #000;padding:24px 22px;height:100%;
     display:flex;flex-direction:column;}}
-  .head{{text-align:center;border-bottom:2px solid #fff;
+  .head{{text-align:center;border-bottom:2px solid #000;
     padding-bottom:13px;margin-bottom:14px;}}
   .head .kicker{{font-size:13px;font-weight:700;text-transform:uppercase;}}
   .head .stop{{font-size:26px;font-weight:700;line-height:1.2;margin:6px 0 4px;}}
   .head .stamp{{font-size:13px;margin-top:6px;text-transform:uppercase;}}
   .rows{{flex:1;display:flex;flex-direction:column;}}
   .row{{display:flex;align-items:center;gap:12px;
-    border-bottom:1px solid #fff;padding:10px 0;}}
-  .line{{width:64px;flex:none;background:#fff;color:#000;text-align:center;
+    border-bottom:1px solid #000;padding:10px 0;}}
+  .line{{width:64px;flex:none;background:#000;color:#fff;text-align:center;
     font-size:20px;font-weight:700;padding:6px 0;}}
   .dest{{flex:1;min-width:0;}}
   .dir{{font-size:18px;font-weight:700;white-space:nowrap;overflow:hidden;}}
@@ -157,7 +157,7 @@ def render_html(stop_name: str, data: Departures, now: datetime) -> str:
     font-size:13px;text-transform:uppercase;}}
   .info{{margin-top:12px;font-size:13px;line-height:1.4;max-height:54px;
     overflow:hidden;}}
-  .footer{{margin-top:14px;padding-top:13px;border-top:2px solid #fff;
+  .footer{{margin-top:14px;padding-top:13px;border-top:2px solid #000;
     display:flex;justify-content:flex-end;font-size:13px;font-weight:700;
     text-transform:uppercase;}}
 </style></head><body>
