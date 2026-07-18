@@ -19,6 +19,7 @@ class DashboardType(str, enum.Enum):
     HOMEASSISTANT_TEMP = "homeassistant_temp"
     IMAGE = "image"
     VAG = "vag"
+    FONT_TEST = "font_test"
 
 
 class DashboardSource(str, enum.Enum):
@@ -75,6 +76,10 @@ DASHBOARD_CATALOG: dict[DashboardType, dict[str, str]] = {
     DashboardType.VAG: {
         "title": "VAG Abfahrten",
         "description": "Live departures for your VGN stop (Nürnberg), with real-time delays.",
+    },
+    DashboardType.FONT_TEST: {
+        "title": "Font Test",
+        "description": "A specimen sheet comparing fonts at several sizes on your epaper.",
     },
 }
 

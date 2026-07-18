@@ -15,6 +15,7 @@ from app.features.bitmap.renderers.base import (
 )
 from app.features.bitmap.renderers.custom_url import CustomUrlRenderer
 from app.features.bitmap.renderers.dashboard import DashboardRendererImpl
+from app.features.bitmap.renderers.font_test import FontTestRenderer
 from app.features.bitmap.renderers.github import GithubRenderer
 from app.features.bitmap.renderers.hn_zeitung import HnZeitungRenderer
 from app.features.bitmap.renderers.homeassistant import HomeAssistantRenderer, HomeAssistantTempRenderer
@@ -43,6 +44,7 @@ __all__ = [
     "HomeAssistantTempRenderer",
     "ImageRenderer",
     "VagRenderer",
+    "FontTestRenderer",
     "renderer_factory",
 ]
 
@@ -58,6 +60,8 @@ def renderer_factory(
         return DashboardRendererImpl()
     if dashboard_type == DashboardType.HN_ZEITUNG:
         return HnZeitungRenderer()
+    if dashboard_type == DashboardType.FONT_TEST:
+        return FontTestRenderer()
     if dashboard_type == DashboardType.CUSTOM_URL:
         return CustomUrlRenderer(custom_url)
     if dashboard_type == DashboardType.HOMEASSISTANT:

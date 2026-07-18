@@ -10,7 +10,8 @@ export type DashboardType =
   | "homeassistant"
   | "homeassistant_temp"
   | "image"
-  | "vag";
+  | "vag"
+  | "font_test";
 
 export type ImageAlgorithm = "floyd_steinberg" | "ordered" | "threshold" | "atkinson";
 export type ImageFit = "contain" | "cover" | "stretch";
