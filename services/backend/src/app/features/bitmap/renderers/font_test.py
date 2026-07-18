@@ -80,21 +80,21 @@ def _outline_html(specimens: str, note: str) -> str:
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <style>
   *{{box-sizing:border-box;margin:0;padding:0;}}
-  html,body{{width:100vw;height:100vh;background:#fff;color:#000;
+  html,body{{width:100vw;height:100vh;background:#000;color:#fff;
     font-family:sans-serif;-webkit-font-smoothing:antialiased;}}
   body{{padding:18px 20px;}}
   h1{{font-size:16px;font-weight:800;text-transform:uppercase;
-    letter-spacing:1px;border-bottom:2px solid #000;padding-bottom:8px;
+    letter-spacing:1px;border-bottom:2px solid #fff;padding-bottom:8px;
     margin-bottom:12px;}}
-  .spec{{padding:8px 0;border-bottom:1px solid #000;}}
+  .spec{{padding:8px 0;border-bottom:1px solid #fff;}}
   .fname{{font-family:sans-serif;font-size:11px;font-weight:800;
-    text-transform:uppercase;letter-spacing:1px;color:#000;margin-bottom:4px;}}
+    text-transform:uppercase;letter-spacing:1px;color:#fff;margin-bottom:4px;}}
   .line{{display:flex;align-items:baseline;gap:8px;line-height:1.25;
     white-space:nowrap;overflow:hidden;}}
-  .line .sz{{font-family:sans-serif;font-size:9px;font-weight:700;color:#000;
+  .line .sz{{font-family:sans-serif;font-size:9px;font-weight:700;color:#fff;
     width:34px;flex:none;text-align:right;opacity:.7;}}
   .line .txt{{flex:1;overflow:hidden;text-overflow:ellipsis;}}
-  .note{{font-family:sans-serif;font-size:9px;color:#000;opacity:.7;
+  .note{{font-family:sans-serif;font-size:9px;color:#fff;opacity:.7;
     margin-top:10px;text-align:center;}}
 </style></head><body>
   <h1>Font Test · Outline</h1>
@@ -123,12 +123,12 @@ def _cozette_html() -> str:
   @font-face {{ font-family:"Cozette"; font-weight:700;
     src:url("{bold}") format("truetype"); }}
   *{{box-sizing:border-box;margin:0;padding:0;}}
-  html,body{{width:100vw;height:100vh;background:#fff;color:#000;
+  html,body{{width:100vw;height:100vh;background:#000;color:#fff;
     font-family:"Cozette",monospace;-webkit-font-smoothing:none;
     font-smooth:never;text-rendering:geometricPrecision;}}
   body{{padding:18px 20px;}}
   h1{{font-family:"Cozette",monospace;font-size:16px;font-weight:700;
-    text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #000;
+    text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #fff;
     padding-bottom:8px;margin-bottom:12px;}}
   .line{{display:flex;align-items:baseline;gap:8px;line-height:1.15;
     white-space:nowrap;overflow:hidden;margin-bottom:6px;}}
@@ -154,7 +154,7 @@ def _stack_vertical(top: bytes, bottom: bytes, size: Size) -> Image.Image:
     top_h = int(height * 0.7)
     a = Image.open(BytesIO(top)).convert("1")
     b = Image.open(BytesIO(bottom)).convert("1")
-    canvas = Image.new("1", (width, height), 1)  # white background
+    canvas = Image.new("1", (width, height), 0)  # black background (epaper convention)
     canvas.paste(a, (0, 0))
     canvas.paste(b, (0, top_h))
     return canvas
