@@ -18,6 +18,13 @@ THRESHOLD = 128
 # Hard-thresholding at native resolution is what makes 1-bit type look jagged.
 SCALE = 3
 
+# The shared body font for all dashboards. A proportional sans read best on the
+# panel in the font test, so dashboards use this CSS generic (rendered
+# supersampled at SCALE, *with* antialiasing) instead of the Cozette pixel font.
+# It's a generic family, so the headless browser supplies whatever sans it
+# bundles — pin a real .ttf here if you need identical output everywhere.
+SANS_STACK = "sans-serif"
+
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
 
 # A (width, height) render target in device pixels. Dashboards render their HTML

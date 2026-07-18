@@ -2,10 +2,10 @@
 
 Data comes from the VAG Abfahrtsmonitor API (start.vag.de, CC-BY 4.0, no API
 key; see https://bundesapi.github.io/vag-api/). The page is drawn with the
-bundled Cozette pixel font as a departure board: one row per departure with the
-line, direction, platform, and a real-time countdown. Rendered at scale=1 like
-the weather dashboard so the pixel font stays crisp through the 1-bit
-threshold.
+shared sans body font as a departure board: one row per departure with the
+line, direction, platform, and a real-time countdown. Rendered supersampled
+(SCALE) like the other dashboards so the antialiased type stays crisp through
+the 1-bit threshold.
 """
 
 from __future__ import annotations
@@ -13,7 +13,6 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from html import escape
-from pathlib import Path
 from typing import ClassVar
 
 import httpx
@@ -21,9 +20,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.features.bitmap.bitmap_models import VagStop
-from app.features.bitmap.renderers.base import NATIVE_SIZE, Size, html_to_bmp
-
-FONTS_DIR = Path(__file__).parent.parent / "fonts"
+from app.features.bitmap.renderers.base import NATIVE_SIZE, SANS_STACK, SCALE, Size, html_to_bmp
 
 VAG_API = "https://start.vag.de/dm/api/v1"
 # How far ahead to ask for departures and how many rows fit the 800px page.
@@ -65,21 +62,11 @@ class Departures(BaseModel):
     Sonderinformationen: list[str] = Field(default_factory=list)
 
 
-def _font_face() -> str:
-    reg = (FONTS_DIR / "Cozette.ttf").as_uri()
-    bold = (FONTS_DIR / "CozetteBold.ttf").as_uri()
-    return f'''
-  @font-face {{ font-family:"Cozette"; font-weight:400;
-    src:url("{reg}") format("truetype"); }}
-  @font-face {{ font-family:"Cozette"; font-weight:700;
-    src:url("{bold}") format("truetype"); }}'''
-
-
 def _no_stop_html() -> str:
     return f"""\
-<!doctype html><html><head><meta charset="utf-8"><style>{_font_face()}
+<!doctype html><html><head><meta charset="utf-8"><style>
   html,body{{margin:0;width:100vw;height:100vh;background:#000;color:#fff;
-    font-family:"Cozette",monospace;-webkit-font-smoothing:none;}}
+    font-family:{SANS_STACK};}}
   body{{display:flex;flex-direction:column;align-items:center;
     justify-content:center;text-align:center;padding:40px;}}
   h1{{font-size:39px;font-weight:700;text-transform:uppercase;margin:0 0 20px;}}
@@ -142,13 +129,12 @@ def render_html(stop_name: str, data: Departures, now: datetime) -> str:
     return f"""\
 <!doctype html><html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=480, initial-scale=1.0">
-<style>{_font_face()}
+<style>
   *{{box-sizing:border-box;margin:0;padding:0;}}
   /* Fill the actual render viewport instead of a fixed 480×800, so the whole
      layout reflows when the device geometry changes. */
   html,body{{width:100vw;height:100vh;background:#000;color:#fff;
-    font-family:"Cozette",monospace;-webkit-font-smoothing:none;
-    font-smooth:never;text-rendering:geometricPrecision;}}
+    font-family:{SANS_STACK};}}
   body{{padding:26px;}}
   .frame{{border:2px solid #fff;padding:24px 22px;height:100%;
     display:flex;flex-direction:column;}}
@@ -200,10 +186,10 @@ class VagRenderer:
     async def render(self, size: Size = NATIVE_SIZE) -> bytes:
         stop = await self.session.get(VagStop, self.user_id)
         if stop is None:
-            return await html_to_bmp(_no_stop_html(), size=size, scale=1)
+            return await html_to_bmp(_no_stop_html(), size=size, scale=SCALE)
         data = await _fetch(stop.vgn_number)
         # The API timestamp is the stop's local time; using it (not the server
         # clock) keeps countdowns right regardless of the server's timezone.
         now = datetime.fromisoformat(data.Metadata.Timestamp)
         html = render_html(data.Haltestellenname or stop.name, data, now)
-        return await html_to_bmp(html, size=size, scale=1)
+        return await html_to_bmp(html, size=size, scale=SCALE)

@@ -15,7 +15,7 @@ from typing import ClassVar, cast
 from openai import OpenAI
 from pydantic import BaseModel, ConfigDict
 
-from app.features.bitmap.renderers.base import NATIVE_SIZE, Size, html_to_bmp
+from app.features.bitmap.renderers.base import NATIVE_SIZE, SCALE, Size, html_to_bmp
 from app.settings import settings
 
 CACHE = Path(__file__).parent.parent / ".hn_cache.json"
@@ -138,31 +138,6 @@ def process_story(client: OpenAI, sid: int, cache: dict[str, Item]) -> Item | No
         return None
 
 
-FONTS_DIR = Path(__file__).parent.parent / "fonts"
-
-
-def _font_face() -> str:
-    """@font-face rules pointing at the bundled Cozette pixel font.
-
-    Cozette is a bitmap font on a 13px grid; sizing text to integer multiples
-    of 13 (and rendering at scale=1) keeps every glyph crisp with no
-    antialiasing for the 1-bit threshold to mangle.
-    """
-    reg = (FONTS_DIR / "Cozette.ttf").as_uri()
-    bold = (FONTS_DIR / "CozetteBold.ttf").as_uri()
-    return f'''
-  @font-face {{
-    font-family: "Cozette";
-    font-weight: 400;
-    src: url("{reg}") format("truetype");
-  }}
-  @font-face {{
-    font-family: "Cozette";
-    font-weight: 700;
-    src: url("{bold}") format("truetype");
-  }}'''
-
-
 def render_html(items: list[Item]) -> str:
     now = datetime.now().strftime("%a %d %b %Y · %H:%M")
     parts = [
@@ -173,7 +148,6 @@ def render_html(items: list[Item]) -> str:
 <meta name="viewport" content="width=480, initial-scale=1.0">
 <title>Hacker News Zeitung</title>
 <style>""",
-        _font_face(),
         """
   * { box-sizing: border-box; margin: 0; padding: 0; }
   /* Fill the actual render viewport instead of a fixed 480×800, so the layout
@@ -182,10 +156,7 @@ def render_html(items: list[Item]) -> str:
   html, body {
     width: 100vw; min-height: 100vh;
     background: #000; color: #fff;
-    font-family: "Cozette", monospace;
-    /* Pixel font at native size: no smoothing, no fractional positioning. */
-    -webkit-font-smoothing: none; font-smooth: never;
-    text-rendering: geometricPrecision;
+    font-family: sans-serif;
   }
   /* Flex column so the frame stretches to the full viewport height and its
      border reaches the bottom edge on any panel size. */
@@ -318,6 +289,6 @@ class HnZeitungRenderer:
     async def render(self, size: Size = NATIVE_SIZE) -> bytes:
         items = await asyncio.to_thread(_build_items)
         html = render_html(items)
-        # scale=1: Cozette is a pixel font sized to its native 13px grid, so we
-        # render at device resolution and skip supersampling.
-        return await html_to_bmp(html, size=size, scale=1)
+        # Supersample the proportional sans so its antialiased edges survive the
+        # 1-bit threshold cleanly.
+        return await html_to_bmp(html, size=size, scale=SCALE)

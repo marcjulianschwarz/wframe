@@ -5,9 +5,9 @@ cloud-hosted wframe can't reach a home behind a router. Instead Home Assistant
 *pushes* light states to the webhook (see ``ha_router``), which holds them in an
 in-memory TTL cache (``ha_cache``). This renderer reads the latest pushed
 snapshot from that cache. If nothing has been pushed (or it expired) it shows a
-"waiting for data" frame. Drawn with the Cozette pixel font at scale=1, like the
-weather and github dashboards, so the type stays crisp through the 1-bit
-threshold.
+"waiting for data" frame. Drawn with the shared sans body font, supersampled
+(SCALE) like the other dashboards so the antialiased type stays crisp through the
+1-bit threshold.
 """
 
 from __future__ import annotations
@@ -15,33 +15,19 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from html import escape
-from pathlib import Path
-
 from app.features.bitmap import ha_cache
-from app.features.bitmap.renderers.base import NATIVE_SIZE, Size, html_to_bmp
+from app.features.bitmap.renderers.base import NATIVE_SIZE, SANS_STACK, SCALE, Size, html_to_bmp
 from app.features.bitmap.renderers.weather import svg_line_chart
 from app.logging import create_logger
 
 logger = create_logger(__name__)
 
-FONTS_DIR = Path(__file__).parent.parent / "fonts"
-
-
-def _font_face() -> str:
-    reg = (FONTS_DIR / "Cozette.ttf").as_uri()
-    bold = (FONTS_DIR / "CozetteBold.ttf").as_uri()
-    return f'''
-  @font-face {{ font-family:"Cozette"; font-weight:400;
-    src:url("{reg}") format("truetype"); }}
-  @font-face {{ font-family:"Cozette"; font-weight:700;
-    src:url("{bold}") format("truetype"); }}'''
-
 
 def _waiting_html() -> str:
     return f"""\
-<!doctype html><html><head><meta charset="utf-8"><style>{_font_face()}
+<!doctype html><html><head><meta charset="utf-8"><style>
   html,body{{margin:0;width:100vw;height:100vh;background:#000;color:#fff;
-    font-family:"Cozette",monospace;-webkit-font-smoothing:none;}}
+    font-family:{SANS_STACK};}}
   body{{display:flex;flex-direction:column;align-items:center;
     justify-content:center;text-align:center;padding:40px;}}
   h1{{font-size:39px;font-weight:700;text-transform:uppercase;margin:0 0 20px;}}
@@ -55,9 +41,9 @@ def _waiting_html() -> str:
 
 def _temp_waiting_html() -> str:
     return f"""\
-<!doctype html><html><head><meta charset="utf-8"><style>{_font_face()}
+<!doctype html><html><head><meta charset="utf-8"><style>
   html,body{{margin:0;width:100vw;height:100vh;background:#000;color:#fff;
-    font-family:"Cozette",monospace;-webkit-font-smoothing:none;}}
+    font-family:{SANS_STACK};}}
   body{{display:flex;flex-direction:column;align-items:center;
     justify-content:center;text-align:center;padding:40px;}}
   h1{{font-size:39px;font-weight:700;text-transform:uppercase;margin:0 0 20px;}}
@@ -103,13 +89,12 @@ def render_html(lights: list[ha_cache.Light]) -> str:
     return f"""\
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=480, initial-scale=1.0">
-<style>{_font_face()}
+<style>
   *{{box-sizing:border-box;margin:0;padding:0;}}
   /* Fill the actual render viewport instead of a fixed 480×800, so the whole
      layout reflows when the device geometry changes. */
   html,body{{width:100vw;height:100vh;background:#000;color:#fff;
-    font-family:"Cozette",monospace;-webkit-font-smoothing:none;
-    font-smooth:never;text-rendering:geometricPrecision;}}
+    font-family:{SANS_STACK};}}
   body{{padding:26px;}}
   .frame{{border:2px solid #fff;padding:24px 22px;height:100%;
     display:flex;flex-direction:column;}}
@@ -161,13 +146,12 @@ def render_sensor_html(series: ha_cache.SensorSeries) -> str:
     return f"""\
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=480, initial-scale=1.0">
-<style>{_font_face()}
+<style>
   *{{box-sizing:border-box;margin:0;padding:0;}}
   /* Fill the actual render viewport instead of a fixed 480×800, so the whole
      layout reflows when the device geometry changes. */
   html,body{{width:100vw;height:100vh;background:#000;color:#fff;
-    font-family:"Cozette",monospace;-webkit-font-smoothing:none;
-    font-smooth:never;text-rendering:geometricPrecision;}}
+    font-family:{SANS_STACK};}}
   body{{padding:26px;}}
   .frame{{border:2px solid #fff;padding:24px 22px;height:100%;
     display:flex;flex-direction:column;}}
@@ -224,14 +208,14 @@ class HomeAssistantRenderer:
         snap = ha_cache.get(self.user_id)
         if snap is None:
             logger.info("ha render: waiting frame (no cached lights)", user_id=str(self.user_id))
-            return await html_to_bmp(_waiting_html(), size=size, scale=1)
+            return await html_to_bmp(_waiting_html(), size=size, scale=SCALE)
         logger.info(
             "ha render: lights grid",
             user_id=str(self.user_id),
             lights=len(snap.lights),
             age_seconds=round(ha_cache.age_seconds(snap)),
         )
-        return await html_to_bmp(render_html(snap.lights), size=size, scale=1)
+        return await html_to_bmp(render_html(snap.lights), size=size, scale=SCALE)
 
 
 class HomeAssistantTempRenderer:
@@ -244,11 +228,11 @@ class HomeAssistantTempRenderer:
         series = ha_cache.get_sensors(self.user_id)
         if series is None or not series.values:
             logger.info("ha render: waiting frame (no cached sensor series)", user_id=str(self.user_id))
-            return await html_to_bmp(_temp_waiting_html(), size=size, scale=1)
+            return await html_to_bmp(_temp_waiting_html(), size=size, scale=SCALE)
         logger.info(
             "ha render: temperature chart",
             user_id=str(self.user_id),
             points=len(series.values),
             age_seconds=round(ha_cache.age_seconds(series)),
         )
-        return await html_to_bmp(render_sensor_html(series), size=size, scale=1)
+        return await html_to_bmp(render_sensor_html(series), size=size, scale=SCALE)

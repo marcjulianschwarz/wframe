@@ -1,9 +1,9 @@
 """Weather renderer — live forecast for the user's stored location.
 
-Data comes from Open-Meteo (no API key). The page is drawn with the bundled
-Cozette pixel font and an inline SVG line chart of the next 24h temperature,
-with a marker on the current hour. Rendered at scale=1 like HN Zeitung so the
-pixel font stays crisp through the 1-bit threshold.
+Data comes from Open-Meteo (no API key). The page is drawn with the shared sans
+body font and an inline SVG line chart of the next 24h temperature, with a marker
+on the current hour. Rendered supersampled (SCALE) so the antialiased type
+survives the 1-bit threshold.
 """
 
 from __future__ import annotations
@@ -11,7 +11,6 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from html import escape
-from pathlib import Path
 from typing import ClassVar
 
 import httpx
@@ -19,9 +18,7 @@ from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.features.bitmap.bitmap_models import WeatherLocation
-from app.features.bitmap.renderers.base import NATIVE_SIZE, Size, html_to_bmp
-
-FONTS_DIR = Path(__file__).parent.parent / "fonts"
+from app.features.bitmap.renderers.base import NATIVE_SIZE, SANS_STACK, SCALE, Size, html_to_bmp
 
 
 class Current(BaseModel):
@@ -91,9 +88,9 @@ WMO = {
 
 def _no_location_html() -> str:
     return f"""\
-<!doctype html><html><head><meta charset="utf-8"><style>{_font_face()}
+<!doctype html><html><head><meta charset="utf-8"><style>
   html,body{{margin:0;width:480px;height:800px;background:#000;color:#fff;
-    font-family:"Cozette",monospace;-webkit-font-smoothing:none;}}
+    font-family:{SANS_STACK};}}
   body{{display:flex;flex-direction:column;align-items:center;
     justify-content:center;text-align:center;padding:40px;}}
   h1{{font-size:39px;font-weight:700;text-transform:uppercase;margin:0 0 20px;}}
@@ -103,16 +100,6 @@ def _no_location_html() -> str:
   <p>No location set yet.<br><br>Open wframe in your browser and<br>
      allow location access to enable<br>this dashboard.</p>
 </body></html>"""
-
-
-def _font_face() -> str:
-    reg = (FONTS_DIR / "Cozette.ttf").as_uri()
-    bold = (FONTS_DIR / "CozetteBold.ttf").as_uri()
-    return f'''
-  @font-face {{ font-family:"Cozette"; font-weight:400;
-    src:url("{reg}") format("truetype"); }}
-  @font-face {{ font-family:"Cozette"; font-weight:700;
-    src:url("{bold}") format("truetype"); }}'''
 
 
 async def _fetch(lat: float, lon: float) -> Forecast:
@@ -166,7 +153,7 @@ def svg_line_chart(times: list[str], temps: list[float], now_idx: int) -> str:
             f'<line x1="{x(i):.1f}" y1="{pad_t + ih}" x2="{x(i):.1f}" '
             + f'y2="{pad_t + ih + 4}" stroke="#fff" stroke-width="1" vector-effect="non-scaling-stroke"/>'
             + f'<text x="{x(i):.1f}" y="{h - 6}" fill="#fff" font-size="11" '
-            + f'font-family="Cozette,monospace" text-anchor="{anchor}">{hh}</text>'
+            + f'font-family="sans-serif" text-anchor="{anchor}">{hh}</text>'
         )
 
     nx, ny = x(now_idx), y(temps[now_idx])
@@ -184,9 +171,9 @@ def svg_line_chart(times: list[str], temps: list[float], now_idx: int) -> str:
   xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
   <rect x="0" y="0" width="{w}" height="{h}" fill="#000"/>
   <text x="{pad_l}" y="11" fill="#fff" font-size="11"
-    font-family="Cozette,monospace">{hi:.0f}&deg;</text>
+    font-family="sans-serif">{hi:.0f}&deg;</text>
   <text x="{pad_l}" y="{pad_t + ih}" fill="#fff" font-size="11"
-    font-family="Cozette,monospace">{lo:.0f}&deg;</text>
+    font-family="sans-serif">{lo:.0f}&deg;</text>
   <line x1="{pad_l}" y1="{pad_t + ih}" x2="{pad_l + iw}" y2="{pad_t + ih}"
     stroke="#fff" stroke-width="1" vector-effect="non-scaling-stroke"/>
   {now_marker}
@@ -235,13 +222,12 @@ def render_html(data: Forecast, place: str | None) -> str:
     return f"""\
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=480, initial-scale=1.0">
-<style>{_font_face()}
+<style>
   *{{box-sizing:border-box;margin:0;padding:0;}}
   /* Fill the actual render viewport instead of a fixed 480×800, so the whole
      layout reflows when the device geometry changes. */
   html,body{{width:100vw;height:100vh;background:#000;color:#fff;
-    font-family:"Cozette",monospace;-webkit-font-smoothing:none;
-    font-smooth:never;text-rendering:geometricPrecision;}}
+    font-family:{SANS_STACK};}}
   body{{padding:26px;}}
   /* Fill the full height so the border reaches the bottom; the chart row grows
      to take the slack between the fixed-height header and stats. */
@@ -305,7 +291,7 @@ class WeatherRenderer:
     async def render(self, size: Size = NATIVE_SIZE) -> bytes:
         loc = await self.session.get(WeatherLocation, self.user_id)
         if loc is None:
-            return await html_to_bmp(_no_location_html(), size=size, scale=1)
+            return await html_to_bmp(_no_location_html(), size=size, scale=SCALE)
         data = await _fetch(loc.latitude, loc.longitude)
         html = render_html(data, loc.place)
-        return await html_to_bmp(html, size=size, scale=1)
+        return await html_to_bmp(html, size=size, scale=SCALE)

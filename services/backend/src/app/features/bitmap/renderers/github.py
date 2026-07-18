@@ -3,8 +3,8 @@
 Data comes from GitHub's public REST API (no auth required; an optional
 GITHUB_TOKEN lifts the 60→5,000 req/hr rate limit). Only public data is read:
 profile, public repos, and a language byte breakdown aggregated across them.
-Drawn with the bundled Cozette pixel font at scale=1, like the weather and HN
-dashboards, so the type stays crisp through the 1-bit threshold.
+Drawn with the shared sans body font, supersampled (SCALE) like the other
+dashboards so the antialiased type stays crisp through the 1-bit threshold.
 """
 
 from __future__ import annotations
@@ -12,7 +12,6 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from html import escape
-from pathlib import Path
 from typing import ClassVar, cast
 
 import httpx
@@ -20,10 +19,8 @@ from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.features.bitmap.bitmap_models import GithubProfile
-from app.features.bitmap.renderers.base import NATIVE_SIZE, Size, html_to_bmp
+from app.features.bitmap.renderers.base import NATIVE_SIZE, SANS_STACK, SCALE, Size, html_to_bmp
 from app.settings import settings
-
-FONTS_DIR = Path(__file__).parent.parent / "fonts"
 
 API = "https://api.github.com"
 # Top repos shown, and languages in the breakdown bar.
@@ -66,16 +63,6 @@ class Aggregate(BaseModel):
     total_forks: int
     top: list[Repo]
     langs: dict[str, int]
-
-
-def _font_face() -> str:
-    reg = (FONTS_DIR / "Cozette.ttf").as_uri()
-    bold = (FONTS_DIR / "CozetteBold.ttf").as_uri()
-    return f'''
-  @font-face {{ font-family:"Cozette"; font-weight:400;
-    src:url("{reg}") format("truetype"); }}
-  @font-face {{ font-family:"Cozette"; font-weight:700;
-    src:url("{bold}") format("truetype"); }}'''
 
 
 def _headers() -> dict[str, str]:
@@ -242,13 +229,12 @@ def render_html(profile: Profile, agg: Aggregate) -> str:
     return f"""\
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=480, initial-scale=1.0">
-<style>{_font_face()}
+<style>
   *{{box-sizing:border-box;margin:0;padding:0;}}
   /* Fill the actual render viewport instead of a fixed 480×800, so the whole
      layout reflows when the device geometry changes. */
   html,body{{width:100vw;height:100vh;background:#000;color:#fff;
-    font-family:"Cozette",monospace;-webkit-font-smoothing:none;
-    font-smooth:never;text-rendering:geometricPrecision;}}
+    font-family:{SANS_STACK};}}
   body{{padding:26px;}}
   .frame{{border:2px solid #fff;padding:24px 22px;height:100%;
     display:flex;flex-direction:column;}}
@@ -313,9 +299,9 @@ def render_html(profile: Profile, agg: Aggregate) -> str:
 
 def _no_username_html() -> str:
     return f"""\
-<!doctype html><html><head><meta charset="utf-8"><style>{_font_face()}
+<!doctype html><html><head><meta charset="utf-8"><style>
   html,body{{margin:0;width:480px;height:800px;background:#000;color:#fff;
-    font-family:"Cozette",monospace;-webkit-font-smoothing:none;}}
+    font-family:{SANS_STACK};}}
   body{{display:flex;flex-direction:column;align-items:center;
     justify-content:center;text-align:center;padding:40px;}}
   h1{{font-size:39px;font-weight:700;text-transform:uppercase;margin:0 0 20px;}}
@@ -335,8 +321,8 @@ class GithubRenderer:
     async def render(self, size: Size = NATIVE_SIZE) -> bytes:
         profile = await self.session.get(GithubProfile, self.user_id)
         if profile is None:
-            return await html_to_bmp(_no_username_html(), size=size, scale=1)
+            return await html_to_bmp(_no_username_html(), size=size, scale=SCALE)
         data = await _fetch(profile.username)
         agg = aggregate(data.repos)
         html = render_html(data.profile, agg)
-        return await html_to_bmp(html, size=size, scale=1)
+        return await html_to_bmp(html, size=size, scale=SCALE)
