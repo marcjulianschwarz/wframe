@@ -2,6 +2,11 @@ name: Publish Docker Images
 
 on:
   push:
+    # Pushes to main ship the newest :latest (small fixes: just push, then run
+    # deploy.sh — no version tag needed). Version tags still cut a pinned
+    # vX.Y.Z image for releases/rollback.
+    branches:
+      - main
     tags:
       - "v*"
 
@@ -31,6 +36,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Compute image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}-${{ matrix.name }}
+          # - main push: `:latest` + `:sha-<short>` (deployable + traceable)
+          # - vX.Y.Z tag: `:vX.Y.Z` + `:latest`
+          # `:latest` is only moved on the default branch or a semver tag, never
+          # on some other branch build.
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=sha-,enable={{is_default_branch}}
+            type=semver,pattern=v{{version}}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+
       - name: Build and push ${{ matrix.name }}
         uses: docker/build-push-action@v5
         with:
@@ -39,6 +59,5 @@ jobs:
           # VITE_API_URL is baked into the frontend bundle at build time. Ignored by backend.
           build-args: |
             VITE_API_URL=https://api.wframe.de
-          tags: |
-            ghcr.io/${{ github.repository }}-${{ matrix.name }}:${{ github.ref_name }}
-            ghcr.io/${{ github.repository }}-${{ matrix.name }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
