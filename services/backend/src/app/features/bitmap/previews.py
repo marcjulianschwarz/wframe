@@ -10,7 +10,10 @@ dashboard changes over time.
 from __future__ import annotations
 
 import math
+import uuid
 from datetime import datetime, timedelta
+
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.features.bitmap.renderers.base import TEMPLATES_DIR
 from app.features.dashboard.dashboard_models import DashboardType
@@ -371,20 +374,30 @@ def preview_html(dashboard_type: DashboardType) -> str:
     return fn()
 
 
-def draft_preview_html(
+async def draft_preview_html(
     dashboard_type: DashboardType,
     *,
+    session: AsyncSession,
+    user_id: uuid.UUID,
     welcome_eyebrow: str | None = None,
     welcome_heading: str | None = None,
     welcome_body: str | None = None,
     welcome_footer: str | None = None,
+    calendar_url: str | None = None,
+    github_username: str | None = None,
 ) -> str:
-    """Live HTML preview reflecting *unsaved* edits for the view editor.
+    """Live HTML preview reflecting the view's *real* configured data.
 
-    For the text-configurable Welcome type we render the renderer's own
-    ``render_html`` with the draft values, so the preview updates as the user
-    types — before anything is saved. For every other type there is no free-text
-    config to preview synchronously, so we fall back to the canned example.
+    This endpoint is authenticated, so every configurable type renders what the
+    device would actually show:
+
+    * Welcome renders synchronously from its draft text (typed, unsaved).
+    * Calendar and GitHub fetch the real feed/profile for the drafted URL/username.
+    * Weather / VAG / Home Assistant use the user's *saved* config (location, stop)
+      or pushed live cache (HA), since those aren't free-text drafts.
+
+    Any empty config or fetch error falls back to the canned sample so the user
+    still sees the layout.
     """
     if dashboard_type == DashboardType.WELCOME:
         from app.features.bitmap.renderers.welcome import _DEFAULT_HEADING, render_html
@@ -400,9 +413,112 @@ def draft_preview_html(
         )
 
     if dashboard_type == DashboardType.CALENDAR:
-        # Calendar text config is just the feed URL, which we can't fetch
-        # synchronously here; the draft preview shows the sample agenda so the
-        # user sees the layout. The saved render will use their real feed.
-        return _calendar_preview()
+        # No drafted feed yet → show the sample agenda so the layout is visible.
+        if not (calendar_url and calendar_url.strip()):
+            return _calendar_preview()
+        from app.features.bitmap.renderers.calendar import (
+            _fetch,
+            _error_html,
+            parse_ics,
+            render_html,
+            upcoming,
+        )
+
+        now = datetime.now()
+        try:
+            ics = await _fetch(calendar_url.strip())
+        except Exception:  # noqa: BLE001 — never leak the (secret) feed URL in the error
+            return _error_html("The feed URL is unreachable.")
+        return render_html(upcoming(parse_ics(ics), now), now)
+
+    if dashboard_type == DashboardType.GITHUB:
+        # No drafted username yet → show the sample profile.
+        if not (github_username and github_username.strip()):
+            return _github_preview()
+        from app.features.bitmap.renderers.github import _fetch, aggregate, render_html
+
+        try:
+            data = await _fetch(github_username.strip())
+            return render_html(data.profile, aggregate(data.repos))
+        except Exception:  # noqa: BLE001 — unknown user / rate limit → fall back to sample
+            return _github_preview()
+
+    if dashboard_type == DashboardType.WEATHER:
+        # Weather config is a saved location; fetch the real forecast for it.
+        from app.features.bitmap.bitmap_models import WeatherLocation
+        from app.features.bitmap.renderers.weather import _fetch, render_html
+
+        loc = await session.get(WeatherLocation, user_id)
+        if loc is None:
+            return _weather_preview()
+        try:
+            data = await _fetch(loc.latitude, loc.longitude)
+            return render_html(data, loc.place)
+        except Exception:  # noqa: BLE001 — upstream hiccup → fall back to sample
+            return _weather_preview()
+
+    if dashboard_type == DashboardType.VAG:
+        # VAG config is a saved stop; fetch its real live departures.
+        from app.features.bitmap.bitmap_models import VagStop
+        from app.features.bitmap.renderers.vag import _fetch, render_html
+
+        stop = await session.get(VagStop, user_id)
+        if stop is None:
+            return _vag_preview()
+        try:
+            data = await _fetch(stop.vgn_number)
+            now = datetime.fromisoformat(data.Metadata.Timestamp)
+            return render_html(data.Haltestellenname or stop.name, data, now)
+        except Exception:  # noqa: BLE001 — upstream hiccup → fall back to sample
+            return _vag_preview()
+
+    if dashboard_type == DashboardType.HOMEASSISTANT:
+        # HA has no free-text config — it's a live push cache. Show the user's
+        # latest cached lights, or the sample if nothing's been pushed yet.
+        from app.features.bitmap import ha_cache
+        from app.features.bitmap.renderers.homeassistant import render_html
+
+        snap = ha_cache.get(user_id)
+        return render_html(snap.lights) if snap is not None else _homeassistant_preview()
+
+    if dashboard_type == DashboardType.HOMEASSISTANT_TEMP:
+        from app.features.bitmap import ha_cache
+        from app.features.bitmap.renderers.homeassistant import render_sensor_html
+
+        series = ha_cache.get_sensors(user_id)
+        if series is None or not series.values:
+            return _homeassistant_temp_preview()
+        return render_sensor_html(series)
+
+    if dashboard_type == DashboardType.IMAGE:
+        # Image renders to a BMP, not HTML. Dither the user's saved upload with
+        # their chosen fit/algorithm/contrast and embed the real result as a
+        # full-bleed data-URI <img> so the iframe shows exactly what the panel
+        # would. No upload yet → the canned placeholder.
+        import asyncio
+        import base64
+
+        from app.features.bitmap.bitmap_models import ImageUpload
+        from app.features.bitmap.renderers.dither import ImageAlgorithm, ImageFit
+        from app.features.bitmap.renderers.image import render_bmp
+
+        upload = await session.get(ImageUpload, user_id)
+        if upload is None:
+            return _image_preview()
+        bmp = await asyncio.to_thread(
+            render_bmp,
+            upload.data,
+            ImageAlgorithm(upload.algorithm),
+            ImageFit(upload.fit),
+            upload.contrast,
+        )
+        b64 = base64.b64encode(bmp).decode("ascii")
+        return (
+            '<!doctype html><html><head><meta charset="utf-8"><style>'
+            "html,body{margin:0;width:100vw;height:100vh;background:#fff;}"
+            "img{display:block;width:100vw;height:100vh;image-rendering:pixelated;}"
+            "</style></head><body>"
+            f'<img src="data:image/bmp;base64,{b64}"></body></html>'
+        )
 
     return preview_html(dashboard_type)

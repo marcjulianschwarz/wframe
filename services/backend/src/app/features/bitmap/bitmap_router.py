@@ -41,24 +41,33 @@ async def preview(dashboard_type: DashboardType) -> HTMLResponse:
 @router.get("/{dashboard_type}/draft-preview", response_class=HTMLResponse)
 async def draft_preview(
     dashboard_type: DashboardType,
+    auth: AuthDep,
+    session: Annotated[AsyncSession, Depends(get_session)],
     welcome_eyebrow: str | None = None,
     welcome_heading: str | None = None,
     welcome_body: str | None = None,
     welcome_footer: str | None = None,
+    calendar_url: str | None = None,
+    github_username: str | None = None,
 ) -> HTMLResponse:
-    """Live example HTML reflecting unsaved edits, for the view editor's preview.
+    """Live HTML reflecting unsaved edits, for the view editor's preview.
 
-    Like ``/preview`` it uses only the passed draft values and canned data — no
-    network, DB, or AI — so it's safe to serve unauthed and embed in an iframe.
-    Text-configurable types (Welcome) reflect the draft; others show the sample.
+    Authenticated: text-configurable types render the *real* feed/profile for the
+    drafted value (Calendar fetches the ICS URL, GitHub fetches the username), so
+    the preview mirrors what the device would show before anything is saved. Empty
+    drafts or fetch errors fall back to the canned sample.
     """
     return HTMLResponse(
-        content=draft_preview_html(
+        content=await draft_preview_html(
             dashboard_type,
+            session=session,
+            user_id=auth.user.id,
             welcome_eyebrow=welcome_eyebrow,
             welcome_heading=welcome_heading,
             welcome_body=welcome_body,
             welcome_footer=welcome_footer,
+            calendar_url=calendar_url,
+            github_username=github_username,
         )
     )
 

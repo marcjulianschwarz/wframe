@@ -1,0 +1,7 @@
+# Tail production container logs locally, one pane per service.
+# Runs `docker logs -f` on the deploy host over SSH. Use: make logs
+procs:
+  backend:
+    cmd: ["ssh", "deploy", "docker logs -f --tail 100 wframe-backend"]
+  frontend:
+    cmd: ["ssh", "deploy", "docker logs -f --tail 100 wframe-frontend"]

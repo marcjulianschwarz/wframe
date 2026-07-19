@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { api, type Dashboard, type DashboardType } from "@/lib/api";
@@ -162,6 +162,8 @@ function ViewEditor({ view, onDone }: { view: Dashboard; onDone: () => void }) {
             welcomeHeading={welcomeHeading}
             welcomeBody={welcomeBody}
             welcomeFooter={welcomeFooter}
+            calendarUrl={calendarUrl}
+            github={github}
             customUrl={isCustom ? url : null}
           />
         </div>
@@ -302,15 +304,18 @@ function ViewEditor({ view, onDone }: { view: Dashboard; onDone: () => void }) {
 const NATIVE_W = 480;
 const NATIVE_H = 800;
 
-/** Scaled iframe preview. For text-configurable types it points at the draft
- * preview endpoint so it reflects unsaved edits; for custom URLs it renders the
- * live page; otherwise it shows the type's canned preview. */
+/** Scaled iframe preview. For custom URLs it renders the live page directly; for
+ * every built-in type it fetches the authenticated draft-preview HTML — which
+ * renders the *real* feed/profile for the drafted value — and shows it via
+ * `srcDoc`, so the preview reflects unsaved edits before Save. */
 function ViewPreview({
   view,
   welcomeEyebrow,
   welcomeHeading,
   welcomeBody,
   welcomeFooter,
+  calendarUrl,
+  github,
   customUrl,
 }: {
   view: Dashboard;
@@ -318,8 +323,11 @@ function ViewPreview({
   welcomeHeading: string;
   welcomeBody: string;
   welcomeFooter: string;
+  calendarUrl: string;
+  github: string;
   customUrl: string | null;
 }) {
+  const { token } = useSession();
   const frameRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0);
 
@@ -333,34 +341,59 @@ function ViewPreview({
     return () => ro.disconnect();
   }, []);
 
-  // Debounce the draft so we don't reload the iframe on every keystroke.
+  // Debounce the draft so we don't refetch on every keystroke.
   const [debounced, setDebounced] = useState({
     welcomeEyebrow,
     welcomeHeading,
     welcomeBody,
     welcomeFooter,
+    calendarUrl,
+    github,
   });
   useEffect(() => {
     const h = window.setTimeout(
-      () => setDebounced({ welcomeEyebrow, welcomeHeading, welcomeBody, welcomeFooter }),
+      () =>
+        setDebounced({ welcomeEyebrow, welcomeHeading, welcomeBody, welcomeFooter, calendarUrl, github }),
       350,
     );
     return () => window.clearTimeout(h);
-  }, [welcomeEyebrow, welcomeHeading, welcomeBody, welcomeFooter]);
+  }, [welcomeEyebrow, welcomeHeading, welcomeBody, welcomeFooter, calendarUrl, github]);
 
-  const src = useMemo(() => {
-    if (customUrl && /^https?:\/\/.+/i.test(customUrl.trim())) return customUrl.trim();
-    if (view.type === "welcome") {
-      return api.draftPreviewUrl("welcome", {
-        welcome_eyebrow: debounced.welcomeEyebrow,
-        welcome_heading: debounced.welcomeHeading,
-        welcome_body: debounced.welcomeBody,
-        welcome_footer: debounced.welcomeFooter,
-      });
+  // Custom URL renders the live page directly (public, no auth). Everything else
+  // fetches the authenticated draft HTML into `srcDoc`.
+  const liveUrl =
+    customUrl && /^https?:\/\/.+/i.test(customUrl.trim()) ? customUrl.trim() : null;
+
+  const [srcDoc, setSrcDoc] = useState<string | null>(null);
+  useEffect(() => {
+    if (liveUrl || !view.type) {
+      setSrcDoc(null);
+      return;
     }
-    if (view.type) return api.draftPreviewUrl(view.type);
-    return null;
-  }, [customUrl, view.type, debounced]);
+    let alive = true;
+    const draft =
+      view.type === "welcome"
+        ? {
+            welcome_eyebrow: debounced.welcomeEyebrow,
+            welcome_heading: debounced.welcomeHeading,
+            welcome_body: debounced.welcomeBody,
+            welcome_footer: debounced.welcomeFooter,
+          }
+        : view.type === "calendar"
+          ? { calendar_url: debounced.calendarUrl }
+          : view.type === "github"
+            ? { github_username: debounced.github }
+            : undefined;
+    api
+      .draftPreviewHtml(token, view.type, draft)
+      .then((html) => {
+        if (alive) setSrcDoc(html);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [token, liveUrl, view.type, debounced]);
 
   return (
     <div
@@ -376,10 +409,10 @@ function ViewPreview({
           className="absolute left-0 top-0 origin-top-left"
           style={{ width: NATIVE_W, height: NATIVE_H, transform: `scale(${scale})` }}
         >
-          {src && (
+          {(liveUrl || srcDoc) && (
             <iframe
               title={`${view.name} preview`}
-              src={src}
+              {...(liveUrl ? { src: liveUrl } : { srcDoc: srcDoc ?? "" })}
               width={NATIVE_W}
               height={NATIVE_H}
               className="border-0"

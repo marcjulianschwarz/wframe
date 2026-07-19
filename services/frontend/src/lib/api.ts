@@ -296,25 +296,34 @@ export const api = {
   previewUrl: (dashboard_type: DashboardType): string =>
     `${BASE}/bitmaps/${dashboard_type}/preview`,
 
-  /** Live example HTML for a built-in type reflecting *unsaved* draft edits, for
-   * the view editor's preview iframe. Text-configurable types (Welcome) reflect
-   * the passed draft; others show the canned sample. Unauthed, canned-data only. */
-  draftPreviewUrl: (
+  /** Live HTML for a built-in type reflecting *unsaved* draft edits, for the view
+   * editor's preview iframe. Authenticated, so text-configurable types render the
+   * real feed/profile for the drafted value (Calendar fetches the ICS URL, GitHub
+   * fetches the username); empty drafts or errors fall back to the canned sample.
+   * Returns the HTML string for the caller to drop into an iframe `srcDoc`. */
+  draftPreviewHtml: async (
+    token: string,
     dashboard_type: DashboardType,
     draft?: {
       welcome_eyebrow?: string;
       welcome_heading?: string;
       welcome_body?: string;
       welcome_footer?: string;
+      calendar_url?: string;
+      github_username?: string;
     },
-  ): string => {
+  ): Promise<string> => {
     const params = new URLSearchParams();
-    if (draft?.welcome_eyebrow !== undefined) params.set("welcome_eyebrow", draft.welcome_eyebrow);
-    if (draft?.welcome_heading !== undefined) params.set("welcome_heading", draft.welcome_heading);
-    if (draft?.welcome_body !== undefined) params.set("welcome_body", draft.welcome_body);
-    if (draft?.welcome_footer !== undefined) params.set("welcome_footer", draft.welcome_footer);
+    for (const [k, v] of Object.entries(draft ?? {})) {
+      if (v !== undefined) params.set(k, v);
+    }
     const qs = params.toString();
-    return `${BASE}/bitmaps/${dashboard_type}/draft-preview${qs ? `?${qs}` : ""}`;
+    const res = await fetch(
+      `${BASE}/bitmaps/${dashboard_type}/draft-preview${qs ? `?${qs}` : ""}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    if (!res.ok) throw new Error(await errorMessage(res));
+    return res.text();
   },
 
   getLocation: (token: string) => req<Location>("/location", token),
